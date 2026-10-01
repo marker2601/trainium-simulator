@@ -1,0 +1,3904 @@
+[
+ {
+  "pair_id": "lk05_vs_k57_s73",
+  "family": "leaky_form",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0222_R_g7lkm_s73",
+  "treatment_bpb": 0.961855,
+  "treatment_steps": 2340,
+  "treatment_k4": 0.9221,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001248,
+  "step_diff_pct": 1.12,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LeakyReLU(0.5)^2 fnm vs relu^2; control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.00125
+ },
+ {
+  "pair_id": "rf_vs_k57_s73",
+  "family": "relu2_fn",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0253_R_g7rf_s73",
+  "treatment_bpb": 0.962017,
+  "treatment_steps": 2365,
+  "treatment_k4": 0.9113,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_RELU2_FN": "1"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001086,
+  "step_diff_pct": 2.2,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "same function as K57, custom backward (1.8% fewer s/step); control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.00109
+ },
+ {
+  "pair_id": "lk35_vs_k57_s73",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0816_R_g7lk35_s73",
+  "treatment_bpb": 0.961759,
+  "treatment_steps": 2326,
+  "treatment_k4": 0.9279,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001344,
+  "step_diff_pct": 0.52,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "K59 recipe vs K57 recipe; control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)"
+ },
+ {
+  "pair_id": "lk35_vs_lk05_s73",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0816_R_g7lk35_s73",
+  "treatment_bpb": 0.961759,
+  "treatment_steps": 2326,
+  "treatment_k4": 0.9279,
+  "control_run": "0222_R_g7lkm_s73",
+  "control_bpb": 0.961855,
+  "control_steps": 2340,
+  "control_k4": 0.9221,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0.5"
+  },
+  "delta_raw": -9.6e-05,
+  "step_diff_pct": -0.6,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "slope only (both fnm); per-step time equal within jitter"
+ },
+ {
+  "pair_id": "lk35_vs_rf_s73",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0816_R_g7lk35_s73",
+  "treatment_bpb": 0.961759,
+  "treatment_steps": 2326,
+  "treatment_k4": 0.9279,
+  "control_run": "0253_R_g7rf_s73",
+  "control_bpb": 0.962017,
+  "control_steps": 2365,
+  "control_k4": 0.9113,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": -0.000258,
+  "step_diff_pct": -1.65,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "leaky 0.35 fnm vs relu^2 custom-backward (RF ~1.5-1.8% faster)"
+ },
+ {
+  "pair_id": "lk05_vs_rf_s73",
+  "family": "leaky_form",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0222_R_g7lkm_s73",
+  "treatment_bpb": 0.961855,
+  "treatment_steps": 2340,
+  "treatment_k4": 0.9221,
+  "control_run": "0253_R_g7rf_s73",
+  "control_bpb": 0.962017,
+  "control_steps": 2365,
+  "control_k4": 0.9113,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": -0.000162,
+  "step_diff_pct": -1.06,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:182 rule B: LK adopted if LK <= RF + 0.0001 at s73"
+ },
+ {
+  "pair_id": "lk05_vs_k57_s58",
+  "family": "leaky_form",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0529_R_g7lkm_s58",
+  "treatment_bpb": 0.963141,
+  "treatment_steps": 2314,
+  "treatment_k4": 0.9311,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.000451,
+  "step_diff_pct": 0.17,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LeakyReLU(0.5)^2 fnm vs relu^2; control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.00045
+ },
+ {
+  "pair_id": "rf_vs_k57_s58",
+  "family": "relu2_fn",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0637_R_g7rf_s58",
+  "treatment_bpb": 0.96232,
+  "treatment_steps": 2355,
+  "treatment_k4": 0.9118,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_RELU2_FN": "1"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001272,
+  "step_diff_pct": 1.95,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "same function as K57, custom backward (1.8% fewer s/step); control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.00127
+ },
+ {
+  "pair_id": "lk35_vs_k57_s58",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0913_R_g7lk35_s58",
+  "treatment_bpb": 0.961894,
+  "treatment_steps": 2327,
+  "treatment_k4": 0.9264,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001698,
+  "step_diff_pct": 0.74,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "K59 recipe vs K57 recipe; control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.0017
+ },
+ {
+  "pair_id": "lk35_vs_lk05_s58",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0913_R_g7lk35_s58",
+  "treatment_bpb": 0.961894,
+  "treatment_steps": 2327,
+  "treatment_k4": 0.9264,
+  "control_run": "0529_R_g7lkm_s58",
+  "control_bpb": 0.963141,
+  "control_steps": 2314,
+  "control_k4": 0.9311,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0.5"
+  },
+  "delta_raw": -0.001247,
+  "step_diff_pct": 0.56,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "slope only (both fnm); per-step time equal within jitter",
+  "monitor_reported_delta": -0.00125
+ },
+ {
+  "pair_id": "lk35_vs_rf_s58",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0913_R_g7lk35_s58",
+  "treatment_bpb": 0.961894,
+  "treatment_steps": 2327,
+  "treatment_k4": 0.9264,
+  "control_run": "0637_R_g7rf_s58",
+  "control_bpb": 0.96232,
+  "control_steps": 2355,
+  "control_k4": 0.9118,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": -0.000426,
+  "step_diff_pct": -1.19,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "leaky 0.35 fnm vs relu^2 custom-backward (RF ~1.5-1.8% faster)",
+  "monitor_reported_delta": -0.00043
+ },
+ {
+  "pair_id": "lk05_vs_rf_s58",
+  "family": "leaky_form",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0529_R_g7lkm_s58",
+  "treatment_bpb": 0.963141,
+  "treatment_steps": 2314,
+  "treatment_k4": 0.9311,
+  "control_run": "0637_R_g7rf_s58",
+  "control_bpb": 0.96232,
+  "control_steps": 2355,
+  "control_k4": 0.9118,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": 0.000821,
+  "step_diff_pct": -1.74,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:182 rule B: LK adopted if LK <= RF + 0.0001 at s73",
+  "monitor_reported_delta": 0.00082
+ },
+ {
+  "pair_id": "lk05_vs_k57_s67",
+  "family": "leaky_form",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0745_R_g7lkm_s67",
+  "treatment_bpb": 0.961867,
+  "treatment_steps": 2341,
+  "treatment_k4": 0.9212,
+  "control_run": "0202_R_g6acc_s67",
+  "control_bpb": 0.96374,
+  "control_steps": 2313,
+  "control_k4": 0.9283,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001873,
+  "step_diff_pct": 1.21,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LeakyReLU(0.5)^2 fnm vs relu^2; control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.00187
+ },
+ {
+  "pair_id": "rf_vs_k57_s67",
+  "family": "relu2_fn",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0714_R_g7rf_s67",
+  "treatment_bpb": 0.962727,
+  "treatment_steps": 2360,
+  "treatment_k4": 0.9108,
+  "control_run": "0202_R_g6acc_s67",
+  "control_bpb": 0.96374,
+  "control_steps": 2313,
+  "control_k4": 0.9283,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_RELU2_FN": "1"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001013,
+  "step_diff_pct": 2.03,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "same function as K57, custom backward (1.8% fewer s/step); control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)",
+  "monitor_reported_delta": -0.00101
+ },
+ {
+  "pair_id": "lk35_vs_k57_s67",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0945_R_g7lk35_s67",
+  "treatment_bpb": 0.961529,
+  "treatment_steps": 2325,
+  "treatment_k4": 0.9271,
+  "control_run": "0202_R_g6acc_s67",
+  "control_bpb": 0.96374,
+  "control_steps": 2313,
+  "control_k4": 0.9283,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.002211,
+  "step_diff_pct": 0.52,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "K59 recipe vs K57 recipe; control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)"
+ },
+ {
+  "pair_id": "lk35_vs_lk05_s67",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0945_R_g7lk35_s67",
+  "treatment_bpb": 0.961529,
+  "treatment_steps": 2325,
+  "treatment_k4": 0.9271,
+  "control_run": "0745_R_g7lkm_s67",
+  "control_bpb": 0.961867,
+  "control_steps": 2341,
+  "control_k4": 0.9212,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0.5"
+  },
+  "delta_raw": -0.000338,
+  "step_diff_pct": -0.68,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "slope only (both fnm); per-step time equal within jitter"
+ },
+ {
+  "pair_id": "lk35_vs_rf_s67",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0945_R_g7lk35_s67",
+  "treatment_bpb": 0.961529,
+  "treatment_steps": 2325,
+  "treatment_k4": 0.9271,
+  "control_run": "0714_R_g7rf_s67",
+  "control_bpb": 0.962727,
+  "control_steps": 2360,
+  "control_k4": 0.9108,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": -0.001198,
+  "step_diff_pct": -1.48,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "leaky 0.35 fnm vs relu^2 custom-backward (RF ~1.5-1.8% faster)"
+ },
+ {
+  "pair_id": "lk05_vs_rf_s67",
+  "family": "leaky_form",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0745_R_g7lkm_s67",
+  "treatment_bpb": 0.961867,
+  "treatment_steps": 2341,
+  "treatment_k4": 0.9212,
+  "control_run": "0714_R_g7rf_s67",
+  "control_bpb": 0.962727,
+  "control_steps": 2360,
+  "control_k4": 0.9108,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": -0.00086,
+  "step_diff_pct": -0.81,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:182 rule B: LK adopted if LK <= RF + 0.0001 at s73",
+  "monitor_reported_delta": -0.00086
+ },
+ {
+  "pair_id": "lk25_vs_lk35_s73",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1112_R_g7lk25_s73",
+  "treatment_bpb": 0.962087,
+  "treatment_steps": 2323,
+  "treatment_k4": 0.9253,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.25"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0.35"
+  },
+  "delta_raw": 0.000328,
+  "step_diff_pct": -0.13,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "slope line search (M:53-55)",
+  "monitor_reported_delta": 0.00033
+ },
+ {
+  "pair_id": "lk25_vs_k57_s73",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1112_R_g7lk25_s73",
+  "treatment_bpb": 0.962087,
+  "treatment_steps": 2323,
+  "treatment_k4": 0.9253,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.25",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001016,
+  "step_diff_pct": 0.39,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)"
+ },
+ {
+  "pair_id": "lk25_vs_lk35_s58",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1149_R_g7lk25_s58",
+  "treatment_bpb": 0.962068,
+  "treatment_steps": 2331,
+  "treatment_k4": 0.9251,
+  "control_run": "0913_R_g7lk35_s58",
+  "control_bpb": 0.961894,
+  "control_steps": 2327,
+  "control_k4": 0.9264,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.25"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0.35"
+  },
+  "delta_raw": 0.000174,
+  "step_diff_pct": 0.17,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "slope line search (M:53-55)",
+  "monitor_reported_delta": 0.00017
+ },
+ {
+  "pair_id": "lk25_vs_k57_s58",
+  "family": "leaky_slope",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1149_R_g7lk25_s58",
+  "treatment_bpb": 0.962068,
+  "treatment_steps": 2331,
+  "treatment_k4": 0.9251,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.25",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001524,
+  "step_diff_pct": 0.91,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "control on code_m9; M12 flags-off is bit-identical to M9 (S60 identity, M:217)"
+ },
+ {
+  "pair_id": "m13_s123_vs_lk05_s73",
+  "family": "m13_flags",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "0606_R_g7lks123_s73",
+  "treatment_bpb": 0.961919,
+  "treatment_steps": 2352,
+  "treatment_k4": 0.9135,
+  "control_run": "0222_R_g7lkm_s73",
+  "control_bpb": 0.961855,
+  "control_steps": 2340,
+  "control_k4": 0.9221,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M13",
+  "code_dir": "code_k13off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_ROPE_FN": "1",
+   "FF_QK_GAIN_FOLD": "1",
+   "FF_RMSNORM_FN": "1"
+  },
+  "control_knobs": {
+   "FF_ROPE_FN": "0",
+   "FF_QK_GAIN_FOLD": "0",
+   "FF_RMSNORM_FN": "0"
+  },
+  "delta_raw": 6.4e-05,
+  "step_diff_pct": 0.51,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M13 S1+S2+S3 on the LK0.5 recipe: same function, custom backwards (full-run +0.5% steps, screen said 1.1%); not adopted (M:139-141)",
+  "monitor_reported_delta": 6e-05
+ },
+ {
+  "pair_id": "softcap165_vs_lk35_s73",
+  "family": "softcap_asym",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1427_R_g7lk35sc165_s73",
+  "treatment_bpb": 0.961542,
+  "treatment_steps": 2323,
+  "treatment_k4": 0.9282,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SOFTCAP_A": "16.5",
+   "FF_SOFTCAP_B": "0"
+  },
+  "control_knobs": {
+   "FF_SOFTCAP_A": "0",
+   "FF_SOFTCAP_B": "0"
+  },
+  "delta_raw": -0.000217,
+  "step_diff_pct": -0.13,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "16.5*tanh(z/15) at all logit sites; k4 0.9282 vs 0.9279 (M:26)",
+  "monitor_reported_delta": -0.00022
+ },
+ {
+  "pair_id": "softcap165_vs_lk35_s58",
+  "family": "softcap_asym",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1539_R_g7lk35sc165_s58",
+  "treatment_bpb": 0.961953,
+  "treatment_steps": 2321,
+  "treatment_k4": 0.9285,
+  "control_run": "0913_R_g7lk35_s58",
+  "control_bpb": 0.961894,
+  "control_steps": 2327,
+  "control_k4": 0.9264,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SOFTCAP_A": "16.5",
+   "FF_SOFTCAP_B": "0"
+  },
+  "control_knobs": {
+   "FF_SOFTCAP_A": "0",
+   "FF_SOFTCAP_B": "0"
+  },
+  "delta_raw": 5.9e-05,
+  "step_diff_pct": -0.26,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip log only (finished after the last monitor entry); s67 pair still queued"
+ },
+ {
+  "pair_id": "qk16_s58",
+  "family": "qk_gain",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0844_R_g7qk16_s58",
+  "treatment_bpb": 0.963307,
+  "treatment_steps": 2313,
+  "treatment_k4": 0.9281,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_QK_GAIN": "1.6"
+  },
+  "control_knobs": {
+   "FF_QK_GAIN": "1.44"
+  },
+  "delta_raw": -0.000285,
+  "step_diff_pct": 0.13,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "",
+  "monitor_reported_delta": -0.00028
+ },
+ {
+  "pair_id": "qk16_s73",
+  "family": "qk_gain",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0958_R_g7qk16_s73",
+  "treatment_bpb": 0.963876,
+  "treatment_steps": 2308,
+  "treatment_k4": 0.9289,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_QK_GAIN": "1.6"
+  },
+  "control_knobs": {
+   "FF_QK_GAIN": "1.44"
+  },
+  "delta_raw": 0.000773,
+  "step_diff_pct": -0.26,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "loses on K57's seed 73 (M:362)",
+  "monitor_reported_delta": 0.00078
+ },
+ {
+  "pair_id": "qk16_s67",
+  "family": "qk_gain",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1029_R_g7qk16_s67",
+  "treatment_bpb": 0.963495,
+  "treatment_steps": 2313,
+  "treatment_k4": 0.9278,
+  "control_run": "0202_R_g6acc_s67",
+  "control_bpb": 0.96374,
+  "control_steps": 2313,
+  "control_k4": 0.9283,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_QK_GAIN": "1.6"
+  },
+  "control_knobs": {
+   "FF_QK_GAIN": "1.44"
+  },
+  "delta_raw": -0.000245,
+  "step_diff_pct": 0.0,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "",
+  "monitor_reported_delta": -0.00024
+ },
+ {
+  "pair_id": "softcap18_s58",
+  "family": "softcap",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0921_R_g7sc18_s58",
+  "treatment_bpb": 0.963947,
+  "treatment_steps": 2313,
+  "treatment_k4": 0.9281,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_SOFTCAP": "18"
+  },
+  "control_knobs": {
+   "FF_SOFTCAP": "15"
+  },
+  "delta_raw": 0.000355,
+  "step_diff_pct": 0.13,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "",
+  "monitor_reported_delta": 0.0004
+ },
+ {
+  "pair_id": "warmup40_s58",
+  "family": "warmup",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1100_R_g7wu40_s58",
+  "treatment_bpb": 0.964254,
+  "treatment_steps": 2272,
+  "treatment_k4": 0.9269,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_WARMUP": "40"
+  },
+  "control_knobs": {
+   "FF_WARMUP": "20"
+  },
+  "delta_raw": 0.000662,
+  "step_diff_pct": -1.65,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "per-step time unchanged, but FF_ACCUM_FROM follows FF_WARMUP so the k1 phase starts later: 38 fewer steps is mechanism, not jitter - compare raw",
+  "monitor_reported_delta": 0.0007
+ },
+ {
+  "pair_id": "emb_lr036_s58",
+  "family": "lr",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1134_R_g7elr36_s58",
+  "treatment_bpb": 0.963626,
+  "treatment_steps": 2305,
+  "treatment_k4": 0.9303,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_EMB_LR": "0.36"
+  },
+  "control_knobs": {
+   "FF_EMB_LR": "0.30"
+  },
+  "delta_raw": 3.4e-05,
+  "step_diff_pct": -0.22,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "",
+  "monitor_reported_delta": 0.0
+ },
+ {
+  "pair_id": "unemb_lr0072_s58",
+  "family": "lr",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1205_R_g7ulr72_s58",
+  "treatment_bpb": 0.963922,
+  "treatment_steps": 2303,
+  "treatment_k4": 0.9305,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_UNEMB_LR": "0.0072"
+  },
+  "control_knobs": {
+   "FF_UNEMB_LR": "0.006"
+  },
+  "delta_raw": 0.00033,
+  "step_diff_pct": -0.3,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "",
+  "monitor_reported_delta": 0.0003
+ },
+ {
+  "pair_id": "mtp_w_1_06_03_s58",
+  "family": "mtp",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1237_R_g7mtpw_s58",
+  "treatment_bpb": 0.963656,
+  "treatment_steps": 2309,
+  "treatment_k4": 0.9278,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_MTP_W": "1,0.6,0.3"
+  },
+  "control_knobs": {
+   "FF_MTP_W": "1,0.5,0.25"
+  },
+  "delta_raw": 6.4e-05,
+  "step_diff_pct": -0.04,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "never reported in the monitor; chip eval.log value"
+ },
+ {
+  "pair_id": "xsa_all_s73",
+  "family": "xsa",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1607_R_g7xa_s73",
+  "treatment_bpb": 0.966484,
+  "treatment_steps": 2103,
+  "treatment_k4": 1.0163,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M10",
+  "code_dir": "code_m10",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_XSA_LAYERS": "all"
+  },
+  "control_knobs": {
+   "FF_XSA_LAYERS": ""
+  },
+  "delta_raw": 0.003381,
+  "step_diff_pct": -9.12,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "+10% k4 step (per-layer 0-dim gate); M:326",
+  "monitor_reported_delta": 0.0034
+ },
+ {
+  "pair_id": "xsa_layers0123_s73",
+  "family": "xsa",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1644_R_g7xe_s73",
+  "treatment_bpb": 0.964328,
+  "treatment_steps": 2235,
+  "treatment_k4": 0.9574,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M10",
+  "code_dir": "code_m10",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_XSA_LAYERS": "0,1,2,3"
+  },
+  "control_knobs": {
+   "FF_XSA_LAYERS": ""
+  },
+  "delta_raw": 0.001225,
+  "step_diff_pct": -3.41,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "+3.4% k4 step; M:313",
+  "monitor_reported_delta": 0.0012
+ },
+ {
+  "pair_id": "leaky05_abs_m10b_s73",
+  "family": "leaky_form",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1722_R_g7lrb_s73",
+  "treatment_bpb": 0.96448,
+  "treatment_steps": 2235,
+  "treatment_k4": 0.9623,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M10b",
+  "code_dir": "code_m10b",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "abs"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": 0.001377,
+  "step_diff_pct": -3.41,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "5-op abs form: +3.4% k4 step (dt 0.96 vs 0.93); M:305-311",
+  "monitor_reported_delta": 0.0014
+ },
+ {
+  "pair_id": "leaky05_max_m11c_s73",
+  "family": "leaky_form",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1939_R_g7lrm_s73",
+  "treatment_bpb": 0.965777,
+  "treatment_steps": 2177,
+  "treatment_k4": 0.9874,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M11c",
+  "code_dir": "code_m11c",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "max"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": 0.002674,
+  "step_diff_pct": -5.92,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "torch.maximum form: +5.9% k4 step; M:282",
+  "monitor_reported_delta": 0.0027
+ },
+ {
+  "pair_id": "mom_peak097_s73",
+  "family": "mom_peak",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1759_R_g7mp97_s73",
+  "treatment_bpb": 0.965084,
+  "treatment_steps": 2311,
+  "treatment_k4": 0.9284,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_MOM_PEAK": "0.97"
+  },
+  "control_knobs": {
+   "FF_MOM_PEAK": "0.95"
+  },
+  "delta_raw": 0.001981,
+  "step_diff_pct": -0.13,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:301",
+  "monitor_reported_delta": 0.002
+ },
+ {
+  "pair_id": "mom_peak093_s73",
+  "family": "mom_peak",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "2017_R_g7mp93_s73",
+  "treatment_bpb": 0.963645,
+  "treatment_steps": 2309,
+  "treatment_k4": 0.9306,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_MOM_PEAK": "0.93"
+  },
+  "control_knobs": {
+   "FF_MOM_PEAK": "0.95"
+  },
+  "delta_raw": 0.000542,
+  "step_diff_pct": -0.22,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:277",
+  "monitor_reported_delta": 0.00055
+ },
+ {
+  "pair_id": "wd_sched1_s73",
+  "family": "wd_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1836_R_g7wds1_s73",
+  "treatment_bpb": 0.963191,
+  "treatment_steps": 2307,
+  "treatment_k4": 0.931,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_WD_SCHED": "1"
+  },
+  "control_knobs": {
+   "FF_WD_SCHED": "0"
+  },
+  "delta_raw": 8.8e-05,
+  "step_diff_pct": -0.3,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "host-side scalar, no step cost (M:293)",
+  "monitor_reported_delta": 9e-05
+ },
+ {
+  "pair_id": "wd_sched1_s58",
+  "family": "wd_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "2048_R_g7wds1_s58",
+  "treatment_bpb": 0.963561,
+  "treatment_steps": 2299,
+  "treatment_k4": 0.9313,
+  "control_run": "0054_R_g6acc_s58",
+  "control_bpb": 0.963592,
+  "control_steps": 2310,
+  "control_k4": 0.9287,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_WD_SCHED": "1"
+  },
+  "control_knobs": {
+   "FF_WD_SCHED": "0"
+  },
+  "delta_raw": -3.1e-05,
+  "step_diff_pct": -0.48,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:270",
+  "monitor_reported_delta": -3e-05
+ },
+ {
+  "pair_id": "wd_sched1_s67",
+  "family": "wd_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "2119_R_g7wds1_s67",
+  "treatment_bpb": 0.963795,
+  "treatment_steps": 2309,
+  "treatment_k4": 0.9281,
+  "control_run": "0202_R_g6acc_s67",
+  "control_bpb": 0.96374,
+  "control_steps": 2313,
+  "control_k4": 0.9283,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_WD_SCHED": "1"
+  },
+  "control_knobs": {
+   "FF_WD_SCHED": "0"
+  },
+  "delta_raw": 5.5e-05,
+  "step_diff_pct": -0.17,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:266",
+  "monitor_reported_delta": 6e-05
+ },
+ {
+  "pair_id": "wd_sched2_s73",
+  "family": "wd_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "2150_R_g7wds2_s73",
+  "treatment_bpb": 0.962858,
+  "treatment_steps": 2322,
+  "treatment_k4": 0.9232,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_WD_SCHED": "2"
+  },
+  "control_knobs": {
+   "FF_WD_SCHED": "0"
+  },
+  "delta_raw": -0.000245,
+  "step_diff_pct": 0.35,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:259: raw gain = 8 extra steps of jitter",
+  "monitor_reported_delta": -0.00025
+ },
+ {
+  "pair_id": "scalar_beta2_099_s73",
+  "family": "beta2",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "1908_R_g7sb99_s73",
+  "treatment_bpb": 0.963408,
+  "treatment_steps": 2307,
+  "treatment_k4": 0.9289,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M11",
+  "code_dir": "code_m11",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_SCALAR_BETA2": "0.99"
+  },
+  "control_knobs": {
+   "FF_SCALAR_BETA2": "0.95"
+  },
+  "delta_raw": 0.000305,
+  "step_diff_pct": -0.3,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:288",
+  "monitor_reported_delta": 0.0003
+ },
+ {
+  "pair_id": "muon_beta2_08_s73",
+  "family": "beta2",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "2253_R_g7mb08_s73",
+  "treatment_bpb": 0.96357,
+  "treatment_steps": 2312,
+  "treatment_k4": 0.9288,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_MUON_BETA2": "0.8"
+  },
+  "control_knobs": {
+   "FF_MUON_BETA2": "0.9"
+  },
+  "delta_raw": 0.000467,
+  "step_diff_pct": -0.09,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:250",
+  "monitor_reported_delta": 0.0005
+ },
+ {
+  "pair_id": "rope_base300k_s73",
+  "family": "rope",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "2222_R_g7rope3_s73",
+  "treatment_bpb": 0.963258,
+  "treatment_steps": 2322,
+  "treatment_k4": 0.9274,
+  "control_run": "0626_R_g7_s73",
+  "control_bpb": 0.963103,
+  "control_steps": 2314,
+  "control_k4": 0.9282,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M9",
+  "control_code_dir": "code_m9",
+  "knob_changes": {
+   "FF_ROPE_BASE": "300000"
+  },
+  "control_knobs": {
+   "FF_ROPE_BASE": "100000"
+  },
+  "delta_raw": 0.000155,
+  "step_diff_pct": 0.35,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:255",
+  "monitor_reported_delta": 0.00016
+ },
+ {
+  "pair_id": "ko03_s58",
+  "family": "key_offset_rad",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1524_R_g5ko03_s58",
+  "treatment_bpb": 0.963918,
+  "treatment_steps": 2300,
+  "treatment_k4": 0.9384,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.3"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -5.1e-05,
+  "step_diff_pct": -0.04,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "G5 default RAD 0.1 (25 rotary pairs shifted) -> 0.3 (37 pairs); adopted 3/3 (M:480)",
+  "monitor_reported_delta": -5e-05
+ },
+ {
+  "pair_id": "ko05_s58",
+  "family": "key_offset_rad",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "2217_R_g5ko05_s58",
+  "treatment_bpb": 0.963807,
+  "treatment_steps": 2290,
+  "treatment_k4": 0.9413,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.5"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -0.000162,
+  "step_diff_pct": -0.48,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:457",
+  "monitor_reported_delta": -0.00016
+ },
+ {
+  "pair_id": "ko03_s53",
+  "family": "key_offset_rad",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1902_R_g5ko03_s53",
+  "treatment_bpb": 0.965473,
+  "treatment_steps": 2282,
+  "treatment_k4": 0.9433,
+  "control_run": "1728_R_g5ctl_s53",
+  "control_bpb": 0.965703,
+  "control_steps": 2300,
+  "control_k4": 0.9383,
+  "control_chip": "C",
+  "seed": 53,
+  "control_seed": 53,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.3"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -0.00023,
+  "step_diff_pct": -0.78,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "G5 default RAD 0.1 (25 rotary pairs shifted) -> 0.3 (37 pairs); adopted 3/3 (M:480)",
+  "monitor_reported_delta": -0.0002
+ },
+ {
+  "pair_id": "ko05_s53",
+  "family": "key_offset_rad",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "2254_R_g5ko05_s53",
+  "treatment_bpb": 0.965313,
+  "treatment_steps": 2287,
+  "treatment_k4": 0.9416,
+  "control_run": "1728_R_g5ctl_s53",
+  "control_bpb": 0.965703,
+  "control_steps": 2300,
+  "control_k4": 0.9383,
+  "control_chip": "C",
+  "seed": 53,
+  "control_seed": 53,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.5"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -0.00039,
+  "step_diff_pct": -0.57,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:457",
+  "monitor_reported_delta": -0.0004
+ },
+ {
+  "pair_id": "ko03_s67",
+  "family": "key_offset_rad",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "2103_R_g5ko03_s67",
+  "treatment_bpb": 0.964461,
+  "treatment_steps": 2286,
+  "treatment_k4": 0.9422,
+  "control_run": "2032_R_g5ctl_s67",
+  "control_bpb": 0.96497,
+  "control_steps": 2286,
+  "control_k4": 0.9421,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.3"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -0.000509,
+  "step_diff_pct": 0.0,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "G5 default RAD 0.1 (25 rotary pairs shifted) -> 0.3 (37 pairs); adopted 3/3 (M:480)",
+  "monitor_reported_delta": -0.0005
+ },
+ {
+  "pair_id": "ko05_s67",
+  "family": "key_offset_rad",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "2325_R_g5ko05_s67",
+  "treatment_bpb": 0.964965,
+  "treatment_steps": 2284,
+  "treatment_k4": 0.9426,
+  "control_run": "2032_R_g5ctl_s67",
+  "control_bpb": 0.96497,
+  "control_steps": 2286,
+  "control_k4": 0.9421,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.5"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -5e-06,
+  "step_diff_pct": -0.09,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:457",
+  "monitor_reported_delta": 0.0
+ },
+ {
+  "pair_id": "ko02_s58",
+  "family": "key_offset_rad",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "2359_R_g5ko02_s58",
+  "treatment_bpb": 0.963888,
+  "treatment_steps": 2288,
+  "treatment_k4": 0.9421,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_KEY_OFFSET_RAD": "0.2"
+  },
+  "control_knobs": {
+   "FF_KEY_OFFSET_RAD": "0.1"
+  },
+  "delta_raw": -8.1e-05,
+  "step_diff_pct": -0.56,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:448",
+  "monitor_reported_delta": -8e-05
+ },
+ {
+  "pair_id": "acc_in_graph_s58",
+  "family": "acc_in_graph",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0054_R_g6acc_s58",
+  "treatment_bpb": 0.963592,
+  "treatment_steps": 2310,
+  "treatment_k4": 0.9287,
+  "control_run": "1524_R_g5ko03_s58",
+  "control_bpb": 0.963918,
+  "control_steps": 2300,
+  "control_k4": 0.9384,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACC_IN_GRAPH": "1"
+  },
+  "control_knobs": {
+   "FF_ACC_IN_GRAPH": "0"
+  },
+  "delta_raw": -0.000326,
+  "step_diff_pct": 0.43,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "-2.2% k4 step, +1.2% steps; in-graph fp32 accumulation (rounding-level numerics change). M9 flags-off == M7 op-for-op",
+  "monitor_reported_delta": -0.00033
+ },
+ {
+  "pair_id": "acc_in_graph_s53",
+  "family": "acc_in_graph",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0131_R_g6acc_s53",
+  "treatment_bpb": 0.964699,
+  "treatment_steps": 2309,
+  "treatment_k4": 0.9289,
+  "control_run": "1902_R_g5ko03_s53",
+  "control_bpb": 0.965473,
+  "control_steps": 2282,
+  "control_k4": 0.9433,
+  "control_chip": "C",
+  "seed": 53,
+  "control_seed": 53,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACC_IN_GRAPH": "1"
+  },
+  "control_knobs": {
+   "FF_ACC_IN_GRAPH": "0"
+  },
+  "delta_raw": -0.000774,
+  "step_diff_pct": 1.18,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "-2.2% k4 step, +1.2% steps; in-graph fp32 accumulation (rounding-level numerics change). M9 flags-off == M7 op-for-op",
+  "monitor_reported_delta": -0.00077
+ },
+ {
+  "pair_id": "acc_in_graph_s67",
+  "family": "acc_in_graph",
+  "in_task_list": true,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0202_R_g6acc_s67",
+  "treatment_bpb": 0.96374,
+  "treatment_steps": 2313,
+  "treatment_k4": 0.9283,
+  "control_run": "2103_R_g5ko03_s67",
+  "control_bpb": 0.964461,
+  "control_steps": 2286,
+  "control_k4": 0.9422,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M9",
+  "code_dir": "code_m9",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACC_IN_GRAPH": "1"
+  },
+  "control_knobs": {
+   "FF_ACC_IN_GRAPH": "0"
+  },
+  "delta_raw": -0.000721,
+  "step_diff_pct": 1.18,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "-2.2% k4 step, +1.2% steps; in-graph fp32 accumulation (rounding-level numerics change). M9 flags-off == M7 op-for-op",
+  "monitor_reported_delta": -0.00072
+ },
+ {
+  "pair_id": "ramp3_g4_C_s58",
+  "family": "accum_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "0915_R_g4r3_s58",
+  "treatment_bpb": 0.964295,
+  "treatment_steps": 2287,
+  "treatment_k4": 0.9411,
+  "control_run": "0806_R_g4_s58",
+  "control_bpb": 0.964669,
+  "control_steps": 2150,
+  "control_k4": 0.9419,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4",
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.000374,
+  "step_diff_pct": 6.37,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:578 -0.0004",
+  "monitor_reported_delta": -0.0004
+ },
+ {
+  "pair_id": "ramp3_g4_C_s53",
+  "family": "accum_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1048_R_g4r3_s53",
+  "treatment_bpb": 0.966042,
+  "treatment_steps": 2278,
+  "treatment_k4": 0.9442,
+  "control_run": "0946_R_g4_s53",
+  "control_bpb": 0.966335,
+  "control_steps": 2150,
+  "control_k4": 0.9417,
+  "control_chip": "C",
+  "seed": 53,
+  "control_seed": 53,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4",
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.000293,
+  "step_diff_pct": 5.95,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:569 -0.0003",
+  "monitor_reported_delta": -0.0003
+ },
+ {
+  "pair_id": "ramp3_g4_A_s67",
+  "family": "accum_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "A",
+  "treatment_run": "A:*_R_g4r3_s67",
+  "treatment_bpb": 0.9648,
+  "treatment_steps": 2291,
+  "treatment_k4": null,
+  "control_run": "A:*_R_g4_s67",
+  "control_bpb": 0.96509,
+  "control_steps": 2142,
+  "control_k4": null,
+  "control_chip": "A",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4",
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.00029,
+  "step_diff_pct": 6.96,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:578 -0.0003; chip A, dir names unknown",
+  "uncertain": true,
+  "monitor_reported_delta": -0.0003
+ },
+ {
+  "pair_id": "p30_g4_C_s58",
+  "family": "accum_sched",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "0843_R_g4p30_s58",
+  "treatment_bpb": 0.964463,
+  "treatment_steps": 2306,
+  "treatment_k4": 0.9412,
+  "control_run": "0806_R_g4_s58",
+  "control_bpb": 0.964669,
+  "control_steps": 2150,
+  "control_k4": 0.9419,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "2:0.3,4"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.000206,
+  "step_diff_pct": 7.26,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:589 -0.0002",
+  "monitor_reported_delta": -0.0002
+ },
+ {
+  "pair_id": "p30_g4_C_s53",
+  "family": "accum_sched",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1017_R_g4p30_s53",
+  "treatment_bpb": 0.965969,
+  "treatment_steps": 2302,
+  "treatment_k4": 0.9427,
+  "control_run": "0946_R_g4_s53",
+  "control_bpb": 0.966335,
+  "control_steps": 2150,
+  "control_k4": 0.9417,
+  "control_chip": "C",
+  "seed": 53,
+  "control_seed": 53,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "2:0.3,4"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.000366,
+  "step_diff_pct": 7.07,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:569 -0.0004",
+  "monitor_reported_delta": -0.0004
+ },
+ {
+  "pair_id": "ramp3_g3_C_s58",
+  "family": "accum_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "0538_R_g3ramp3_s58",
+  "treatment_bpb": 0.965749,
+  "treatment_steps": 2219,
+  "treatment_k4": 0.959,
+  "control_run": "0127_R_g2zero_s58",
+  "control_bpb": 0.966072,
+  "control_steps": 2093,
+  "control_k4": null,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M6",
+  "code_dir": "code_m6",
+  "control_code_version": "M6",
+  "control_code_dir": "code_m6",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4",
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.000323,
+  "step_diff_pct": 6.02,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:633 -0.0003",
+  "monitor_reported_delta": -0.0003
+ },
+ {
+  "pair_id": "ramp3_g3_C_s67",
+  "family": "accum_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "0653_R_g3ramp3_s67",
+  "treatment_bpb": 0.966328,
+  "treatment_steps": 2216,
+  "treatment_k4": 0.9603,
+  "control_run": "0245_R_g2zero_s67",
+  "control_bpb": 0.966289,
+  "control_steps": 2091,
+  "control_k4": null,
+  "control_chip": "C",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M6",
+  "code_dir": "code_m6",
+  "control_code_version": "M6",
+  "control_code_dir": "code_m6",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4",
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": 3.9e-05,
+  "step_diff_pct": 5.98,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:613 +0.00004",
+  "monitor_reported_delta": 4e-05
+ },
+ {
+  "pair_id": "ramp3_g3_A_s67",
+  "family": "accum_sched",
+  "in_task_list": true,
+  "date_utc": "2026-09-27",
+  "chip": "A",
+  "treatment_run": "A:*_R_g3ramp3_s67",
+  "treatment_bpb": 0.96637,
+  "treatment_steps": 2209,
+  "treatment_k4": null,
+  "control_run": "A:*_R_g2zero_s67",
+  "control_bpb": 0.96647,
+  "control_steps": 2089,
+  "control_k4": null,
+  "control_chip": "A",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M6",
+  "code_dir": "code_m6",
+  "control_code_version": "M6",
+  "control_code_dir": "code_m6",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4",
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.0001,
+  "step_diff_pct": 5.74,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:638 -0.0001; chip A",
+  "uncertain": true,
+  "monitor_reported_delta": -0.0001
+ },
+ {
+  "pair_id": "p30_g3_C_s58",
+  "family": "accum_sched",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "0609_R_g3p30_s58",
+  "treatment_bpb": 0.965921,
+  "treatment_steps": 2240,
+  "treatment_k4": 0.962,
+  "control_run": "0127_R_g2zero_s58",
+  "control_bpb": 0.966072,
+  "control_steps": 2093,
+  "control_k4": null,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M6",
+  "code_dir": "code_m6",
+  "control_code_version": "M6",
+  "control_code_dir": "code_m6",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "2:0.3,4"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "2:0.2,4",
+   "FF_ACCUM_LR": "0.7071"
+  },
+  "delta_raw": -0.000151,
+  "step_diff_pct": 7.02,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:590 -0.00015",
+  "monitor_reported_delta": -0.00015
+ },
+ {
+  "pair_id": "g4_vs_g3_C_s58",
+  "family": "zero2_adamw_zero",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "0806_R_g4_s58",
+  "treatment_bpb": 0.964669,
+  "treatment_steps": 2150,
+  "treatment_k4": 0.9419,
+  "control_run": "0127_R_g2zero_s58",
+  "control_bpb": 0.966072,
+  "control_steps": 2093,
+  "control_k4": null,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M6",
+  "control_code_dir": "code_m6",
+  "knob_changes": {
+   "FF_MUON_ZERO2": "1",
+   "FF_ADAMW_ZERO": "1",
+   "FF_EMA_EVERY": "32"
+  },
+  "control_knobs": {
+   "FF_MUON_ZERO2": "0",
+   "FF_ADAMW_ZERO": "0",
+   "FF_EMA_EVERY": "4"
+  },
+  "delta_raw": -0.001403,
+  "step_diff_pct": 2.72,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "K54a mechanism (M:587 -0.0014); code_m7 vs code_m6, bit-identical patches",
+  "monitor_reported_delta": -0.0014
+ },
+ {
+  "pair_id": "g4_vs_g3_A_s67",
+  "family": "zero2_adamw_zero",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "A",
+  "treatment_run": "A:*_R_g4_s67",
+  "treatment_bpb": 0.96509,
+  "treatment_steps": 2142,
+  "treatment_k4": null,
+  "control_run": "A:*_R_g2zero_s67",
+  "control_bpb": 0.96647,
+  "control_steps": 2089,
+  "control_k4": null,
+  "control_chip": "A",
+  "seed": 67,
+  "control_seed": 67,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M6",
+  "control_code_dir": "code_m6",
+  "knob_changes": {
+   "FF_MUON_ZERO2": "1",
+   "FF_ADAMW_ZERO": "1",
+   "FF_EMA_EVERY": "32"
+  },
+  "control_knobs": {
+   "FF_MUON_ZERO2": "0",
+   "FF_ADAMW_ZERO": "0",
+   "FF_EMA_EVERY": "4"
+  },
+  "delta_raw": -0.00138,
+  "step_diff_pct": 2.54,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:588 -0.0014; chip A",
+  "uncertain": true,
+  "monitor_reported_delta": -0.0014
+ },
+ {
+  "pair_id": "first_stage008_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1237_R_g5r08_s58",
+  "treatment_bpb": 0.964059,
+  "treatment_steps": 2353,
+  "treatment_k4": 0.9363,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.08,2:0.2,4"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4"
+  },
+  "delta_raw": 9e-05,
+  "step_diff_pct": 2.26,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:548 +0.0001",
+  "monitor_reported_delta": 0.0001
+ },
+ {
+  "pair_id": "stage_lrs_06_08_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1308_R_g5lr68_s58",
+  "treatment_bpb": 0.964159,
+  "treatment_steps": 2303,
+  "treatment_k4": 0.9354,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_LR": "0.6,0.8"
+  },
+  "control_knobs": {
+   "FF_ACCUM_LR": "0.5,0.7071"
+  },
+  "delta_raw": 0.00019,
+  "step_diff_pct": 0.09,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:548 +0.0002",
+  "monitor_reported_delta": 0.0002
+ },
+ {
+  "pair_id": "mtp_phases_02_05_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1423_R_g5mtp50_s58",
+  "treatment_bpb": 0.964122,
+  "treatment_steps": 2301,
+  "treatment_k4": 0.937,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_MTP_PHASES": "0.2,0.5"
+  },
+  "control_knobs": {
+   "FF_MTP_PHASES": "0.2,0.45"
+  },
+  "delta_raw": 0.000153,
+  "step_diff_pct": 0.0,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:539 +0.00015; MTP stage lengths change the head cost mix",
+  "monitor_reported_delta": 0.00015
+ },
+ {
+  "pair_id": "ramp3_p30_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1555_R_g5r3p30_s58",
+  "treatment_bpb": 0.963985,
+  "treatment_steps": 2453,
+  "treatment_k4": 0.937,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.3,4"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4"
+  },
+  "delta_raw": 1.6e-05,
+  "step_diff_pct": 6.61,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:520 +0.00002",
+  "monitor_reported_delta": 2e-05
+ },
+ {
+  "pair_id": "matrix_lr175_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1626_R_g5mlr175_s58",
+  "treatment_bpb": 0.964396,
+  "treatment_steps": 2286,
+  "treatment_k4": 0.9419,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_MATRIX_LR_SCALE": "1.75"
+  },
+  "control_knobs": {
+   "FF_MATRIX_LR_SCALE": "2.0"
+  },
+  "delta_raw": 0.000427,
+  "step_diff_pct": -0.65,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:521 +0.0004",
+  "monitor_reported_delta": 0.0004
+ },
+ {
+  "pair_id": "matrix_lr23_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1800_R_g5mlr23_s58",
+  "treatment_bpb": 0.964442,
+  "treatment_steps": 2300,
+  "treatment_k4": 0.9365,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_MATRIX_LR_SCALE": "2.3"
+  },
+  "control_knobs": {
+   "FF_MATRIX_LR_SCALE": "2.0"
+  },
+  "delta_raw": 0.000473,
+  "step_diff_pct": -0.04,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:511 +0.0005",
+  "monitor_reported_delta": 0.0005
+ },
+ {
+  "pair_id": "wd0012_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1657_R_g5wd012_s58",
+  "treatment_bpb": 0.964559,
+  "treatment_steps": 2287,
+  "treatment_k4": 0.9407,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_WD": "0.012"
+  },
+  "control_knobs": {
+   "FF_WD": "0.02"
+  },
+  "delta_raw": 0.00059,
+  "step_diff_pct": -0.61,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:511 +0.0006",
+  "monitor_reported_delta": 0.0006
+ },
+ {
+  "pair_id": "wd003_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1831_R_g5wd03_s58",
+  "treatment_bpb": 0.964307,
+  "treatment_steps": 2290,
+  "treatment_k4": 0.943,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_WD": "0.03"
+  },
+  "control_knobs": {
+   "FF_WD": "0.02"
+  },
+  "delta_raw": 0.000338,
+  "step_diff_pct": -0.48,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:511 +0.0003",
+  "monitor_reported_delta": 0.0003
+ },
+ {
+  "pair_id": "adamw_lr17_s58",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "0315_R_g5alr17s_s58",
+  "treatment_bpb": 0.964552,
+  "treatment_steps": 2285,
+  "treatment_k4": 0.9427,
+  "control_run": "1200_R_g5_s58",
+  "control_bpb": 0.963969,
+  "control_steps": 2301,
+  "control_k4": 0.936,
+  "control_chip": "C",
+  "seed": 58,
+  "control_seed": 58,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ADAMW_LR_SCALE": "1.7",
+   "FF_SCALAR_LR": "0.1664"
+  },
+  "control_knobs": {
+   "FF_ADAMW_LR_SCALE": "1.4142",
+   "FF_SCALAR_LR": "0.20"
+  },
+  "delta_raw": 0.000583,
+  "step_diff_pct": -0.7,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:419 +0.0006 (de-confounded)",
+  "monitor_reported_delta": 0.0006
+ },
+ {
+  "pair_id": "ramp3_p30_s53",
+  "family": "g5_retune",
+  "in_task_list": false,
+  "date_utc": "2026-09-27",
+  "chip": "C",
+  "treatment_run": "1933_R_g5r3p30_s53",
+  "treatment_bpb": 0.965639,
+  "treatment_steps": 2445,
+  "treatment_k4": 0.9392,
+  "control_run": "1728_R_g5ctl_s53",
+  "control_bpb": 0.965703,
+  "control_steps": 2300,
+  "control_k4": 0.9383,
+  "control_chip": "C",
+  "seed": 53,
+  "control_seed": 53,
+  "code_version": "M7",
+  "code_dir": "code_m7",
+  "control_code_version": "M7",
+  "control_code_dir": "code_m7",
+  "knob_changes": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.3,4"
+  },
+  "control_knobs": {
+   "FF_ACCUM_SCHED": "1:0.06,2:0.2,4"
+  },
+  "delta_raw": -6.4e-05,
+  "step_diff_pct": 6.3,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M:498 -0.00006",
+  "monitor_reported_delta": -6e-05
+ },
+ {
+  "pair_id": "reh_k59_vs_k57",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C40_cold_K59",
+  "treatment_bpb": 0.96092,
+  "treatment_steps": 2357,
+  "treatment_k4": 0.9312,
+  "control_run": "C36_cold_K57",
+  "control_bpb": 0.961927,
+  "control_steps": 2359,
+  "control_k4": 0.9278,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K59 a5ab16b1",
+  "control_code_version": "M9",
+  "control_code_dir": "K57_min 2f8145a3",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm",
+   "FF_TIME_TARGET": "1793"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0",
+   "FF_TIME_TARGET": "1790.5"
+  },
+  "delta_raw": -0.001007,
+  "step_diff_pct": -0.08,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:76 -0.00101; both cold; official 0.9671 vs 0.9686 (-0.0015)",
+  "monitor_reported_delta": -0.00101
+ },
+ {
+  "pair_id": "reh_k59_vs_k57t",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C40_cold_K59",
+  "treatment_bpb": 0.96092,
+  "treatment_steps": 2357,
+  "treatment_k4": 0.9312,
+  "control_run": "C37_cold_K57T",
+  "control_bpb": 0.962085,
+  "control_steps": 2359,
+  "control_k4": 0.9299,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K59 a5ab16b1",
+  "control_code_version": "M9",
+  "control_code_dir": "K57T_min 2a84bbec",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.001165,
+  "step_diff_pct": -0.08,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "same TT 1793: the cleanest LK0.35 rehearsal pair"
+ },
+ {
+  "pair_id": "reh_k58lk_vs_k57t",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C38_cold_K58",
+  "treatment_bpb": 0.961213,
+  "treatment_steps": 2380,
+  "treatment_k4": 0.9211,
+  "control_run": "C37_cold_K57T",
+  "control_bpb": 0.962085,
+  "control_steps": 2359,
+  "control_k4": 0.9299,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K58lk_min ce6c68fe",
+  "control_code_version": "M9",
+  "control_code_dir": "K57T_min 2a84bbec",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.000872,
+  "step_diff_pct": 0.89,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:176 -0.00088",
+  "monitor_reported_delta": -0.00088
+ },
+ {
+  "pair_id": "reh_k58rf_vs_k57t",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C39_cold_K58R",
+  "treatment_bpb": 0.961182,
+  "treatment_steps": 2412,
+  "treatment_k4": 0.9098,
+  "control_run": "C37_cold_K57T",
+  "control_bpb": 0.962085,
+  "control_steps": 2359,
+  "control_k4": 0.9299,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K58rf_min 349e3768",
+  "control_code_version": "M9",
+  "control_code_dir": "K57T_min 2a84bbec",
+  "knob_changes": {
+   "FF_RELU2_FN": "1"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0"
+  },
+  "delta_raw": -0.000903,
+  "step_diff_pct": 2.25,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "RF: +2.2% steps"
+ },
+ {
+  "pair_id": "reh_k58lk_vs_k57",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C38_cold_K58",
+  "treatment_bpb": 0.961213,
+  "treatment_steps": 2380,
+  "treatment_k4": 0.9211,
+  "control_run": "C36_cold_K57",
+  "control_bpb": 0.961927,
+  "control_steps": 2359,
+  "control_k4": 0.9278,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K58lk_min ce6c68fe",
+  "control_code_version": "M9",
+  "control_code_dir": "K57_min 2f8145a3",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.5",
+   "FF_LEAKY_FORM": "fnm",
+   "FF_TIME_TARGET": "1793"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0",
+   "FF_TIME_TARGET": "1790.5"
+  },
+  "delta_raw": -0.000714,
+  "step_diff_pct": 0.89,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:177 -0.00072",
+  "monitor_reported_delta": -0.00072
+ },
+ {
+  "pair_id": "reh_k58rf_vs_k57",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C39_cold_K58R",
+  "treatment_bpb": 0.961182,
+  "treatment_steps": 2412,
+  "treatment_k4": 0.9098,
+  "control_run": "C36_cold_K57",
+  "control_bpb": 0.961927,
+  "control_steps": 2359,
+  "control_k4": 0.9278,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K58rf_min 349e3768",
+  "control_code_version": "M9",
+  "control_code_dir": "K57_min 2f8145a3",
+  "knob_changes": {
+   "FF_RELU2_FN": "1",
+   "FF_TIME_TARGET": "1793"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0",
+   "FF_RELU2_FN": "0",
+   "FF_TIME_TARGET": "1790.5"
+  },
+  "delta_raw": -0.000745,
+  "step_diff_pct": 2.25,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:160 -0.00075",
+  "monitor_reported_delta": -0.00075
+ },
+ {
+  "pair_id": "reh_k59_vs_k58lk",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C40_cold_K59",
+  "treatment_bpb": 0.96092,
+  "treatment_steps": 2357,
+  "treatment_k4": 0.9312,
+  "control_run": "C38_cold_K58",
+  "control_bpb": 0.961213,
+  "control_steps": 2380,
+  "control_k4": 0.9211,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K59 a5ab16b1",
+  "control_code_version": "M12",
+  "control_code_dir": "K58lk_min ce6c68fe",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35"
+  },
+  "control_knobs": {
+   "FF_LEAKY_RELU2": "0.5"
+  },
+  "delta_raw": -0.000293,
+  "step_diff_pct": -0.97,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:76 -0.00029; K59 got 23 fewer steps (k4 0.9312 vs 0.9211: host jitter)",
+  "monitor_reported_delta": -0.00029
+ },
+ {
+  "pair_id": "reh_k59_vs_k58rf",
+  "family": "rehearsal",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C40_cold_K59",
+  "treatment_bpb": 0.96092,
+  "treatment_steps": 2357,
+  "treatment_k4": 0.9312,
+  "control_run": "C39_cold_K58R",
+  "control_bpb": 0.961182,
+  "control_steps": 2412,
+  "control_k4": 0.9098,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "K59 a5ab16b1",
+  "control_code_version": "M12",
+  "control_code_dir": "K58rf_min 349e3768",
+  "knob_changes": {
+   "FF_LEAKY_RELU2": "0.35",
+   "FF_LEAKY_FORM": "fnm"
+  },
+  "control_knobs": {
+   "FF_RELU2_FN": "1"
+  },
+  "delta_raw": -0.000262,
+  "step_diff_pct": -2.28,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:76 -0.00026",
+  "monitor_reported_delta": -0.00026
+ },
+ {
+  "pair_id": "reh_k57t_vs_k57",
+  "family": "rehearsal",
+  "in_task_list": false,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "C37_cold_K57T",
+  "treatment_bpb": 0.962085,
+  "treatment_steps": 2359,
+  "treatment_k4": 0.9299,
+  "control_run": "C36_cold_K57",
+  "control_bpb": 0.961927,
+  "control_steps": 2359,
+  "control_k4": 0.9278,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M9",
+  "code_dir": "K57T_min 2a84bbec",
+  "control_code_version": "M9",
+  "control_code_dir": "K57_min 2f8145a3",
+  "knob_changes": {
+   "FF_TIME_TARGET": "1793"
+  },
+  "control_knobs": {
+   "FF_TIME_TARGET": "1790.5"
+  },
+  "delta_raw": 0.000158,
+  "step_diff_pct": 0.0,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:227 +0.00016 at the same step count (schedule-stretch noise); a re-draw of K57",
+  "monitor_reported_delta": 0.00016
+ },
+ {
+  "pair_id": "reh_k57_vs_k56_seed",
+  "family": "seed",
+  "in_task_list": false,
+  "date_utc": "2026-09-28",
+  "chip": "C",
+  "treatment_run": "C36_cold_K57",
+  "treatment_bpb": 0.961927,
+  "treatment_steps": 2359,
+  "treatment_k4": 0.9278,
+  "control_run": "C35_cold_K56a",
+  "control_bpb": 0.962448,
+  "control_steps": 2360,
+  "control_k4": 0.9277,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 67,
+  "code_version": "M9",
+  "code_dir": "K57_min 2f8145a3",
+  "control_code_version": "M9",
+  "control_code_dir": "K56acc_min d9882006",
+  "knob_changes": {
+   "FF_SEED": "73"
+  },
+  "control_knobs": {
+   "FF_SEED": "67"
+  },
+  "delta_raw": -0.000521,
+  "step_diff_pct": -0.04,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor"
+  ],
+  "note": "M:382 -0.00052 (seed 73 vs 67, same recipe)",
+  "monitor_reported_delta": -0.00052
+ },
+ {
+  "pair_id": "seed_C_lk35_s281_vs_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1220_R_g7lk35_s281",
+  "treatment_bpb": 0.963895,
+  "treatment_steps": 2325,
+  "treatment_k4": 0.926,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 281,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "281"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.002136,
+  "step_diff_pct": -0.04,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LK0.35 seed sweep on chip C (M:41)"
+ },
+ {
+  "pair_id": "seed_C_lk35_s283_vs_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1254_R_g7lk35_s283",
+  "treatment_bpb": 0.962463,
+  "treatment_steps": 2329,
+  "treatment_k4": 0.9261,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 283,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "283"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.000704,
+  "step_diff_pct": 0.13,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LK0.35 seed sweep on chip C (M:41)"
+ },
+ {
+  "pair_id": "seed_C_lk35_s293_vs_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1325_R_g7lk35_s293",
+  "treatment_bpb": 0.96281,
+  "treatment_steps": 2324,
+  "treatment_k4": 0.927,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 293,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "293"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.001051,
+  "step_diff_pct": -0.09,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LK0.35 seed sweep on chip C (M:41)"
+ },
+ {
+  "pair_id": "seed_C_lk35_s307_vs_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "C",
+  "treatment_run": "1356_R_g7lk35_s307",
+  "treatment_bpb": 0.963333,
+  "treatment_steps": 2322,
+  "treatment_k4": 0.9273,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 307,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "307"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.001574,
+  "step_diff_pct": -0.17,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "LK0.35 seed sweep on chip C (M:41)"
+ },
+ {
+  "pair_id": "seed_D_lk35_s97_vs_D_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1240_R_g7lk35_s97",
+  "treatment_bpb": 0.969416,
+  "treatment_steps": 2150,
+  "treatment_k4": 1.0526,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 97,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "97"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.002978,
+  "step_diff_pct": -0.14,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip D seed judged only against D's own s73 (M:50)"
+ },
+ {
+  "pair_id": "seed_D_lk35_s113_vs_D_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1312_R_g7lk35_s113",
+  "treatment_bpb": 0.968713,
+  "treatment_steps": 2153,
+  "treatment_k4": 1.0524,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 113,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "113"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.002275,
+  "step_diff_pct": 0.0,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip D seed judged only against D's own s73 (M:50)"
+ },
+ {
+  "pair_id": "seed_D_lk35_s127_vs_D_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1344_R_g7lk35_s127",
+  "treatment_bpb": 0.968172,
+  "treatment_steps": 2149,
+  "treatment_k4": 1.0467,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 127,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "127"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.001734,
+  "step_diff_pct": -0.19,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip D seed judged only against D's own s73 (M:50)"
+ },
+ {
+  "pair_id": "seed_D_lk35_s131_vs_D_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1416_R_g7lk35_s131",
+  "treatment_bpb": 0.967459,
+  "treatment_steps": 2152,
+  "treatment_k4": 1.0448,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 131,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "131"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.001021,
+  "step_diff_pct": -0.05,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip D seed judged only against D's own s73 (M:50)"
+ },
+ {
+  "pair_id": "seed_D_lk35_s137_vs_D_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1448_R_g7lk35_s137",
+  "treatment_bpb": 0.967997,
+  "treatment_steps": 2147,
+  "treatment_k4": 1.0461,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 137,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "137"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.001559,
+  "step_diff_pct": -0.28,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip D seed judged only against D's own s73 (M:50)"
+ },
+ {
+  "pair_id": "seed_D_lk35_s139_vs_D_s73",
+  "family": "seed",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1520_R_g7lk35_s139",
+  "treatment_bpb": 0.967681,
+  "treatment_steps": 2150,
+  "treatment_k4": 1.0408,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 139,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_SEED": "139"
+  },
+  "control_knobs": {
+   "FF_SEED": "73"
+  },
+  "delta_raw": 0.001243,
+  "step_diff_pct": -0.14,
+  "changes_step_time": false,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "chip D seed judged only against D's own s73 (M:50)"
+ },
+ {
+  "pair_id": "chipD_vs_chipC_lk35_s73",
+  "family": "chip",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1202_R_g7lk35_s73",
+  "treatment_bpb": 0.966438,
+  "treatment_steps": 2153,
+  "treatment_k4": 1.0359,
+  "control_run": "0816_R_g7lk35_s73",
+  "control_bpb": 0.961759,
+  "control_steps": 2326,
+  "control_k4": 0.9279,
+  "control_chip": "C",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M12",
+  "code_dir": "code_k12off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {},
+  "control_knobs": {},
+  "delta_raw": 0.004679,
+  "step_diff_pct": -7.44,
+  "changes_step_time": true,
+  "same_chip": false,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "same recipe/seed/code on chip D (runtime 2.33.10) vs chip C (2.34.10): D k4 1.036 vs 0.928 (+11.6%), -7.4% steps (M:44-51)",
+  "monitor_reported_delta": 0.00468
+ },
+ {
+  "pair_id": "m14_asa_D_s73",
+  "family": "m14_attn_src",
+  "in_task_list": true,
+  "date_utc": "2026-09-29",
+  "chip": "D",
+  "treatment_run": "1552_R_m14asa_s73",
+  "treatment_bpb": 0.964712,
+  "treatment_steps": 2155,
+  "treatment_k4": 1.0362,
+  "control_run": "1202_R_g7lk35_s73",
+  "control_bpb": 0.966438,
+  "control_steps": 2153,
+  "control_k4": 1.0359,
+  "control_chip": "D",
+  "seed": 73,
+  "control_seed": 73,
+  "code_version": "M14",
+  "code_dir": "code_k14off",
+  "control_code_version": "M12",
+  "control_code_dir": "code_k12off",
+  "knob_changes": {
+   "FF_ATTN_SRC": "5:6,7,8"
+  },
+  "control_knobs": {
+   "FF_ATTN_SRC": ""
+  },
+  "delta_raw": -0.001726,
+  "step_diff_pct": 0.09,
+  "changes_step_time": true,
+  "same_chip": true,
+  "sources": [
+   "chip_log",
+   "monitor",
+   "queue_script"
+  ],
+  "note": "M14 attention-source reuse (save norm(x) after block 5; blocks 6-8 attend to it). Chip log only: finished 16:30 UTC; S60 said +0.2% k4, full-run k4 1.0362 vs 1.0359. Chip C s73 (1639_R_m14asa_s73) still running; s58/s67 queued"
+ }
+]

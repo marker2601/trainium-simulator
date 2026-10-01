@@ -1,0 +1,34 @@
+submission,uploaded_cdt,rehearsal_chip,rehearsal_bpb,rehearsal_steps,official_bpb,offset,best_so_far,change_vs_previous_best
+F2,2026-09-15,A,1.14032,1257,1.1463,+0.0060,yes,"first upload: 131k batch, microbatch 8, cooldown 0.20"
+F6,2026-09-15,A,1.13444,1316,1.1397,+0.0053,yes,cooldown 0.30
+K15,2026-09-17,A,1.12825,1808,1.1360,+0.0077,yes,"0-dim lambdas, compile, static loss, async sync"
+K24,2026-09-18,A,1.08260,912,1.0885,+0.0059,yes,"depth 12, 262k batch, Muon x2.0, AdamW x1.4142, WD 0.02, cooldown 0.3"
+K29,2026-09-19,A,1.04959,935,1.0554,+0.0058,yes,stream rows (eval-layout finding)
+K33,2026-09-19,A,1.03622,917,1.0427,+0.0065,yes,value embeddings + stream rows
+K36,~2026-09-21,A,1.02058,,1.0268,+0.0062,yes,"GQA with one KV head (FF_KV_SDPA)"
+K38,2026-09-21,A,1.00015,1526,1.0055,+0.0054,yes,"head dim 256 + scalar stack"
+K39,2026-09-21,B,0.99566,1599,1.0027,+0.0070,yes,"fused CE, TT 1780"
+K40,2026-09-21,A,0.98954,1393,0.9953,+0.0058,yes,"depth 10 x width 1024, cooldown 0.45, Muon shard; first sub-1.0"
+K41,~2026-09-22,A,0.98827,1507,0.9937,+0.0054,yes,depth 9 x width 1024
+K43,2026-09-22,B,0.98321,1610,0.9897,+0.0065,yes,"seed 67, two insurance levels, EMA every 8"
+K44,~2026-09-24,B,0.98235,1615,0.9888,+0.0065,yes,cooldown 0.60
+K45,2026-09-25,B,0.97941,1692,0.9861,+0.0067,yes,"scalar constants, async optimizer, Muon views"
+K46,2026-09-25,B,0.97725,1753,0.9845,+0.0073,yes,OPT_FUSE 2
+K50,~2026-09-26,B,0.96914,1943,0.9760,+0.0069,yes,"Muon schedule, multi-token prediction, batch warm-up 131k -> 262k"
+K51,2026-09-26,C,0.96789,2036,0.9742,+0.0063,yes,"key offset, accumulation schedule 2:0.2,4"
+K53,2026-09-26,C,0.96515,2142,0.9712,+0.0061,yes,"ZeRO Muon, EMA prewarm, EMA every 32"
+K54b_min,~2026-09-27,C,0.96326,2353,0.9705,+0.0072,yes,"ZeRO-2 + AdamW ZeRO + 3-phase batch ramp"
+K56,2026-09-28,C,0.96245,2360,0.9693,+0.0069,yes,"key offset radius 0.3, accumulation inside the graph"
+K57,2026-09-28,C,0.96193,2359,0.9686,+0.0067,yes,seed 73
+K59,~2026-09-29,C,0.96092,2357,0.9671,+0.0062,yes,LeakyReLU(0.35)^2
+K60,2026-09-29,C,0.95910,2361,0.9655,+0.0064,yes,"attention-source reuse 5:6,7,8"
+K63,2026-09-30,C,0.95821,2385,0.9647,+0.0065,yes,"EMA off, TT 1795, cooldown 0.7, small-batch LR 0.35/0.6"
+K65a,2026-09-30,,,,0.9681,,no,official test: XSHIFT in blocks 6-8 (re-rolled the warm-up path)
+K65b,2026-09-30,,,,0.9652,,no,official test: late k=8 batch in the cooldown
+K65c,2026-09-30,,,,0.9647,,no,official test: EMA-Nesterov lookahead 0.3 (tie)
+K65d,2026-09-30,,,,0.9653,,no,official test: split AdamW cooldown 0.4
+K70a,2026-09-30,E,0.955946,2318,0.9625,+0.0066,yes,"row pool 256; rehearsal normalised to chip-C speed (raw chip E 0.957259, chip E runs 3.5% slow)"
+K73s4,2026-09-30,H,0.955209,2390,0.9620,+0.0068,yes,"pool + OPT_FUSE 3 + XU 48 + c_proj LR 0.8, shuffle salt 4"
+K73s6,2026-09-30,G,0.955138,2398,0.9625,+0.0074,no,shuffle salt 6 (its local edge did not transfer)
+K77a,2026-09-30,G,0.954729,2375,0.9617,+0.0070,yes,salt 4 + EMA blend 0.6 (best official)
+K82s4,2026-09-30,H,0.954472,2388,,,,"salt 4 + EMA blend 0.6 + EMA prewarm; projected 0.9611-0.9619; not yet scored when this release was written"

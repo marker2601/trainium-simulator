@@ -1,0 +1,335 @@
+/home/ubuntu/workspace/native_venv/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+device=neuron dtype=torch.bfloat16 world_size=8
+schedule=time time_target=1793.0s num_steps=1000000 cooldown_fraction=0.6 bucket_allreduce=False official_budget=1800s
+model_config={
+  "sequence_len": 1024,
+  "vocab_size": 8192,
+  "n_layer": 9,
+  "n_head": 4,
+  "n_embd": 1024,
+  "value_residual": false,
+  "value_embeds": 1,
+  "unet": false,
+  "bos_id": 8188,
+  "bos_mode": 0,
+  "logit_softcap": 15.0,
+  "qk_gain": 1.44,
+  "n_kv_heads": 1,
+  "mlp_mult": 4,
+  "key_offset": true,
+  "key_offset_rad": 0.3,
+  "mlp_leaky": 0.35,
+  "mlp_leaky_form": "fnm",
+  "attn_src_after": 5,
+  "attn_src_layers": [
+    6,
+    7,
+    8
+  ]
+}
+FF_KEY_OFFSET: 74 of 256 key channels read position t-1: 91..127 and 219..255
+FF_LEAKY_RELU2=0.35: MLP activation leaky_relu(h, 0.35)**2 (in place); no new parameters or RNG draws, and c_proj starts at zero, so step 0's loss equals the flags-off control's
+M12 activation: FF_LEAKY_FORM=fnm _LeakySq (an autograd.Function that saves s only; backward g * (s * 2.0))
+M14: FF_ATTN_SRC=5:6,7,8 (blocks [6, 7, 8] project q/k/v from norm(x) saved after block 5; residual and MLP on x) | FF_POOL_LAST=0 (x += sum w_j * out_j, blocks [], 0-dim, init 0, scalar AdamW) | FF_CFC_INIT=0.4 (c_fc init U(+-0.4 * s))
+FF_MTP=1: loss = sum_k w_k * CE(next-token logits, target t+k), k = 1..3, weights (1.0, 0.5, 0.25) fading (w3 by 0.2, w2 by 0.45 of charged time) over 9 stages: (1,0.5,0.21875), (1,0.5,0.15625), (1,0.5,0.09375), (1,0.5,0.03125), (1,0.4375,0), (1,0.3125,0), (1,0.1875,0), (1,0.0625,0), (1,0,0). The logged train loss is that weighted objective until the last stage: compare val_bpb.
+num_params=124,256,278 flops_per_token=7.581204e+08
+torch.compile enabled (backend=neuron)
+micro_tokens=65,536 grad_accum_steps=4
+FF_ACCUM_SCHED=1:0.06,2:0.2,4: 1 micro-batches per update (65,536 tokens) with LR x 0.5 from step 20 (end of warm-up) until 0.06 of charged time, 4 (262,144 tokens) otherwise; the Muon momentum ramp counts tokens
+FF_ACCUM_SCHED RAMP3: then 2 micro-batches per update (131,072 tokens) with LR x 0.7071 until 0.2 of charged time
+train loader: stream rows, 8 independent streams (no fallback)
+FF_MASK_BOS_TARGET=1: training targets equal to the BOS id (8188) are -1 (ignored); inputs, the model and the evaluator are unchanged. The logged train loss is the mean over the remaining targets: compare val_bpb.
+FF_MUON_ZERO2: 4 Muon group buffers are single spans of ONE fp32 buffer of 8 x 16,777,216 elements (+134 MiB slot padding); rank r updates slot r only, the step's all_gather hands the other rows over as torch.bfloat16 (2 copy_), and an fp32 all_gather runs before every EMA update, insurance save and the final save
+FF_MUON_VIEWS: 54 Muon parameters are rows of 4 group buffers
+FF_OPT_FUSE=2: 24 AdamW parameters are rows of 2 group buffers
+FF_ACC_IN_GRAPH=1: 79 trainable leaves (124,256,278 fp32, 0.463 GiB) accumulate in the compiled backward as where(keep, acc + g, g); p.grad = None before every micro-step, so AccumulateGrad steals and never adds
+async_sync=on foreach_adamw=False loss_chunk=0 fused_ce=8 manual_attention=False
+ema=on decay=0.99 every=32 save_ema_above_level=3 insurance_at=(9.0,) prewarm_step=3
+FF_ADAMW_ZERO=1: AdamW group of 2 x (8192, 1024) (FF_OPT_FUSE buffer, 16,777,216 fp32) over 8 ranks: rank r updates flat [r*2,097,152, (r+1)*2,097,152) with moments for that slice only, then ONE fp32 all_gather into the parameter storage; first-step self-check on
+FF_ADAMW_ZERO=1: AdamW group of 1 x (8192, 1024) (one parameter, 8,388,608 fp32) over 8 ranks: rank r updates flat [r*1,048,576, (r+1)*1,048,576) with moments for that slice only, then ONE fp32 all_gather into the parameter storage; first-step self-check on
+FF_MUON_SCHED: 54 Muon matrices in 4 groups over 8 ranks: ONE all_gather of 8 x 16,777,216 elements (per-group shards: 4 all_gathers, 165,675,008), 0 unpack cats; modeled slowest rank 18.8 ms vs 44.2 ms (FF_MUON_SCHED_OP_US=200, FF_MUON_SCHED_TFLOPS=40)
+  rank 0: 1024x1024[0:13]  (18.5 ms)
+  rank 1: 1024x1024[13:18]  (12.0 ms)
+  rank 2: 1024x4096[0:4]  (17.7 ms)
+  rank 3: 1024x4096[4:8]  (17.7 ms)
+  rank 4: 1024x4096[8:9] + 256x1024[0:9]  (18.8 ms)
+  rank 5: 256x1024[9:18] + 4096x1024[0:1]  (18.8 ms)
+  rank 6: 4096x1024[1:5]  (17.7 ms)
+  rank 7: 4096x1024[5:9]  (17.7 ms)
+FF_MUON_ZERO: each rank runs phase 1 and NorMuon on its rows above only; the all_gather carries NorMuon's output
+step 00000 | loss 15.4810 | lrm 0.050 | dt 450.10s | tok/s 582 | charged 452s | next_level 20
+FF_ACC_IN_GRAPH after step 0: {"frames_ok": 1, "frames_total": 1, "graph_breaks": 0, "unique_graphs": 1}
+step 00001 | loss 15.4476 | lrm 0.100 | dt 0.97s | tok/s 271,279 | charged 456s | next_level 20
+step 00002 | loss 15.3873 | lrm 0.150 | dt 0.92s | tok/s 283,886 | charged 457s | next_level 20
+step 00003 | loss 15.2480 | lrm 0.200 | dt 6.08s | tok/s 43,098 | charged 463s | next_level 20
+step 00004 | loss 14.9337 | lrm 0.250 | dt 0.92s | tok/s 285,701 | charged 0s | next_level 20
+step 00010 | loss 13.1062 | lrm 0.550 | dt 0.92s | tok/s 284,191 | charged 6s | next_level 20
+FF_ACCUM_SCHED phase 1: 1 micro-batches per update (65,536 tokens) from step 20 (charged 14s)
+step 00020 | loss 11.7448 | lrm 0.500 | dt 0.28s | tok/s 234,872 | charged 14s | next_level 20
+step 00030 | loss 11.1291 | lrm 0.500 | dt 0.29s | tok/s 226,478 | charged 17s | next_level 20
+step 00040 | loss 10.7622 | lrm 0.500 | dt 0.28s | tok/s 230,343 | charged 20s | next_level 20
+step 00050 | loss 10.4227 | lrm 0.500 | dt 0.30s | tok/s 218,096 | charged 23s | next_level 20
+step 00060 | loss 10.1553 | lrm 0.500 | dt 0.29s | tok/s 226,142 | charged 26s | next_level 20
+step 00070 | loss 9.9923 | lrm 0.500 | dt 0.30s | tok/s 220,325 | charged 29s | next_level 20
+step 00080 | loss 9.8577 | lrm 0.500 | dt 0.28s | tok/s 230,348 | charged 32s | next_level 20
+step 00090 | loss 9.7764 | lrm 0.500 | dt 0.29s | tok/s 222,764 | charged 35s | next_level 20
+step 00100 | loss 9.7012 | lrm 0.500 | dt 0.29s | tok/s 224,094 | charged 38s | next_level 20
+step 00110 | loss 9.6331 | lrm 0.500 | dt 0.30s | tok/s 220,203 | charged 41s | next_level 20
+step 00120 | loss 9.3794 | lrm 0.500 | dt 0.29s | tok/s 229,256 | charged 44s | next_level 20
+step 00130 | loss 9.2504 | lrm 0.500 | dt 0.29s | tok/s 225,825 | charged 47s | next_level 20
+step 00140 | loss 9.1383 | lrm 0.500 | dt 0.30s | tok/s 221,147 | charged 49s | next_level 20
+step 00150 | loss 9.1604 | lrm 0.500 | dt 0.29s | tok/s 225,674 | charged 52s | next_level 20
+step 00160 | loss 9.1606 | lrm 0.500 | dt 0.30s | tok/s 221,573 | charged 55s | next_level 20
+step 00170 | loss 8.9933 | lrm 0.500 | dt 0.29s | tok/s 228,110 | charged 58s | next_level 20
+step 00180 | loss 8.8174 | lrm 0.500 | dt 0.28s | tok/s 230,553 | charged 61s | next_level 20
+step 00190 | loss 8.8191 | lrm 0.500 | dt 0.28s | tok/s 231,105 | charged 64s | next_level 20
+step 00200 | loss 8.8993 | lrm 0.500 | dt 0.30s | tok/s 219,550 | charged 67s | next_level 20
+step 00210 | loss 8.7824 | lrm 0.500 | dt 0.30s | tok/s 221,367 | charged 70s | next_level 20
+step 00220 | loss 8.7456 | lrm 0.500 | dt 0.28s | tok/s 231,471 | charged 73s | next_level 20
+step 00230 | loss 8.8145 | lrm 0.500 | dt 0.29s | tok/s 222,800 | charged 76s | next_level 20
+step 00240 | loss 8.6920 | lrm 0.500 | dt 0.29s | tok/s 222,610 | charged 79s | next_level 20
+step 00250 | loss 8.6980 | lrm 0.500 | dt 0.29s | tok/s 228,569 | charged 82s | next_level 20
+step 00260 | loss 8.6777 | lrm 0.500 | dt 0.30s | tok/s 220,500 | charged 85s | next_level 20
+step 00270 | loss 8.4799 | lrm 0.500 | dt 0.28s | tok/s 231,589 | charged 88s | next_level 20
+FF_MTP stage 1/8: loss weights (1.0, 0.5, 0.15625) from step 278 (charged 90s)
+step 00280 | loss 8.4125 | lrm 0.500 | dt 0.28s | tok/s 231,629 | charged 91s | next_level 20
+step 00290 | loss 8.2382 | lrm 0.500 | dt 0.29s | tok/s 224,296 | charged 93s | next_level 20
+step 00300 | loss 8.0302 | lrm 0.500 | dt 0.29s | tok/s 222,640 | charged 96s | next_level 20
+step 00310 | loss 8.0410 | lrm 0.500 | dt 0.29s | tok/s 223,948 | charged 99s | next_level 20
+step 00320 | loss 8.0396 | lrm 0.500 | dt 0.30s | tok/s 216,742 | charged 102s | next_level 20
+step 00330 | loss 8.0433 | lrm 0.500 | dt 0.29s | tok/s 227,964 | charged 105s | next_level 20
+FF_ACCUM_SCHED phase 2: 2 micro-batches per update (131,072 tokens) from step 340 (charged 108s)
+step 00340 | loss 7.9856 | lrm 0.707 | dt 0.51s | tok/s 257,053 | charged 108s | next_level 20
+step 00350 | loss 8.0155 | lrm 0.707 | dt 0.51s | tok/s 259,355 | charged 113s | next_level 20
+step 00360 | loss 7.9946 | lrm 0.707 | dt 0.49s | tok/s 265,499 | charged 118s | next_level 20
+step 00370 | loss 7.9032 | lrm 0.707 | dt 0.51s | tok/s 258,282 | charged 124s | next_level 20
+step 00380 | loss 7.8383 | lrm 0.707 | dt 0.50s | tok/s 260,466 | charged 129s | next_level 20
+step 00390 | loss 7.8112 | lrm 0.707 | dt 0.50s | tok/s 260,281 | charged 134s | next_level 20
+step 00400 | loss 7.6814 | lrm 0.707 | dt 0.51s | tok/s 255,378 | charged 139s | next_level 20
+step 00410 | loss 7.8053 | lrm 0.707 | dt 0.50s | tok/s 259,865 | charged 144s | next_level 20
+step 00420 | loss 7.7754 | lrm 0.707 | dt 0.50s | tok/s 263,321 | charged 149s | next_level 20
+step 00430 | loss 7.7808 | lrm 0.707 | dt 0.50s | tok/s 261,628 | charged 154s | next_level 20
+step 00440 | loss 7.7672 | lrm 0.707 | dt 0.50s | tok/s 259,662 | charged 159s | next_level 20
+step 00450 | loss 7.8686 | lrm 0.707 | dt 0.50s | tok/s 260,401 | charged 164s | next_level 20
+step 00460 | loss 7.8612 | lrm 0.707 | dt 0.51s | tok/s 254,760 | charged 169s | next_level 20
+step 00470 | loss 7.7835 | lrm 0.707 | dt 0.51s | tok/s 257,630 | charged 174s | next_level 20
+FF_MTP stage 2/8: loss weights (1.0, 0.5, 0.09375) from step 481 (charged 179s)
+step 00480 | loss 7.8672 | lrm 0.707 | dt 0.52s | tok/s 251,315 | charged 179s | next_level 20
+step 00490 | loss 7.5096 | lrm 0.707 | dt 0.51s | tok/s 255,843 | charged 184s | next_level 20
+step 00500 | loss 7.3302 | lrm 0.707 | dt 0.51s | tok/s 259,381 | charged 189s | next_level 20
+step 00510 | loss 7.2282 | lrm 0.707 | dt 0.53s | tok/s 249,637 | charged 195s | next_level 20
+step 00520 | loss 7.2667 | lrm 0.707 | dt 0.50s | tok/s 260,624 | charged 200s | next_level 20
+step 00530 | loss 7.2262 | lrm 0.707 | dt 0.51s | tok/s 259,418 | charged 205s | next_level 20
+step 00540 | loss 7.2516 | lrm 0.707 | dt 0.50s | tok/s 261,370 | charged 210s | next_level 20
+step 00550 | loss 7.1570 | lrm 0.707 | dt 0.51s | tok/s 258,199 | charged 215s | next_level 20
+step 00560 | loss 7.1498 | lrm 0.707 | dt 0.50s | tok/s 260,391 | charged 220s | next_level 20
+step 00570 | loss 7.2119 | lrm 0.707 | dt 0.50s | tok/s 260,389 | charged 225s | next_level 20
+step 00580 | loss 7.1297 | lrm 0.707 | dt 0.51s | tok/s 257,001 | charged 230s | next_level 20
+step 00590 | loss 7.0694 | lrm 0.707 | dt 0.52s | tok/s 254,225 | charged 235s | next_level 20
+step 00600 | loss 7.1017 | lrm 0.707 | dt 0.50s | tok/s 262,639 | charged 240s | next_level 20
+step 00610 | loss 7.2100 | lrm 0.707 | dt 0.52s | tok/s 253,616 | charged 245s | next_level 20
+step 00620 | loss 7.2149 | lrm 0.707 | dt 0.50s | tok/s 261,730 | charged 251s | next_level 20
+step 00630 | loss 7.2019 | lrm 0.707 | dt 0.51s | tok/s 257,532 | charged 256s | next_level 20
+step 00640 | loss 7.1076 | lrm 0.707 | dt 0.50s | tok/s 261,440 | charged 261s | next_level 20
+step 00650 | loss 7.1277 | lrm 0.707 | dt 0.50s | tok/s 260,687 | charged 266s | next_level 20
+FF_MTP stage 3/8: loss weights (1.0, 0.5, 0.03125) from step 658 (charged 269s)
+step 00660 | loss 7.0504 | lrm 0.707 | dt 0.50s | tok/s 262,520 | charged 271s | next_level 20
+step 00670 | loss 6.8349 | lrm 0.707 | dt 0.51s | tok/s 258,380 | charged 276s | next_level 20
+step 00680 | loss 6.6224 | lrm 0.707 | dt 0.52s | tok/s 251,688 | charged 281s | next_level 20
+step 00690 | loss 6.6095 | lrm 0.707 | dt 0.50s | tok/s 264,136 | charged 286s | next_level 20
+step 00700 | loss 6.6713 | lrm 0.707 | dt 0.50s | tok/s 264,463 | charged 291s | next_level 20
+step 00710 | loss 6.5323 | lrm 0.707 | dt 0.51s | tok/s 255,840 | charged 296s | next_level 20
+step 00720 | loss 6.5215 | lrm 0.707 | dt 0.51s | tok/s 257,239 | charged 301s | next_level 20
+step 00730 | loss 6.2698 | lrm 0.707 | dt 0.50s | tok/s 261,909 | charged 306s | next_level 20
+step 00740 | loss 6.2717 | lrm 0.707 | dt 0.50s | tok/s 259,717 | charged 312s | next_level 20
+step 00750 | loss 6.4657 | lrm 0.707 | dt 0.51s | tok/s 257,507 | charged 317s | next_level 20
+step 00760 | loss 6.5887 | lrm 0.707 | dt 0.52s | tok/s 253,318 | charged 322s | next_level 20
+step 00770 | loss 6.6327 | lrm 0.707 | dt 0.50s | tok/s 259,905 | charged 327s | next_level 20
+step 00780 | loss 6.5968 | lrm 0.707 | dt 0.50s | tok/s 260,682 | charged 332s | next_level 20
+step 00790 | loss 6.5830 | lrm 0.707 | dt 0.51s | tok/s 256,744 | charged 337s | next_level 20
+step 00800 | loss 6.5362 | lrm 0.707 | dt 0.51s | tok/s 259,026 | charged 342s | next_level 20
+step 00810 | loss 6.4493 | lrm 0.707 | dt 0.51s | tok/s 256,175 | charged 347s | next_level 20
+step 00820 | loss 6.4566 | lrm 0.707 | dt 0.51s | tok/s 258,972 | charged 352s | next_level 20
+step 00830 | loss 6.5036 | lrm 0.707 | dt 0.50s | tok/s 262,616 | charged 357s | next_level 20
+FF_MTP stage 4/8: loss weights (1.0, 0.4375, 0.0) from step 834 (charged 359s)
+FF_ACCUM_SCHED phase 3: 4 micro-batches per update (262,144 tokens) from step 834 (charged 359s)
+step 00840 | loss 6.1674 | lrm 1.000 | dt 0.93s | tok/s 281,428 | charged 365s | next_level 20
+step 00850 | loss 5.9930 | lrm 1.000 | dt 0.93s | tok/s 282,020 | charged 375s | next_level 20
+step 00860 | loss 5.8967 | lrm 1.000 | dt 0.93s | tok/s 281,180 | charged 384s | next_level 20
+step 00870 | loss 5.9347 | lrm 1.000 | dt 0.92s | tok/s 283,897 | charged 393s | next_level 20
+step 00880 | loss 5.8088 | lrm 1.000 | dt 0.93s | tok/s 281,204 | charged 403s | next_level 20
+step 00890 | loss 5.8363 | lrm 1.000 | dt 0.93s | tok/s 282,301 | charged 412s | next_level 20
+step 00900 | loss 5.8886 | lrm 1.000 | dt 0.94s | tok/s 277,438 | charged 422s | next_level 20
+step 00910 | loss 5.8507 | lrm 1.000 | dt 0.93s | tok/s 283,107 | charged 431s | next_level 20
+step 00920 | loss 5.8680 | lrm 1.000 | dt 0.94s | tok/s 280,191 | charged 440s | next_level 20
+step 00930 | loss 5.8102 | lrm 1.000 | dt 0.92s | tok/s 284,814 | charged 450s | next_level 20
+step 00940 | loss 5.8033 | lrm 1.000 | dt 0.94s | tok/s 279,400 | charged 459s | next_level 20
+step 00950 | loss 5.7345 | lrm 1.000 | dt 0.94s | tok/s 279,429 | charged 468s | next_level 20
+FF_MTP stage 5/8: loss weights (1.0, 0.3125, 0.0) from step 954 (charged 471s)
+step 00960 | loss 5.3418 | lrm 1.000 | dt 0.93s | tok/s 282,287 | charged 477s | next_level 20
+step 00970 | loss 4.9800 | lrm 1.000 | dt 0.93s | tok/s 281,398 | charged 487s | next_level 20
+step 00980 | loss 4.9806 | lrm 1.000 | dt 0.92s | tok/s 285,785 | charged 496s | next_level 20
+step 00990 | loss 4.9812 | lrm 1.000 | dt 0.94s | tok/s 278,914 | charged 505s | next_level 20
+step 01000 | loss 4.9970 | lrm 1.000 | dt 0.93s | tok/s 283,105 | charged 515s | next_level 20
+step 01010 | loss 4.9838 | lrm 1.000 | dt 0.92s | tok/s 283,800 | charged 524s | next_level 20
+step 01020 | loss 5.0391 | lrm 1.000 | dt 0.93s | tok/s 282,818 | charged 534s | next_level 20
+step 01030 | loss 5.0568 | lrm 1.000 | dt 0.93s | tok/s 281,612 | charged 543s | next_level 20
+step 01040 | loss 5.0720 | lrm 1.000 | dt 0.93s | tok/s 282,294 | charged 552s | next_level 20
+step 01050 | loss 5.1091 | lrm 1.000 | dt 0.93s | tok/s 282,162 | charged 562s | next_level 20
+step 01060 | loss 5.0575 | lrm 1.000 | dt 0.94s | tok/s 279,210 | charged 571s | next_level 20
+step 01070 | loss 5.1187 | lrm 1.000 | dt 0.92s | tok/s 284,212 | charged 580s | next_level 20
+FF_MTP stage 6/8: loss weights (1.0, 0.1875, 0.0) from step 1074 (charged 583s)
+step 01080 | loss 4.7407 | lrm 1.000 | dt 0.92s | tok/s 283,542 | charged 590s | next_level 20
+step 01090 | loss 4.3471 | lrm 1.000 | dt 0.93s | tok/s 280,982 | charged 599s | next_level 20
+step 01100 | loss 4.2559 | lrm 1.000 | dt 0.95s | tok/s 277,270 | charged 609s | next_level 20
+step 01110 | loss 4.2630 | lrm 1.000 | dt 0.94s | tok/s 279,898 | charged 618s | next_level 20
+step 01120 | loss 4.2708 | lrm 1.000 | dt 0.94s | tok/s 278,988 | charged 627s | next_level 20
+step 01130 | loss 4.2383 | lrm 1.000 | dt 0.93s | tok/s 281,855 | charged 637s | next_level 20
+step 01140 | loss 4.2524 | lrm 1.000 | dt 0.93s | tok/s 280,830 | charged 646s | next_level 20
+step 01150 | loss 4.2827 | lrm 1.000 | dt 0.94s | tok/s 279,627 | charged 655s | next_level 20
+step 01160 | loss 4.2329 | lrm 1.000 | dt 0.93s | tok/s 283,052 | charged 665s | next_level 20
+step 01170 | loss 4.2424 | lrm 1.000 | dt 0.93s | tok/s 281,450 | charged 674s | next_level 20
+step 01180 | loss 4.2297 | lrm 1.000 | dt 0.94s | tok/s 280,076 | charged 684s | next_level 20
+step 01190 | loss 4.2253 | lrm 1.000 | dt 0.93s | tok/s 281,781 | charged 693s | next_level 20
+FF_MTP stage 7/8: loss weights (1.0, 0.0625, 0.0) from step 1193 (charged 695s)
+step 01200 | loss 3.7637 | lrm 1.000 | dt 0.93s | tok/s 280,572 | charged 702s | next_level 20
+step 01210 | loss 3.5631 | lrm 1.000 | dt 0.94s | tok/s 280,161 | charged 712s | next_level 20
+step 01216 | loss 3.5157 | lrm 1.000 | dt 0.92s | tok/s 283,971 | charged 717s | next_level 19
+step 01220 | loss 3.4789 | lrm 0.950 | dt 0.93s | tok/s 281,151 | charged 721s | next_level 19
+step 01230 | loss 3.3340 | lrm 0.950 | dt 0.93s | tok/s 282,571 | charged 730s | next_level 19
+step 01240 | loss 3.2849 | lrm 0.950 | dt 0.93s | tok/s 281,555 | charged 740s | next_level 19
+step 01250 | loss 3.3394 | lrm 0.950 | dt 0.95s | tok/s 276,979 | charged 749s | next_level 19
+step 01260 | loss 3.3566 | lrm 0.950 | dt 0.92s | tok/s 284,423 | charged 758s | next_level 19
+step 01270 | loss 3.4264 | lrm 0.950 | dt 0.94s | tok/s 279,430 | charged 768s | next_level 19
+step 01277 | loss 3.3447 | lrm 0.950 | dt 0.93s | tok/s 282,179 | charged 774s | next_level 18
+step 01280 | loss 3.3555 | lrm 0.900 | dt 0.93s | tok/s 283,262 | charged 777s | next_level 18
+step 01290 | loss 3.4297 | lrm 0.900 | dt 0.92s | tok/s 284,375 | charged 786s | next_level 18
+step 01300 | loss 3.3593 | lrm 0.900 | dt 0.92s | tok/s 283,779 | charged 796s | next_level 18
+step 01310 | loss 3.4190 | lrm 0.900 | dt 0.93s | tok/s 281,115 | charged 805s | next_level 18
+FF_MTP stage 8/8: loss weights (1.0, 0.0, 0.0) from step 1313 (charged 807s)
+step 01320 | loss 3.1512 | lrm 0.900 | dt 0.93s | tok/s 281,468 | charged 814s | next_level 18
+step 01330 | loss 2.9765 | lrm 0.900 | dt 0.93s | tok/s 282,164 | charged 824s | next_level 18
+step 01338 | loss 2.9921 | lrm 0.900 | dt 0.94s | tok/s 278,128 | charged 831s | next_level 17
+step 01340 | loss 3.0314 | lrm 0.850 | dt 0.94s | tok/s 279,117 | charged 833s | next_level 17
+step 01350 | loss 2.9965 | lrm 0.850 | dt 0.92s | tok/s 283,689 | charged 842s | next_level 17
+step 01360 | loss 2.9204 | lrm 0.850 | dt 0.93s | tok/s 282,497 | charged 852s | next_level 17
+step 01370 | loss 2.9118 | lrm 0.850 | dt 0.93s | tok/s 281,412 | charged 861s | next_level 17
+step 01380 | loss 2.9696 | lrm 0.850 | dt 0.92s | tok/s 285,907 | charged 871s | next_level 17
+step 01390 | loss 2.9804 | lrm 0.850 | dt 0.93s | tok/s 282,793 | charged 880s | next_level 17
+step 01398 | loss 2.9065 | lrm 0.850 | dt 0.93s | tok/s 283,189 | charged 887s | next_level 16
+step 01400 | loss 2.9093 | lrm 0.800 | dt 0.93s | tok/s 281,149 | charged 889s | next_level 16
+step 01410 | loss 2.8412 | lrm 0.800 | dt 0.94s | tok/s 279,775 | charged 899s | next_level 16
+step 01420 | loss 2.8472 | lrm 0.800 | dt 0.95s | tok/s 275,035 | charged 908s | next_level 16
+step 01430 | loss 2.8620 | lrm 0.800 | dt 0.92s | tok/s 284,513 | charged 917s | next_level 16
+step 01440 | loss 2.8245 | lrm 0.800 | dt 0.93s | tok/s 282,241 | charged 927s | next_level 16
+step 01450 | loss 2.9353 | lrm 0.800 | dt 0.92s | tok/s 283,617 | charged 936s | next_level 16
+step 01459 | loss 2.9144 | lrm 0.800 | dt 0.93s | tok/s 282,106 | charged 944s | next_level 15
+step 01460 | loss 2.8844 | lrm 0.750 | dt 0.93s | tok/s 281,099 | charged 945s | next_level 15
+step 01470 | loss 2.8938 | lrm 0.750 | dt 0.93s | tok/s 280,746 | charged 955s | next_level 15
+step 01480 | loss 2.8653 | lrm 0.750 | dt 0.93s | tok/s 281,797 | charged 964s | next_level 15
+step 01490 | loss 2.8407 | lrm 0.750 | dt 0.93s | tok/s 281,759 | charged 973s | next_level 15
+step 01500 | loss 2.8608 | lrm 0.750 | dt 0.94s | tok/s 278,120 | charged 983s | next_level 15
+step 01510 | loss 2.8128 | lrm 0.750 | dt 0.93s | tok/s 280,911 | charged 992s | next_level 15
+step 01519 | loss 2.8619 | lrm 0.750 | dt 0.93s | tok/s 281,092 | charged 1000s | next_level 14
+step 01520 | loss 2.8633 | lrm 0.700 | dt 0.96s | tok/s 272,823 | charged 1001s | next_level 14
+step 01530 | loss 2.9336 | lrm 0.700 | dt 0.94s | tok/s 279,843 | charged 1011s | next_level 14
+step 01540 | loss 2.9353 | lrm 0.700 | dt 0.93s | tok/s 282,061 | charged 1020s | next_level 14
+step 01550 | loss 2.9547 | lrm 0.700 | dt 0.94s | tok/s 280,312 | charged 1029s | next_level 14
+step 01560 | loss 2.9199 | lrm 0.700 | dt 0.93s | tok/s 282,904 | charged 1039s | next_level 14
+step 01570 | loss 2.8581 | lrm 0.700 | dt 0.94s | tok/s 279,453 | charged 1048s | next_level 14
+step 01580 | loss 2.9491 | lrm 0.700 | dt 0.93s | tok/s 283,157 | charged 1057s | next_level 13
+step 01590 | loss 2.9136 | lrm 0.650 | dt 0.93s | tok/s 281,018 | charged 1067s | next_level 13
+step 01600 | loss 2.8526 | lrm 0.650 | dt 0.92s | tok/s 285,365 | charged 1076s | next_level 13
+step 01610 | loss 2.8849 | lrm 0.650 | dt 0.91s | tok/s 287,039 | charged 1085s | next_level 13
+step 01620 | loss 2.7914 | lrm 0.650 | dt 0.93s | tok/s 282,413 | charged 1095s | next_level 13
+step 01630 | loss 2.7903 | lrm 0.650 | dt 0.93s | tok/s 280,845 | charged 1104s | next_level 13
+step 01640 | loss 2.8118 | lrm 0.650 | dt 0.92s | tok/s 284,223 | charged 1113s | next_level 13
+step 01641 | loss 2.8368 | lrm 0.650 | dt 0.94s | tok/s 277,763 | charged 1114s | next_level 12
+step 01650 | loss 2.7755 | lrm 0.600 | dt 0.93s | tok/s 283,186 | charged 1123s | next_level 12
+step 01660 | loss 2.8094 | lrm 0.600 | dt 0.93s | tok/s 280,496 | charged 1132s | next_level 12
+step 01670 | loss 2.8150 | lrm 0.600 | dt 0.94s | tok/s 278,154 | charged 1142s | next_level 12
+step 01680 | loss 2.7716 | lrm 0.600 | dt 0.94s | tok/s 280,231 | charged 1151s | next_level 12
+step 01690 | loss 2.7608 | lrm 0.600 | dt 0.93s | tok/s 280,915 | charged 1160s | next_level 12
+step 01700 | loss 2.8057 | lrm 0.600 | dt 0.94s | tok/s 279,470 | charged 1170s | next_level 12
+step 01701 | loss 2.8081 | lrm 0.600 | dt 0.93s | tok/s 281,522 | charged 1171s | next_level 11
+step 01710 | loss 2.7965 | lrm 0.550 | dt 0.93s | tok/s 281,176 | charged 1179s | next_level 11
+step 01720 | loss 2.7633 | lrm 0.550 | dt 0.92s | tok/s 284,149 | charged 1188s | next_level 11
+step 01730 | loss 2.7478 | lrm 0.550 | dt 0.94s | tok/s 279,286 | charged 1198s | next_level 11
+step 01740 | loss 2.7267 | lrm 0.550 | dt 0.93s | tok/s 283,321 | charged 1207s | next_level 11
+step 01750 | loss 2.7658 | lrm 0.550 | dt 0.94s | tok/s 277,990 | charged 1216s | next_level 11
+step 01760 | loss 2.7915 | lrm 0.550 | dt 0.94s | tok/s 279,367 | charged 1226s | next_level 11
+step 01762 | loss 2.8170 | lrm 0.550 | dt 0.93s | tok/s 280,903 | charged 1228s | next_level 10
+step 01770 | loss 2.7745 | lrm 0.500 | dt 0.93s | tok/s 281,322 | charged 1235s | next_level 10
+step 01780 | loss 2.7155 | lrm 0.500 | dt 0.92s | tok/s 283,507 | charged 1245s | next_level 10
+step 01790 | loss 2.8010 | lrm 0.500 | dt 0.93s | tok/s 280,625 | charged 1254s | next_level 10
+step 01800 | loss 2.7641 | lrm 0.500 | dt 0.95s | tok/s 275,653 | charged 1263s | next_level 10
+step 01810 | loss 2.7322 | lrm 0.500 | dt 0.93s | tok/s 282,965 | charged 1273s | next_level 10
+step 01820 | loss 2.7025 | lrm 0.500 | dt 0.93s | tok/s 282,924 | charged 1282s | next_level 10
+step 01822 | loss 2.7123 | lrm 0.500 | dt 0.92s | tok/s 283,782 | charged 1284s | next_level 9
+step 01830 | loss 2.7318 | lrm 0.450 | dt 0.93s | tok/s 282,558 | charged 1291s | next_level 9
+step 01840 | loss 2.7575 | lrm 0.450 | dt 0.93s | tok/s 280,947 | charged 1301s | next_level 9
+step 01850 | loss 2.8488 | lrm 0.450 | dt 0.95s | tok/s 277,382 | charged 1310s | next_level 9
+step 01860 | loss 2.8587 | lrm 0.450 | dt 0.92s | tok/s 284,674 | charged 1320s | next_level 9
+step 01870 | loss 2.7952 | lrm 0.450 | dt 0.93s | tok/s 281,481 | charged 1329s | next_level 9
+step 01880 | loss 2.7675 | lrm 0.450 | dt 0.93s | tok/s 280,953 | charged 1338s | next_level 9
+step 01882 | loss 2.7589 | lrm 0.450 | dt 0.93s | tok/s 280,499 | charged 1340s | next_level 8
+step 01890 | loss 2.7467 | lrm 0.400 | dt 0.94s | tok/s 279,318 | charged 1348s | next_level 8
+step 01900 | loss 2.7109 | lrm 0.400 | dt 0.93s | tok/s 282,271 | charged 1357s | next_level 8
+step 01910 | loss 2.6959 | lrm 0.400 | dt 0.94s | tok/s 280,290 | charged 1366s | next_level 8
+step 01920 | loss 2.7602 | lrm 0.400 | dt 0.95s | tok/s 274,630 | charged 1376s | next_level 8
+step 01930 | loss 2.8233 | lrm 0.400 | dt 0.93s | tok/s 281,274 | charged 1385s | next_level 8
+step 01940 | loss 2.7631 | lrm 0.400 | dt 0.93s | tok/s 280,553 | charged 1394s | next_level 8
+step 01943 | loss 2.7668 | lrm 0.400 | dt 0.94s | tok/s 279,111 | charged 1397s | next_level 7
+step 01950 | loss 2.7958 | lrm 0.350 | dt 0.94s | tok/s 279,945 | charged 1404s | next_level 7
+step 01960 | loss 2.7803 | lrm 0.350 | dt 0.94s | tok/s 278,845 | charged 1413s | next_level 7
+step 01970 | loss 2.7428 | lrm 0.350 | dt 0.92s | tok/s 284,630 | charged 1423s | next_level 7
+step 01980 | loss 2.6894 | lrm 0.350 | dt 0.92s | tok/s 284,598 | charged 1432s | next_level 7
+step 01990 | loss 2.6110 | lrm 0.350 | dt 0.94s | tok/s 278,471 | charged 1441s | next_level 7
+step 02000 | loss 2.7084 | lrm 0.350 | dt 0.93s | tok/s 283,024 | charged 1451s | next_level 7
+step 02003 | loss 2.7400 | lrm 0.350 | dt 0.92s | tok/s 283,514 | charged 1454s | next_level 6
+step 02010 | loss 2.7376 | lrm 0.300 | dt 0.93s | tok/s 282,459 | charged 1460s | next_level 6
+step 02020 | loss 2.7485 | lrm 0.300 | dt 0.93s | tok/s 281,222 | charged 1470s | next_level 6
+step 02030 | loss 2.6832 | lrm 0.300 | dt 0.93s | tok/s 281,246 | charged 1479s | next_level 6
+step 02040 | loss 2.6924 | lrm 0.300 | dt 0.93s | tok/s 280,606 | charged 1488s | next_level 6
+step 02050 | loss 2.7073 | lrm 0.300 | dt 0.95s | tok/s 275,039 | charged 1498s | next_level 6
+step 02060 | loss 2.6533 | lrm 0.300 | dt 0.94s | tok/s 280,281 | charged 1507s | next_level 6
+step 02064 | loss 2.6952 | lrm 0.300 | dt 0.93s | tok/s 282,595 | charged 1511s | next_level 5
+step 02070 | loss 2.7474 | lrm 0.250 | dt 0.94s | tok/s 279,759 | charged 1516s | next_level 5
+step 02080 | loss 2.7375 | lrm 0.250 | dt 0.93s | tok/s 282,619 | charged 1526s | next_level 5
+step 02090 | loss 2.6748 | lrm 0.250 | dt 0.93s | tok/s 280,842 | charged 1535s | next_level 5
+step 02100 | loss 2.6987 | lrm 0.250 | dt 0.93s | tok/s 281,684 | charged 1544s | next_level 5
+step 02110 | loss 2.6863 | lrm 0.250 | dt 0.93s | tok/s 281,340 | charged 1554s | next_level 5
+step 02120 | loss 2.7090 | lrm 0.250 | dt 0.94s | tok/s 280,114 | charged 1563s | next_level 5
+step 02124 | loss 2.6692 | lrm 0.250 | dt 0.93s | tok/s 280,383 | charged 1567s | next_level 4
+step 02130 | loss 2.6814 | lrm 0.200 | dt 0.95s | tok/s 277,218 | charged 1572s | next_level 4
+step 02140 | loss 2.7054 | lrm 0.200 | dt 0.93s | tok/s 280,415 | charged 1582s | next_level 4
+step 02150 | loss 2.6759 | lrm 0.200 | dt 0.93s | tok/s 283,014 | charged 1591s | next_level 4
+step 02160 | loss 2.6485 | lrm 0.200 | dt 0.95s | tok/s 275,288 | charged 1601s | next_level 4
+step 02170 | loss 2.5622 | lrm 0.200 | dt 0.93s | tok/s 281,373 | charged 1610s | next_level 4
+step 02180 | loss 2.5547 | lrm 0.200 | dt 0.94s | tok/s 278,820 | charged 1619s | next_level 4
+step 02185 | loss 2.5847 | lrm 0.200 | dt 0.93s | tok/s 281,256 | charged 1624s | next_level 3
+step 02190 | loss 2.6294 | lrm 0.150 | dt 0.92s | tok/s 283,521 | charged 1629s | next_level 3
+step 02200 | loss 2.6579 | lrm 0.150 | dt 0.94s | tok/s 279,847 | charged 1638s | next_level 3
+step 02210 | loss 2.6077 | lrm 0.150 | dt 0.94s | tok/s 279,646 | charged 1647s | next_level 3
+step 02220 | loss 2.6418 | lrm 0.150 | dt 0.92s | tok/s 284,739 | charged 1657s | next_level 3
+step 02230 | loss 2.6914 | lrm 0.150 | dt 0.93s | tok/s 280,552 | charged 1666s | next_level 3
+step 02240 | loss 2.6396 | lrm 0.150 | dt 0.93s | tok/s 282,876 | charged 1676s | next_level 3
+step 02245 | loss 2.6829 | lrm 0.150 | dt 0.93s | tok/s 282,123 | charged 1680s | next_level 2
+step 02250 | loss 2.6779 | lrm 0.100 | dt 0.92s | tok/s 284,343 | charged 1685s | next_level 2
+step 02260 | loss 2.7157 | lrm 0.100 | dt 0.93s | tok/s 280,666 | charged 1694s | next_level 2
+step 02270 | loss 2.7561 | lrm 0.100 | dt 0.92s | tok/s 283,421 | charged 1704s | next_level 2
+step 02280 | loss 2.7535 | lrm 0.100 | dt 0.94s | tok/s 278,723 | charged 1713s | next_level 2
+step 02290 | loss 2.6620 | lrm 0.100 | dt 0.93s | tok/s 281,613 | charged 1722s | next_level 2
+step 02300 | loss 2.5651 | lrm 0.100 | dt 0.93s | tok/s 282,045 | charged 1732s | next_level 2
+step 02306 | loss 2.5935 | lrm 0.100 | dt 0.93s | tok/s 281,436 | charged 1737s | next_level 1
+step 02310 | loss 2.6221 | lrm 0.050 | dt 0.93s | tok/s 280,930 | charged 1741s | next_level 1
+step 02320 | loss 2.6339 | lrm 0.050 | dt 0.95s | tok/s 275,261 | charged 1750s | next_level 1
+step 02330 | loss 2.6016 | lrm 0.050 | dt 0.92s | tok/s 283,868 | charged 1760s | next_level 1
+step 02340 | loss 2.6123 | lrm 0.050 | dt 0.93s | tok/s 281,155 | charged 1769s | next_level 1
+step 02350 | loss 2.7264 | lrm 0.050 | dt 0.93s | tok/s 283,395 | charged 1778s | next_level 1
+step 02360 | loss 2.6869 | lrm 0.050 | dt 0.93s | tok/s 281,928 | charged 1788s | next_level 1
+final checkpoint: trained weights (last applied level 1, ema_steps 74)
+/home/ubuntu/workspace/native_venv/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+ff_summary: {"acc_in_graph": {"dynamo": {"frames_ok": 1, "frames_total": 1, "graph_breaks": 0, "unique_graphs": 1}, "leaves_eager": 0, "leaves_in_graph": 79, "mode": 1}, "accum_sched": {"final_k": 4, "force_steps": null, "lr_scale": [0.5, 0.7071], "median_step_seconds_by_k": {"1": 0.2911, "2": 0.5054, "4": 0.9324}, "schedule": "1:0.06,2:0.2,4", "steps_by_k": {"1": 320, "2": 494, "4": 1547}, "switches": [[1, 20, 13.8, 1], [2, 340, 107.9, 2], [3, 834, 359.0, 4]]}, "adamw_lr_scale": 1.4142, "bucket_allreduce": false, "charged_seconds_est_after_save": 1788.1, "checkpoint": "/root/ff-claude/runs/C41_cold_K60/out/final.pt", "compiled": true, "cooldown_fraction": 0.6, "depth": 9, "ema_decay": 0.99, "final_level": 1, "final_smoothed_loss": 2.6869, "grad_accum_steps": 4, "insurance_saved": false, "m14": {"attn_src": "5:6,7,8", "cfc_init": 0.4, "pool_last": 0}, "mask_bos_target": true, "matrix_lr_scale": 2.0, "median_step_seconds": 0.9273, "microbatch": 8, "mtp": {"final_stage": 8, "levels": 4, "mode": 1, "phases": [0.2, 0.45], "switches": [[1, 278, 89.7], [2, 481, 179.3], [3, 658, 269.4], [4, 834, 359.0], [5, 954, 471.0], [6, 1074, 583.2], [7, 1193, 694.8], [8, 1313, 806.9]], "weights": [1.0, 0.5, 0.25]}, "num_params": 124256278, "saved_weights": "trained", "schedule": "time", "seed": 73, "startup_allowance_est": 494.7, "steps": 2361, "time_target_seconds": 1793.0, "tokens_per_second": 282710, "total_batch": 262144, "total_tokens": 491257856, "training_seconds_before_save": 1787.7, "warmup_steps": 20, "width": 1024}

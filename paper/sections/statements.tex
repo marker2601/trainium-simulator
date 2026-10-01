@@ -1,0 +1,69 @@
+% sections/statements.tex
+\section*{Reproducibility statement}
+\addcontentsline{toc}{section}{Reproducibility statement}
+
+\ifanonymous
+The code, data and analysis scripts are in an anonymised repository supplied with the submission:
+\else
+The code, data and analysis scripts are in the public repository
+\url{https://github.com/marker2601/trainium-simulator}:
+\fi
+\begin{itemize}
+  \item \textbf{Data.} \texttt{results/official-scores.csv} (every scored upload with its rehearsal and offset),
+    \texttt{research/sim-data/runs.jsonl} (\val{ds-n} run records, chips A--D), \texttt{validation-pairs.json}
+    (\val{ds-pairs} pairs), \texttt{official-uploads.csv}, the dataset QA and validation reports, and three reference
+    chip-log directories used by the parsers and tests. Our code, data and documents are released under the MIT
+    licence; recipes derived from the organiser's baseline are Apache-2.0; contributed records are CC-BY-4.0.
+  \item \textbf{Code.} The simulator (\texttt{ffsim/}, numpy only), the GPU proxy (\texttt{ffsim/gpu/}), the app
+    (\texttt{space/}), the contribution pipeline (\texttt{ffsim/contrib.py}, \texttt{.github/workflows/}), and both
+    recipes byte-identical to the uploaded files, with their SHA-256 hashes in \texttt{recipes/README.md}.
+  \item \textbf{Commands.} \texttt{python -m pytest -q tests} runs the test suite;
+    \texttt{python paper/analysis/make\_all.py} regenerates \texttt{paper/numbers.tex}, every table in
+    \texttt{paper/tables/} and every figure in \texttt{paper/figures/}; \texttt{python paper/check\_tex.py} runs the
+    static checks; \texttt{latexmk -pdf main.tex} in \texttt{paper/} builds this document. The analysis is
+    deterministic (fixed random seeds, no clock).
+  \item \textbf{What is reported but not recomputable.} Numbers marked \docnum{} are quoted from the campaign
+    documents in \texttt{docs/} because their raw records are not released: chip-log measurements, the final-day runs
+    on chips E, G and H (row-pool pair, salt lotteries, EMA-blend and output-projection pairs, pool-size ablation),
+    and the GPU-proxy measurements. \Cref{app:docfacts} lists them with their sources. Official scores come only from
+    the organisers. Re-running a recipe needs a \texttt{trn2.3xlarge} instance and the organiser's kit, which we do
+    not redistribute; raw chip harvests are withheld because they contain host details.
+\end{itemize}
+
+\section*{Ethics and broader impact}
+\addcontentsline{toc}{section}{Ethics and broader impact}
+
+\paragraph{Fair competition and the evaluation data.} All results come from our own submissions. We trained only on
+the training data provided by the kit. We scored rehearsals on the first \val{eval-tokens} tokens of the public
+validation data provided by the kit, and chose seeds and shuffle salts by those scores. The rules call the official
+shard ``pinned'' and do not say whether it is disjoint from the public validation data; if it is not, that selection
+used part of the evaluation text (\cref{sec:contest,sec:salts}). Four uploads were official tests of single changes
+(\cref{sec:limits}). Other teams appear only as rank-indexed scores from the public leaderboard snapshot, and one
+public write-up by another participant is cited.
+
+\paragraph{Compute.} The run dataset alone represents about \val{trn-hours-total}~\texttt{trn2.3xlarge} instance-hours
+(\val{ds-full} full runs at a median \val{trn-charged-median}~s of charged time plus a median
+\val{trn-startup-median}~s of start-up, and \val{ds-screens} screens), plus final-day rehearsals on chips E, G and H
+that are not in the dataset, and about \$\val{gpu-cost-total}\docnum{} of GPU time for the proxy by 30~September. The
+contest rules provide AWS promotional credits to participating teams \citep{trainiumfrontier2026rules}.
+% TODO(owner): state which part of this compute the promotional credits covered and which was self-funded.
+The released simulator is meant to reduce the compute others spend on screening ideas.
+
+\paragraph{Contributed data.} The contribution pipeline requires explicit consent, publishes data under CC-BY-4.0,
+rejects records that look like secrets or personal data, and lets contributors stay anonymous.
+
+\paragraph{Broader impact.} The work concerns training efficiency for small language models. We do not see a direct
+path to misuse beyond that of the general techniques it builds on.
+
+\ifanonymous\else
+\section*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+We thank the organisers of the AWS Trainium Frontier challenge for the contest and its kit, and the open-source
+communities this work builds on, including PyTorch, the AWS Neuron SDK, NumPy, matplotlib and Gradio, and the nanoGPT
+and modded-nanoGPT communities. We thank Danish Ali and Shiv for their help during the campaign, and Ritwika Kancharla,
+whose public write-up of her own approach to the contest \citep{kancharla2026trainiumofthought} we learned from.
+% Owner's request (1 Oct 2026): thank Shiv and Danish for helping, and Ritwika for her paper (she did not help).
+% TODO(owner): confirm spellings and full names ("Danish Ali"; Shiv's surname) and that all three agree to be named.
+% Hidden automatically when \anonymoustrue (double-blind venues).
+\fi

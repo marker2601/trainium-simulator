@@ -1,0 +1,27 @@
+% sections/contrib.tex
+\section{C4: Released artifacts and a guarded contribution pipeline}
+\label{sec:contrib}
+
+Almost every record behind \ffsim{} comes from one team's instances and one recipe family, which is the main reason
+the surrogate fails on new mechanisms (\cref{sec:simdata,sec:simval}). Other participants hold the data it lacks. We therefore
+release, besides the simulator, the run dataset, both recipes, the upload ledger and a local app, a pipeline through
+which anyone can contribute the numbers from runs they have already done. It is an artifact, not a result: at the time
+of writing no external contribution exists, so we make no claim that the simulator improves with use.
+
+A contribution is one JSON record per run: hardware, time budget, an optional published base recipe plus the knobs
+that changed, seed, steps, the local and/or official score, and an explicit consent flag. Every record is checked for
+schema, secrets and personal data, plausible knob ranges, duplicates and outliers before a maintainer sees it; an
+outlier is flagged for review, never rejected, because a run the model predicts badly is the run it needs. Each
+(hardware, base recipe) combination gets its own fixed effect, so a systematic difference between a contributor's
+setup and ours is absorbed there rather than in shared coefficients, and one account adds at most \val{guard-cap}
+records to a fit. A maintainer's approval opens a pull request with the record exactly as approved, and merging
+triggers a refit that is \emph{guarded}: it refuses to write anything if the in-sample or pair-validation error on our
+own data grows by more than \val{guard-max-worse}~bpb, or if the prediction for a published base recipe moves by more
+than \val{guard-max-shift}~bpb. \Cref{app:contrib} gives the mechanics and a stress test.
+
+The stress test is weak evidence and we present it as such. Its ``honest'' records are generated from the model's own
+predictions plus noise, so accepting them is close to automatic; its attack, a coordinated pair of sock-puppet records
+that pull a shared coefficient, was designed by us with the thresholds known, and there is no adaptive attacker. The
+guard refused that attack down to two records and accepted the honest ones. An attacker who knows the thresholds can
+stay under them, and per-hardware effects can absorb slow drifts. What the guard does is turn the cheapest damaging
+attack, pulling a shared coefficient, into a visible failure.

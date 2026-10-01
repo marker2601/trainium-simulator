@@ -8,7 +8,7 @@ A simulator, a calibration method and a best recipe from Phase 1 of the AWS Trai
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](requirements.txt)
-[![Tests](https://img.shields.io/badge/tests-255%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-384%20passing-brightgreen.svg)](tests/)
 [![AWS Trainium](https://img.shields.io/badge/AWS-Trainium%20%28trn2%29-FF9900.svg)](https://github.com/aws-neuron/trainium-frontier)
 [![Gradio](https://img.shields.io/badge/UI-Gradio-F97316.svg)](space/)
 
@@ -99,7 +99,7 @@ CDT on 1 Oct) rank #10 was 0.9554 and rank #1 was 0.9328, so we finished outside
 git clone https://github.com/marker2601/trainium-simulator.git
 cd trainium-simulator
 pip install -r requirements.txt
-python -m pytest -q tests/        # 255 pass, 5 skip (they need the full private chip harvest)
+python -m pytest -q tests/        # 322 pass, 5 skip (they need the full private chip harvest)
 ```
 
 **Command line.** Fit the three models from the shipped dataset (about 2 s), check them, then predict:
@@ -117,7 +117,8 @@ python -m ffsim search --space ffsim/examples/space-k60-local.json --n-sims 1000
     --out out/search-k60-local
 ```
 
-**Local app.** A Gradio UI with three tabs: predict a recipe, a speed-to-score calculator, and an about page.
+**Local app.** A Gradio UI with four tabs: predict a recipe, a speed-to-score calculator, add your own runs, and an
+about page.
 
 ```bash
 pip install -r space/requirements.txt
@@ -125,7 +126,7 @@ python space/app.py               # then open http://127.0.0.1:7860
 ```
 
 **From Python.** Every button is an API endpoint (`/predict`, `/predict_overrides`, `/speed_to_score`,
-`/score_to_speed`):
+`/score_to_speed`, `/contrib_record`):
 
 ```python
 from gradio_client import Client
@@ -177,6 +178,48 @@ tie, and anything flagged `EXTRAP`, `NEVER-VARIED` or "cost unknown" needs a spe
 > [!WARNING]
 > `models.pkl` is a pickle. Build your own with `fit`; never load one from someone else.
 
+## Help the simulator learn
+
+[![Contributed runs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmarker2601%2Ftrainium-simulator%2Fmain%2Fcontrib%2Fstats.json&query=%24.n_records&label=contributed%20runs&color=blue)](contrib/stats.json)
+
+<!-- contrib-stats:start -->Contributed runs so far: **0**. Be the first: the simulator refits on every merged submission (see [CONTRIBUTING.md](CONTRIBUTING.md)).<!-- contrib-stats:end -->
+
+The simulator is only as good as the runs it has seen, and almost all of them are ours. If you trained a recipe on
+Trainium (or replayed one on the GPU proxy), share the numbers you already have: score, steps, seed and the `FF_*`
+knobs you changed. Every merged run is added to the data and the models are refitted on it, with a guard that
+refuses any refit that makes the model worse on our own runs. A run the model gets wrong is the most useful one you
+can send.
+
+**Three ways to submit** (all end in the same reviewed pull request):
+
+1. **The app.** The "Add my runs" tab (`python space/app.py`) checks your run and builds a pre-filled GitHub issue
+   link. Nothing is sent until you open the link and submit the issue yourself.
+2. **The issue form.** [Open a "Submit a training run" issue](https://github.com/marker2601/trainium-simulator/issues/new?template=run-submission.yml)
+   and paste one JSON record (format: [`contrib/schema.json`](contrib/schema.json)).
+3. **The command line.** Check a record locally, then print its issue link:
+
+   ```bash
+   python -m ffsim contrib validate my-run.json     # schema, secret scan, duplicate check, outlier guard
+   python -m ffsim contrib issue-url my-run.json    # pre-filled issue URL
+   ```
+
+A record, starting from our published K82s4 recipe and listing only what you changed:
+
+```json
+{"schema_version": "1", "hardware": "trn2.3xlarge", "time_budget_s": 1800, "base_recipe": "K82s4",
+ "recipe": {"FF_COOLDOWN_FRAC": "0.65"}, "seed": 58, "chip_val_bpb": 0.9551, "steps": 2390,
+ "contributor": "your-github-login", "consent": true}
+```
+
+**What happens next:** the issue is public as soon as you submit it. A GitHub Action re-validates the record and
+comments the result; a maintainer reviews it and approves it with the `contrib-approved` label, which opens a pull
+request labelled `contrib` (an edit after approval withdraws the approval); merging it triggers a guarded refit that
+opens a pull request updating the fitted model ([`ffsim/model/params.json`](ffsim/model/params.json), plain JSON,
+never a pickle) and the statistics above, including the error on contributed runs before and after the model learned
+from them (leave-one-out). **Only what is in the JSON goes into the data**, and anything that looks like an account
+id, instance id, key, token, e-mail or IP address, in the record or the issue text, is rejected. Full details:
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Key findings (TL;DR)
 
 - **Row-pool data sampling was the best late lever: -0.0023 on chip, -0.0022 officially** (0.9647 &rarr; 0.9625).
@@ -221,14 +264,17 @@ checksums are in [`recipes/README.md`](recipes/README.md).
 ```
 ffsim/                 the simulator: route 1 (numpy surrogate), gpu/ (route 2 proxy), cloud/, examples/
 space/                 the Gradio app (python space/app.py) and its API
+contrib/               schema.json (one contributed run) and stats.json (what the community has added)
+.github/               run-submission issue form; CI, contribution-check and refit workflows
 recipes/               K82s4 and K60 train.py, byte-identical to the uploaded files (Apache-2.0)
 docs/                  FINDINGS, SIMULATOR, EXACT-ORACLE, GAP-ANALYSIS, campaign-time notes
 docs/figures/          every figure (SVG, PNG, PDF) and the one script that builds them from repo data
 paper/                 OUTLINE.md: the plan, claims ledger and open experiments for the technical report
 results/               official-scores.csv: every scored upload with rehearsal and offset
-research/sim-data/     runs.jsonl, validation-pairs.json, official-uploads.csv, validation reports, searches
+research/sim-data/     runs.jsonl, validation-pairs.json, official-uploads.csv, validation reports, searches,
+                       contrib/runs-contrib.jsonl (merged community runs)
 research/              experiments.csv (chips A/B table) and the K60 cold rehearsal log
-tests/                 260 tests (255 pass; 5 need the private chip harvest) and fixture logs
+tests/                 327 tests (322 pass; 5 need the private chip harvest) and fixture logs
 ```
 
 ## Honest limitations

@@ -127,7 +127,8 @@ def harness(tmp_path: Path):
     log = tmp_path / "aws.log"
     env = dict(os.environ)
     env.update({
-        "PATH": str(bin_dir) + os.pathsep + env.get("PATH", ""),
+        # bash's own folder (Git's usr/bin on Windows: date, sed, ...) is often missing from a PowerShell PATH
+        "PATH": os.pathsep.join([str(bin_dir), str(Path(bash).parent), env.get("PATH", "")]),
         "FAKE_AWS_LOG": _posix(log),
         "FAKE_AWS_PY": str(tmp_path / "fake_aws.py"),
         "FAKE_AWS_PYTHON": sys.executable,

@@ -1,0 +1,74 @@
+% sections/related.tex
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Speed-runs and time-to-result benchmarks.} The GPT-2-small speed-run lineage starts from nanoGPT
+\citep{karpathy2022nanogpt} and the GPT-2 recipe \citep{radford2019gpt2}; the modded-nanoGPT records
+\citep{jordan2024moddednanogpt} turned it into a public race on FineWeb-style data \citep{penedo2024fineweb}.
+Academic work on fixed-budget training includes cramming a BERT in one GPU-day \citep{geiping2023cramming}, BERT on
+an academic budget \citep{izsak2021academic} and budget-aware schedules \citep{li2020budgeted}. MLPerf Training
+\citep{mattson2020mlperf} and AlgoPerf \citep{dahl2023algoperf} formalise time-to-result benchmarking and discuss
+the run-to-run variance and the workload-specific tuning it invites; AlgoPerf is the closest analogue to a
+wall-clock contest. Our setting adds a graph compiler inside the charged clock and an organiser-scored shard, and
+we contribute measurements of the evaluation loop rather than a recipe.
+
+\paragraph{Leaderboards, adaptive reuse and selection.} Reusing a hold-out set for many adaptive decisions
+overfits it; the reusable hold-out \citep{dwork2015reusable} and the Ladder mechanism \citep{blum2015ladder} limit
+what a leaderboard reveals for this reason. A meta-analysis of Kaggle competitions \citep{roelofs2019metaanalysis}
+found such overfitting smaller in practice than worst-case theory suggests, and model-selection bias inflates the
+score of whatever is chosen as best \citep{cawley2010overfitting}. These are the right frame for three things we
+did: four uploads were official tests of single changes (\cref{sec:limits}), seeds and shuffle salts were chosen
+by their rehearsal score (a winner's curse, \cref{sec:salts}), and the rehearsal scores the public text that may
+overlap the official shard (\cref{sec:contest}).
+
+\paragraph{Optimizers, schedules and instability.} Our recipe uses Muon, momentum orthogonalised by a Newton--Schulz
+iteration \citep{jordan2024muon,bjorck1971orthogonal}, for matrices and AdamW
+\citep{kingma2015adam,loshchilov2019adamw} for the rest. Muon is analysed as steepest descent under a spectral norm
+by \citet{bernstein2024anthology,bernstein2024modular}; scaling studies and variants include
+\citet{liu2025muonscalable} and NorMuon \citep{li2025normuon}. Warm-up and decay follow the warmup-stable-decay and
+cooldown literature \citep{loshchilov2017sgdr,hu2024minicpm,hagele2024scaling,defazio2024schedulefree}. Why warm-up
+stabilises early training is analysed by \citet{liu2020radam} and \citet{xiong2020layernorm}; loss spikes and
+instabilities in early or large-scale training are studied by \citet{wortsman2024proxies}, \citet{chowdhery2023palm},
+\citet{molybog2023adam} and \citet{takase2025spike}. Our warm-up ``spike path'' (\cref{sec:seeds}) is a small-scale
+instance. The batch warm-up follows the critical-batch-size view \citep{mccandlish2018largebatch} and
+linear-scaling practice \citep{goyal2017imagenet}.
+
+\paragraph{Scaling laws and the price of compute.} Power laws in compute \citep{kaplan2020scaling} and
+compute-optimal allocation \citep{hoffmann2022chinchilla} describe loss as a function of model size and tokens;
+\citet{hagele2024scaling} extend them to runs whose length is set by a cooldown. Our price of a step
+(\cref{sec:price}) is the same object seen locally, the slope of score in log steps at one operating point, used to
+price engineering changes.
+
+\paragraph{Weight averaging, data order and architecture.} Our final weights blend live weights with an
+exponential moving average \citep{polyak1992averaging,izmailov2018swa,kaddour2022lawa,sanyal2023earlyavg,moralesbrotons2024ema,busbridge2023ema}.
+Random reshuffling beats with-replacement sampling \citep{gurbuzbalaban2019reshuffling,mishchenko2020reshuffling},
+partial shuffles trade I/O for statistical quality \citep{xu2022corgipile}, and packing and document boundaries
+affect language-model quality \citep{krell2021packing,zhao2024sequence,ding2024truncations}; our row pool is a
+row-level shuffle buffer on a streaming loader. The architecture uses attention \citep{vaswani2017attention} with
+rotary embeddings \citep{su2021roformer}, grouped-query attention with one key/value head
+\citep{shazeer2019mqa,ainslie2023gqa}, a squared-ReLU-family MLP \citep{so2021primer}, value embeddings related to
+value-residual learning \citep{zhou2024valueresidual} and multi-token prediction \citep{gloeckle2024multitoken};
+attention-source reuse is closest to cross-layer attention sharing \citep{brandon2024cla,xiao2019sharing}.
+
+\paragraph{Performance models and learning-curve surrogates.} Step time has been predicted analytically and from
+learned models: the roofline model \citep{williams2009roofline}, Paleo \citep{qi2017paleo}, cost predictors
+\citep{justus2018predicting}, a learned TPU cost model \citep{kaufman2021tpu} and Habitat \citep{yu2021habitat}.
+Throughput and utilisation work \citep{narayanan2021megatron,korthikanti2023recompute,dao2022flashattention,dao2023flashattention2,chowdhery2023palm}
+motivates separating step time from per-step quality. Learning-curve extrapolation
+\citep{domhan2015extrapolating,swersky2014freezethaw,klein2017lcbnn,adriaensen2023lcpfn} and multi-fidelity search
+\citep{li2018hyperband,falkner2018bohb} predict final loss from partial runs. \ffsim{} is simpler: a linear model on
+recipe features with an explicit step term, fitted on full runs only, because in our data short screens predict
+early loss but not the final ranking.
+
+\paragraph{Variance, determinism and reproducibility.} Seed and data-order variance can rival the effects being
+studied \citep{picard2021seed,dodge2020finetuning,bouthillier2021variance}, and implementation-level nondeterminism
+adds more \citep{pham2020variance,nagarajan2018deterministic,zhuang2021randomness,summers2021nondeterminism}; PyTorch
+documents which operations can be made deterministic \citep{pytorch_reproducibility}. Our protocol depends on the
+accelerator being deterministic for a fixed file and seed (\cref{sec:determinism}).
+
+\paragraph{Trainium.} Trainium2 and its NeuronCore-v3 are documented by AWS
+\citep{aws_trainium,aws_trainium2_arch,aws_trn2_arch,aws_neuroncore_v3}; programs are compiled by the Neuron
+compiler \citep{aws_neuron_docs} and custom kernels are written in NKI \citep{aws_nki_docs}. A search on
+1~October 2026 found no peer-reviewed study of small-model training efficiency on this hardware. Other participants
+have published write-ups of their own approaches to this contest, for example on co-designing the model and its
+kernels \citep{kancharla2026trainiumofthought}.

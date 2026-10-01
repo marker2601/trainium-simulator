@@ -1,0 +1,1 @@
+startup_s=518.0 charged_s=1790.1

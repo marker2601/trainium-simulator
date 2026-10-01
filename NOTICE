@@ -1,0 +1,31 @@
+FrontierForge public release
+Copyright (c) 2026 FrontierForge team. Licensed under the MIT licence (LICENSE),
+except for the files listed below.
+
+This release contains modified versions of files from the AWS Trainium Frontier
+challenge kit (https://github.com/aws-neuron/trainium-frontier), which is
+licensed under the Apache License, Version 2.0. The upstream NOTICE reads:
+
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Files derived from the organiser's training baseline (Apache-2.0; licence text in
+recipes/LICENSE-APACHE-2.0):
+
+  recipes/K82s4/train.py   modified by the FrontierForge team, Sep 2026
+  recipes/K60/train.py     modified by the FrontierForge team, Sep 2026
+  ffsim/gpu/train_gpu.py   generated from recipes/K60/train.py by
+                           ffsim/gpu/make_train_gpu.py (32 patches for CUDA/CPU
+                           and a virtual charged clock; see
+                           ffsim/gpu/PATCH_NOTES.md)
+
+Changes made in the two recipes, relative to the organiser baseline:
+architecture (depth/width, grouped-query attention with one KV head, value
+embeddings, LeakyReLU^2 MLP, attention-source reuse, key offset, multi-token
+prediction), optimizer and schedule (Muon/AdamW scaling, fused Newton-Schulz,
+ZeRO sharding, batch warm-up, charged-clock cooldown, EMA blend and prewarm),
+data sampling (row pool) and many throughput changes. Each file's header
+docstring states that it is derived from the organiser baseline. The recipe files
+are byte-identical to the files we uploaded to the challenge (sha256 in
+recipes/README.md), so no further notice was inserted into them.
+
+The organiser's prepare.py, README, tokenizer and data are not redistributed.

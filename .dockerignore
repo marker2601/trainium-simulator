@@ -1,0 +1,10 @@
+# Build context for ffsim/cloud/Dockerfile (run from the repo root: docker build -f ffsim/cloud/Dockerfile -t ffsim .).
+# That Dockerfile COPYs only ffsim/ and research/sim-data/, so send nothing else: without this file the context
+# is the whole checkout (~115 MB of logs, other packages and .git) instead of ~20 MB.
+*
+!ffsim/
+!research/sim-data/
+# never needed inside the image
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/

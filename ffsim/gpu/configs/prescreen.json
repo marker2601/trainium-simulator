@@ -1,0 +1,291 @@
+{
+ "_comment": "STAGE 0 SMOKE at 300 steps: 6 of the gate pairs, seed 73 only, plus the same-GPU null. Purpose: prove the virtual clock and the data path (protocol gate 0: 2,097,152 tokens / 8,387,440 bytes scored), read the noise floor, and see the SIGN of the large effects. NOT acceptance: late-paying mechanisms (attention-source reuse may be one) and the 300-step phase geometry are not the full run. --steps 300 makes train_gpu.py rescale the virtual clock so the 6%/20% phase switches and the cooldown keep their fractions.",
+ "_arms": {
+  "as0": {
+   "env": {
+    "FF_ATTN_SRC": ""
+   },
+   "what": "attention-source reuse OFF (empty FF_ATTN_SRC disables; the pair's control knob)"
+  },
+  "k60": {
+   "env": {},
+   "what": "K60 base exactly (train.py bakes LK 0.35 fnm, FF_ATTN_SRC=5:6,7,8, KO 0.3, ACC_IN_GRAPH 1, ramp3, QK 1.44, MOM_PEAK 0.95, WD_SCHED 0, softcap 15 / A 0, warmup 20, EMB_LR 0.30)"
+  },
+  "lk05": {
+   "env": {
+    "FF_LEAKY_RELU2": "0.5"
+   },
+   "what": "LeakyReLU slope 0.5 (fnm form baked)"
+  },
+  "mp97": {
+   "env": {
+    "FF_MOM_PEAK": "0.97"
+   },
+   "what": "Muon momentum peak 0.97"
+  },
+  "noramp": {
+   "env": {
+    "FF_ACCUM_SCHED": "2:0.2,4",
+    "FF_ACCUM_LR": "0.7071"
+   },
+   "what": "no k1 phase (the ramp3 pair's control)"
+  },
+  "relu2": {
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "0"
+   },
+   "what": "K57-style relu^2 activation (the pair's control knobs)"
+  },
+  "repeat": {
+   "env": {},
+   "what": "k60 seed 73 re-run on the SAME GPU: kernel nondeterminism null"
+  },
+  "rf": {
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "1"
+   },
+   "what": "relu^2 with the custom backward (RF); FF_LEAKY_RELU2=0 added because K60 bakes 0.35 and the Trainium rf arm ran on the LEAKY=0 base"
+  }
+ },
+ "defaults": {
+  "steps": 300,
+  "env": {},
+  "args": [
+   "--data-world",
+   "8",
+   "--eval-tokens",
+   "2097152",
+   "--eval-emulate-ranks",
+   "8",
+   "--compile",
+   "none"
+  ]
+ },
+ "runs": [
+  {
+   "label": "k60_s73",
+   "arm": "k60",
+   "pair": "lk35_vs_relu2,lk35_vs_rf,lk35_vs_lk05,asa,mp97,mp93,acc_in_graph,ko03,ramp3,r3p30,qk16,warmup40,wd_sched1,softcap165,emb_lr036",
+   "seed": 73,
+   "steps": 300,
+   "env": {},
+   "gpu": 0
+  },
+  {
+   "label": "k60_s73_repeat",
+   "arm": "repeat",
+   "pair": "null_repeat",
+   "seed": 73,
+   "steps": 300,
+   "env": {},
+   "gpu": 0
+  },
+  {
+   "label": "relu2_s73",
+   "arm": "relu2",
+   "pair": "lk35_vs_relu2,rf_vs_relu2",
+   "seed": 73,
+   "steps": 300,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "0"
+   }
+  },
+  {
+   "label": "rf_s73",
+   "arm": "rf",
+   "pair": "rf_vs_relu2,lk35_vs_rf",
+   "seed": 73,
+   "steps": 300,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "1"
+   }
+  },
+  {
+   "label": "lk05_s73",
+   "arm": "lk05",
+   "pair": "lk35_vs_lk05",
+   "seed": 73,
+   "steps": 300,
+   "env": {
+    "FF_LEAKY_RELU2": "0.5"
+   }
+  },
+  {
+   "label": "as0_s73",
+   "arm": "as0",
+   "pair": "asa,asb",
+   "seed": 73,
+   "steps": 300,
+   "env": {
+    "FF_ATTN_SRC": ""
+   }
+  },
+  {
+   "label": "mp97_s73",
+   "arm": "mp97",
+   "pair": "mp97",
+   "seed": 73,
+   "steps": 300,
+   "env": {
+    "FF_MOM_PEAK": "0.97"
+   }
+  },
+  {
+   "label": "noramp_s73",
+   "arm": "noramp",
+   "pair": "ramp3",
+   "seed": 73,
+   "steps": 300,
+   "env": {
+    "FF_ACCUM_SCHED": "2:0.2,4",
+    "FF_ACCUM_LR": "0.7071"
+   }
+  }
+ ],
+ "pairs": [
+  {
+   "pair_id": "lk35_vs_relu2",
+   "family": "leaky_slope",
+   "treatment_arm": "k60",
+   "control_arm": "relu2",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "lk35_vs_k57_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00134 T 2326/C 2314 (0816_R_g7lk35_s73 vs 0626_R_g7_s73)"
+    },
+    {
+     "pair_id": "lk35_vs_k57_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00170 T 2327/C 2310 (0913_R_g7lk35_s58 vs 0054_R_g6acc_s58)"
+    },
+    {
+     "pair_id": "lk35_vs_k57_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00221 T 2325/C 2313 (0945_R_g7lk35_s67 vs 0202_R_g6acc_s67)"
+    },
+    {
+     "pair_id": "reh_k59_vs_k57t",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00117 T 2357/C 2359 (C40_cold_K59 vs C37_cold_K57T)"
+    }
+   ],
+   "note": "LK slope 0.35 (fnm) vs relu^2; T = K60 base; C = pair control knobs {FF_LEAKY_RELU2=0, FF_RELU2_FN=0}"
+  },
+  {
+   "pair_id": "rf_vs_relu2",
+   "family": "relu2_fn",
+   "treatment_arm": "rf",
+   "control_arm": "relu2",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "rf_vs_k57_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00109 T 2365/C 2314 (0253_R_g7rf_s73 vs 0626_R_g7_s73)"
+    },
+    {
+     "pair_id": "rf_vs_k57_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00127 T 2355/C 2310 (0637_R_g7rf_s58 vs 0054_R_g6acc_s58)"
+    },
+    {
+     "pair_id": "rf_vs_k57_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00101 T 2360/C 2313 (0714_R_g7rf_s67 vs 0202_R_g6acc_s67)"
+    }
+   ],
+   "note": "RF custom backward vs relu^2. Trainium win is throughput (+1.8% steps); equal-step delta is ~0, so calibrate marks it non-decisive: a null-expected pair"
+  },
+  {
+   "pair_id": "lk35_vs_lk05",
+   "family": "leaky_slope",
+   "treatment_arm": "k60",
+   "control_arm": "lk05",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "lk35_vs_lk05_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00125 T 2327/C 2314 (0913_R_g7lk35_s58 vs 0529_R_g7lkm_s58)"
+    },
+    {
+     "pair_id": "lk35_vs_lk05_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00010 T 2326/C 2340 (0816_R_g7lk35_s73 vs 0222_R_g7lkm_s73)"
+    },
+    {
+     "pair_id": "lk35_vs_lk05_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00034 T 2325/C 2341 (0945_R_g7lk35_s67 vs 0745_R_g7lkm_s67)"
+    }
+   ]
+  },
+  {
+   "pair_id": "asa",
+   "family": "attn_src",
+   "treatment_arm": "k60",
+   "control_arm": "as0",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "m14_asa_D_s73",
+     "note": "validation-pairs.json: chip D s73 delta_raw -0.00173 T 2155/C 2153 (1552_R_m14asa_s73 vs 1202_R_g7lk35_s73)"
+    },
+    {
+     "pair_id": "asa_C_s73",
+     "delta_raw": -0.00181,
+     "treatment_steps": 2315,
+     "control_steps": 2326,
+     "seed": 73,
+     "chip": "C",
+     "source": "spec Data updates 29 Sep 17:50 UTC (1639_R_m14asa_s73 vs 0816_R_g7lk35_s73)"
+    },
+    {
+     "pair_id": "asa_C_s67",
+     "delta_raw": -0.00136,
+     "treatment_steps": null,
+     "control_steps": null,
+     "seed": 67,
+     "chip": "C",
+     "source": "spec Data updates 29 Sep 17:50 UTC (chip C s67; step counts not recorded)"
+    }
+   ],
+   "note": "FF_ATTN_SRC=5:6,7,8 (AS-a) vs off; T = K60 base; C sets FF_ATTN_SRC empty. 4 AS pairs in all with asb"
+  },
+  {
+   "pair_id": "mp97",
+   "family": "mom_peak",
+   "treatment_arm": "mp97",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "mom_peak097_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw +0.00198 T 2311/C 2314 (1759_R_g7mp97_s73 vs 0626_R_g7_s73)"
+    }
+   ]
+  },
+  {
+   "pair_id": "ramp3",
+   "family": "accum_sched",
+   "treatment_arm": "k60",
+   "control_arm": "noramp",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "ramp3_g4_C_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00037 T 2287/C 2150 (0915_R_g4r3_s58 vs 0806_R_g4_s58)"
+    },
+    {
+     "pair_id": "ramp3_g4_C_s53",
+     "note": "validation-pairs.json: chip C s53 delta_raw -0.00029 T 2278/C 2150 (1048_R_g4r3_s53 vs 0946_R_g4_s53)"
+    },
+    {
+     "pair_id": "ramp3_g3_C_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00032 T 2219/C 2093 (0538_R_g3ramp3_s58 vs 0127_R_g2zero_s58)"
+    },
+    {
+     "pair_id": "ramp3_g3_C_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw +0.00004 T 2216/C 2091 (0653_R_g3ramp3_s67 vs 0245_R_g2zero_s67)"
+    }
+   ],
+   "note": "ramp3 wins on Trainium only through +6% steps; at EQUAL steps it trains on fewer tokens, so the corrected target is ~+0.003 (a loss). Tests the equal-step correction itself"
+  }
+ ]
+}

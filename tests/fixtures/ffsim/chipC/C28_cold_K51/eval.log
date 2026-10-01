@@ -1,0 +1,9 @@
+{
+  "eval_over_timeout": false,
+  "eval_seconds": 50.74573601099837,
+  "eval_timeout": 1200,
+  "num_bytes": 8387440,
+  "num_tokens": 2097152,
+  "total_nats": 5627028.0,
+  "val_bpb": 0.9678859569240843
+}

@@ -1,0 +1,84 @@
+{
+ "name": "k60-local",
+ "description": "All single and double changes around K60 (K59 + M14 attention-source reuse FF_ATTN_SRC=5:6,7,8, official 0.9655) over the campaign's validated levers: the same eight dims as space-k59-local. Values outside the fitted support are flagged EXTRAP in the report. The K60 arm on the chip C queue is the AS-a arm C:1639_R_m14asa_s73 (0.95995 @2315 at TT 1760): its job env is the K59 arm's plus FF_CODE_DIR=code_k14off and FF_ATTN_SRC=5:6,7,8 (research/sim-data/chipC/1639_R_m14asa_s73/overrides).",
+ "base": {
+  "recipe": "recipe-K60.json"
+ },
+ "queue": {
+  "chip": "C",
+  "reference_run": "C:1639_R_m14asa_s73",
+  "base_env": "/root/ff-claude/queue/base.env (FF_TIME_TARGET=1760 FF_SEED=51 FF_COOLDOWN_FRAC=0.45 FF_EMA_EVERY=4 ...; harvested copy research/sim-data/chipC/_meta/queue/base.env)",
+  "job_env": "FF_COOLDOWN_FRAC=0.60 FF_ASYNC_OPT=1 FF_SCALAR_CONSTS=2 FF_MUON_VIEWS=1 FF_OPT_FUSE=2 FF_MUON_SCHED=1 FF_MTP=1 FF_MASK_BOS_TARGET=1 FF_XU_QUEUE=32 FF_KEY_OFFSET=1 FF_MTP_PHASES=0.2,0.45 FF_CODE_DIR=/root/ff-claude/code_k14off FF_MUON_ZERO=1 FF_MUON_ZERO2=1 FF_ADAMW_ZERO=1 FF_EMA_EVERY=32 FF_ACCUM_SCHED=1:0.06,2:0.2,4 FF_ACCUM_LR=0.5,0.7071 FF_KEY_OFFSET_RAD=0.3 FF_ACC_IN_GRAPH=1 FF_LEAKY_FORM=fnm FF_LEAKY_RELU2=0.35 FF_ATTN_SRC=5:6,7,8",
+  "source": "research/sim-data/chipC/1639_R_m14asa_s73/overrides (AS-a s73 = the K60 recipe on the chip C queue; FF_SEED dropped, superseded duplicates removed)"
+ },
+ "dims": [
+  {
+   "knob": "FF_LEAKY_RELU2",
+   "values": [
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5
+   ]
+  },
+  {
+   "knob": "FF_SOFTCAP",
+   "range": [
+    12,
+    20
+   ],
+   "step": 1
+  },
+  {
+   "knob": "FF_WD_SCHED",
+   "values": [
+    0.0,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "knob": "FF_MOM_PEAK",
+   "values": [
+    0.9,
+    0.95,
+    0.97
+   ]
+  },
+  {
+   "knob": "FF_SCALAR_LR",
+   "values": [
+    0.16,
+    0.2,
+    0.25
+   ]
+  },
+  {
+   "knob": "FF_COOLDOWN_FRAC",
+   "values": [
+    0.5,
+    0.6,
+    0.7
+   ]
+  },
+  {
+   "knob": "FF_QK_GAIN",
+   "values": [
+    1.2,
+    1.44,
+    1.7
+   ]
+  },
+  {
+   "knob": "FF_EMB_LR",
+   "values": [
+    0.25,
+    0.3,
+    0.35
+   ]
+  }
+ ],
+ "max_changes": 2
+}

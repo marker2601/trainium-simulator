@@ -1,0 +1,6 @@
+date_utc,chip,run,code_version,recipe_tag,seed,steps,bpb_2m,bpb_2m_ema,bpb_20m,submission,is_screen,control_run,control_bpb,delta_raw,delta_norm,knob_changes,note
+2026-09-26,C,C28_cold_K51,K51,cold-rehearsal,67,2036,0.96789,,,K51,0,,,,,FF_SEED=67 FF_TIME_TARGET=1788,cold rehearsal of K51 on chip C
+2026-09-29,C,C40_cold_K59,M12,lk35,73,2357,0.96092,,0.96792,K59,0,C36_cold_K57,0.96193,-0.00101,-0.00098,FF_LEAKY_RELU2=0.35 FF_SEED=73,anchor rehearsal
+2026-09-28,C,C36_cold_K57,M12,k57,73,2359,0.96193,,,K57,0,,,,,FF_SEED=73,
+2026-09-28,D,D3_lk35_s58,M12,lk35,58,2201,0.96488,0.96470,,,0,D2_rf_s58,0.96530,-0.00042,-0.00038,FF_LEAKY_RELU2=0.35,chip D pair
+2026-09-28,C,S60_m13_qkv,M13,qkv-fusion,73,60,,,,,1,S60_m12_base,,,,FF_FUSE_QKV=1,step-time screen only

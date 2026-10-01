@@ -1,0 +1,886 @@
+{
+ "_comment": "CALIBRATION GATE for the GPU proxy against real chip-C Trainium pairs (research/sim-data/validation-pairs.json). Every run is train.py (K60 = recipes/K60/train.py) on CUDA with a VIRTUAL charged clock (--clock virtual --step-seconds k1,k2,k4) so accum phases, MTP stages, cooldown and EMA levels switch at the Trainium step numbers, and --steps 2314 for every pair run: MODE (a), one shared K60 triple rescaled to the K57/lk35-era chip-C control count (see _steps_policy). Gate 2 (absolute level) is measured by the two _absolute_level runs at the Trainium reference step counts 2357 / 2361, outside `pairs`. The proxy is accepted by calibrate.py only if sign agreement >= 80% on the decisive pairs and the scale a of delta_trn ~ a*delta_gpu is bounded.",
+ "_arms": {
+  "k60": {
+   "env": {},
+   "what": "K60 base exactly (train.py bakes LK 0.35 fnm, FF_ATTN_SRC=5:6,7,8, KO 0.3, ACC_IN_GRAPH 1, ramp3, QK 1.44, MOM_PEAK 0.95, WD_SCHED 0, softcap 15 / A 0, warmup 20, EMB_LR 0.30)"
+  },
+  "repeat": {
+   "env": {},
+   "what": "k60 seed 73 re-run on the SAME GPU: kernel nondeterminism null"
+  },
+  "repeat2": {
+   "env": {},
+   "what": "k60 seed 73 re-run on a DIFFERENT GPU: device/driver null (collapses to gpu 0 on a 1-GPU box)"
+  },
+  "relu2": {
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "0"
+   },
+   "what": "K57-style relu^2 activation (the pair's control knobs)"
+  },
+  "rf": {
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "1"
+   },
+   "what": "relu^2 with the custom backward (RF); FF_LEAKY_RELU2=0 added because K60 bakes 0.35 and the Trainium rf arm ran on the LEAKY=0 base"
+  },
+  "lk05": {
+   "env": {
+    "FF_LEAKY_RELU2": "0.5"
+   },
+   "what": "LeakyReLU slope 0.5 (fnm form baked)"
+  },
+  "as0": {
+   "env": {
+    "FF_ATTN_SRC": ""
+   },
+   "what": "attention-source reuse OFF (empty FF_ATTN_SRC disables; the pair's control knob)"
+  },
+  "asb": {
+   "env": {
+    "FF_ATTN_SRC": "4:5,6,7,8"
+   },
+   "what": "attention-source reuse variant b"
+  },
+  "mp97": {
+   "env": {
+    "FF_MOM_PEAK": "0.97"
+   },
+   "what": "Muon momentum peak 0.97"
+  },
+  "mp93": {
+   "env": {
+    "FF_MOM_PEAK": "0.93"
+   },
+   "what": "Muon momentum peak 0.93"
+  },
+  "ko01": {
+   "env": {
+    "FF_KEY_OFFSET_RAD": "0.1"
+   },
+   "what": "key offset 0.1 rad (the pair's control)"
+  },
+  "noramp": {
+   "env": {
+    "FF_ACCUM_SCHED": "2:0.2,4",
+    "FF_ACCUM_LR": "0.7071"
+   },
+   "what": "no k1 phase (the ramp3 pair's control)"
+  },
+  "r3p30": {
+   "env": {
+    "FF_ACCUM_SCHED": "1:0.06,2:0.3,4"
+   },
+   "what": "k2 phase to 30% (FF_ACCUM_LR stays 0.5,0.7071)"
+  },
+  "qk16": {
+   "env": {
+    "FF_QK_GAIN": "1.6"
+   },
+   "what": "QK gain 1.6"
+  },
+  "wu40": {
+   "env": {
+    "FF_WARMUP": "40"
+   },
+   "what": "warm-up 40 steps"
+  },
+  "wds1": {
+   "env": {
+    "FF_WD_SCHED": "1"
+   },
+   "what": "weight-decay schedule 1"
+  },
+  "sc165": {
+   "env": {
+    "FF_SOFTCAP_A": "16.5",
+    "FF_SOFTCAP_B": "0"
+   },
+   "what": "asymmetric softcap 16.5*tanh(z/15)"
+  },
+  "elr36": {
+   "env": {
+    "FF_EMB_LR": "0.36"
+   },
+   "what": "embedding LR 0.36"
+  },
+  "abs_base": {
+   "env": {
+    "FF_ATTN_SRC": ""
+   },
+   "what": "gate 2 only: same env as as0 (K59 lineage) at 2357 steps; separate arm name so calibrate.py's arm-keyed statistics ignore it"
+  },
+  "abs_asa": {
+   "env": {},
+   "what": "gate 2 only: same env as k60 (K60 as scored) at 2361 steps; separate arm name so it stays out of the k60 base seed spread"
+  }
+ },
+ "_env_rule": "run env = defaults.env + run.env on top of the K60 file's baked defaults; each arm carries the pair's own treatment or control knob set, plus any K60-baked knob the pair's base did not have reset to that base's value (rf adds FF_LEAKY_RELU2=0). Both arms of every pair therefore share the K60 base (LK 0.35 + attention-source reuse), which is a base shift relative to the K57/g5/g4-era Trainium measurements and is part of what the calibration measures.",
+ "_steps_policy": "MODE (a), NOT the mode (b) log replay that PROTOCOL.md 3.2 describes: fleet.py build_command emits one '--clock virtual --step-seconds k1=0.2950,k2=0.5060,k4=0.9280 --steps 2314' (fleet.DEFAULT_STEP_SECONDS = K60-lineage chip-C medians) for every pair run, and train_gpu.py rescales that triple by one factor (1.02587) so the clock-driven run ends at 2314 = the K57/lk35-era chip-C control step count (s73 2314, s58 2310, s67 2313; lk35 2326). The rescaled walk switches at accum phase 2 step 329, phase 3 step 813, EMA level 19 step 1190, MTP 270/467/640/813/931/1048/1166/1284: 3-9 steps EARLIER than the chip-C LK35 controls (0816_R_g7lk35_s73 / 0913_R_g7lk35_s58 train.log: 333/332, 820/818, 1198/1197, MTP 274/472/646/820/939/1057/1175/1293). No run replays a Trainium log (make_train_gpu.py --step-seconds-from-log / --stop-step are not used by fleet.py; a per-pair mode (b) needs fleet.py changes and is a later stage). Both arms of every pair share this schedule, so the GPU deltas are equal-step, equal-switch deltas. One shared base arm per seed keeps the fleet at ~39 runs. The g5/g4-era (2300/2150) and chip-D (2153) pairs are compared as deltas, which are step-count-insensitive to first order; their Trainium targets are corrected to equal steps by calibrate.py (delta_eq = delta_raw + 0.057 ln(T/C)). configs/prescreen.json (300 steps) is a SMOKE TEST of the clock and data path, not the PROTOCOL 5 pre-screen (which is four runs at the K60 schedule, 2361 steps); memory: a 120-300-step screen predicts early loss only.",
+ "_absolute_level": {
+  "what": "PROTOCOL.md 3.3 gate 2 (absolute level; a smoke test, PROTOCOL 4 row 12): two runs at the Trainium reference step counts, deliberately OUTSIDE `pairs` and under their own arm names: calibrate.py matches pair runs on (seed, steps) and keys the base seed spread / nulls on arm k60 / repeat*, so abs_base (2357) and abs_asa (2361) enter no delta, no null and no seed spread.",
+  "runs": {
+   "abs_base_s73": {
+    "arm": "abs_base",
+    "env": {
+     "FF_ATTN_SRC": ""
+    },
+    "steps": 2357,
+    "target_bpb": 0.96092,
+    "target_run": "C40_cold_K59 (chip C, seed 73, 2357 steps, TT 1793; validation-pairs.json reh_k59_vs_k57t treatment) = K59 lineage = K60 with attention-source reuse off",
+    "pass_within": 0.01,
+    "structural_beyond": 0.03
+   },
+   "abs_asa_s73": {
+    "arm": "abs_asa",
+    "env": {},
+    "steps": 2361,
+    "target_bpb": 0.9591,
+    "target_run": "C41_cold_K60 (chip C, seed 73, 2361 steps, TT 1793; rehearsal of the official 0.9655) = K60 as scored",
+    "pass_within": 0.01,
+    "structural_beyond": 0.03
+   }
+  },
+  "note": "--steps 2357 / 2361 rescale the same shared triple by their own factor, so these two runs also switch at the rescaled K60 walk, not at the C40/C41 logs. Beyond 0.03 = structural: check --data-world 8, --eval-emulate-ranks 8, FF_LAMBDA_0D=1 (PROTOCOL 3.3). They are not paired with each other: different step counts, and the asa delta is measured by the asa pair at 2314."
+ },
+ "_decisive": "calibrate.py decides: |delta_eq| >= 0.0005 with a stable sign over k in [0.045, 0.070]. Expected decisive: lk35_vs_relu2, lk35_vs_rf, lk35_vs_lk05, asa, asb, mp97, ramp3, r3p30 (8); null-expected at equal steps: rf_vs_relu2, wd_sched1, softcap165, emb_lr036, qk16; ambiguous: ko03, mp93, warmup40. Report sign agreement per family too: the two accum_sched pairs test the equal-step correction, not a model change.",
+ "_dropped": {
+  "acc_in_graph": "REMOVED 29 Sep (pair k60 vs acc0, runs acc0_s53 / acc0_s67): defaults.args carries --compile none, and train_gpu.py _gpu_normalise_args (make_train_gpu.py:297-303) forces FF_ACC_IN_GRAPH=0 in eager mode (recorded as acc_in_graph_disabled), so both arms ran the same eager accumulation path and the pair was a guaranteed tie that would have entered sign_agreement_all for $5-8. PROTOCOL 3.1: FF_ACC_IN_GRAPH is a Neuron graph-capture flag with no GPU pair; testing it needs --compile inductor and a separate context (PROTOCOL 4 row 7). The Trainium refs acc_in_graph_s53/s67/s58 stay in validation-pairs.json."
+ },
+ "_seeds": "the pair's own Trainium seed(s) where they exist (73/58/67/53) so per-seed sign rows are possible; a second seed everywhere.",
+ "_nulls": "k60_s73_repeat (same GPU as k60_s73) and k60_s73_repeat2 (other GPU) measure kernel / device nondeterminism.",
+ "_sources": [
+  "research/sim-data/validation-pairs.json",
+  "docs/simulator-spec.md Data updates 29 Sep 17:50 UTC (asa chip C s73/s67, asb D s73)"
+ ],
+ "defaults": {
+  "steps": 2314,
+  "env": {},
+  "args": [
+   "--data-world",
+   "8",
+   "--eval-tokens",
+   "2097152",
+   "--eval-emulate-ranks",
+   "8",
+   "--compile",
+   "none"
+  ]
+ },
+ "runs": [
+  {
+   "label": "k60_s73",
+   "arm": "k60",
+   "pair": "lk35_vs_relu2,lk35_vs_rf,lk35_vs_lk05,asa,mp97,mp93,ko03,ramp3,r3p30,qk16,warmup40,wd_sched1,softcap165,emb_lr036",
+   "seed": 73,
+   "steps": 2314,
+   "env": {},
+   "gpu": 0
+  },
+  {
+   "label": "k60_s58",
+   "arm": "k60",
+   "pair": "lk35_vs_relu2,lk35_vs_rf,lk35_vs_lk05,asa,mp97,mp93,ko03,ramp3,r3p30,qk16,warmup40,wd_sched1,softcap165,emb_lr036",
+   "seed": 58,
+   "steps": 2314,
+   "env": {}
+  },
+  {
+   "label": "k60_s67",
+   "arm": "k60",
+   "pair": "lk35_vs_relu2,lk35_vs_rf,lk35_vs_lk05,asa,mp97,mp93,ko03,ramp3,r3p30,qk16,warmup40,wd_sched1,softcap165,emb_lr036",
+   "seed": 67,
+   "steps": 2314,
+   "env": {}
+  },
+  {
+   "label": "k60_s53",
+   "arm": "k60",
+   "pair": "lk35_vs_relu2,lk35_vs_rf,lk35_vs_lk05,asa,mp97,mp93,ko03,ramp3,r3p30,qk16,warmup40,wd_sched1,softcap165,emb_lr036",
+   "seed": 53,
+   "steps": 2314,
+   "env": {}
+  },
+  {
+   "label": "k60_s73_repeat",
+   "arm": "repeat",
+   "pair": "null_repeat",
+   "seed": 73,
+   "steps": 2314,
+   "env": {},
+   "gpu": 0
+  },
+  {
+   "label": "k60_s73_repeat2",
+   "arm": "repeat2",
+   "pair": "null_repeat2",
+   "seed": 73,
+   "steps": 2314,
+   "env": {},
+   "gpu": 1
+  },
+  {
+   "label": "abs_base_s73",
+   "arm": "abs_base",
+   "pair": "abs_level",
+   "seed": 73,
+   "steps": 2357,
+   "env": {
+    "FF_ATTN_SRC": ""
+   }
+  },
+  {
+   "label": "abs_asa_s73",
+   "arm": "abs_asa",
+   "pair": "abs_level",
+   "seed": 73,
+   "steps": 2361,
+   "env": {}
+  },
+  {
+   "label": "relu2_s73",
+   "arm": "relu2",
+   "pair": "lk35_vs_relu2,rf_vs_relu2",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "0"
+   }
+  },
+  {
+   "label": "relu2_s58",
+   "arm": "relu2",
+   "pair": "lk35_vs_relu2,rf_vs_relu2",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "0"
+   }
+  },
+  {
+   "label": "relu2_s67",
+   "arm": "relu2",
+   "pair": "lk35_vs_relu2,rf_vs_relu2",
+   "seed": 67,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "0"
+   }
+  },
+  {
+   "label": "rf_s73",
+   "arm": "rf",
+   "pair": "rf_vs_relu2,lk35_vs_rf",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "1"
+   }
+  },
+  {
+   "label": "rf_s58",
+   "arm": "rf",
+   "pair": "rf_vs_relu2,lk35_vs_rf",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "1"
+   }
+  },
+  {
+   "label": "rf_s67",
+   "arm": "rf",
+   "pair": "rf_vs_relu2,lk35_vs_rf",
+   "seed": 67,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0",
+    "FF_RELU2_FN": "1"
+   }
+  },
+  {
+   "label": "lk05_s58",
+   "arm": "lk05",
+   "pair": "lk35_vs_lk05",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0.5"
+   }
+  },
+  {
+   "label": "lk05_s73",
+   "arm": "lk05",
+   "pair": "lk35_vs_lk05",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_LEAKY_RELU2": "0.5"
+   }
+  },
+  {
+   "label": "as0_s73",
+   "arm": "as0",
+   "pair": "asa,asb",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_ATTN_SRC": ""
+   }
+  },
+  {
+   "label": "as0_s67",
+   "arm": "as0",
+   "pair": "asa,asb",
+   "seed": 67,
+   "steps": 2314,
+   "env": {
+    "FF_ATTN_SRC": ""
+   }
+  },
+  {
+   "label": "as0_s58",
+   "arm": "as0",
+   "pair": "asa,asb",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_ATTN_SRC": ""
+   }
+  },
+  {
+   "label": "asb_s73",
+   "arm": "asb",
+   "pair": "asb",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_ATTN_SRC": "4:5,6,7,8"
+   }
+  },
+  {
+   "label": "mp97_s73",
+   "arm": "mp97",
+   "pair": "mp97",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_MOM_PEAK": "0.97"
+   }
+  },
+  {
+   "label": "mp97_s58",
+   "arm": "mp97",
+   "pair": "mp97",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_MOM_PEAK": "0.97"
+   }
+  },
+  {
+   "label": "mp93_s73",
+   "arm": "mp93",
+   "pair": "mp93",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_MOM_PEAK": "0.93"
+   }
+  },
+  {
+   "label": "ko01_s67",
+   "arm": "ko01",
+   "pair": "ko03",
+   "seed": 67,
+   "steps": 2314,
+   "env": {
+    "FF_KEY_OFFSET_RAD": "0.1"
+   }
+  },
+  {
+   "label": "ko01_s53",
+   "arm": "ko01",
+   "pair": "ko03",
+   "seed": 53,
+   "steps": 2314,
+   "env": {
+    "FF_KEY_OFFSET_RAD": "0.1"
+   }
+  },
+  {
+   "label": "noramp_s58",
+   "arm": "noramp",
+   "pair": "ramp3",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_ACCUM_SCHED": "2:0.2,4",
+    "FF_ACCUM_LR": "0.7071"
+   }
+  },
+  {
+   "label": "noramp_s53",
+   "arm": "noramp",
+   "pair": "ramp3",
+   "seed": 53,
+   "steps": 2314,
+   "env": {
+    "FF_ACCUM_SCHED": "2:0.2,4",
+    "FF_ACCUM_LR": "0.7071"
+   }
+  },
+  {
+   "label": "r3p30_s58",
+   "arm": "r3p30",
+   "pair": "r3p30",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_ACCUM_SCHED": "1:0.06,2:0.3,4"
+   }
+  },
+  {
+   "label": "r3p30_s53",
+   "arm": "r3p30",
+   "pair": "r3p30",
+   "seed": 53,
+   "steps": 2314,
+   "env": {
+    "FF_ACCUM_SCHED": "1:0.06,2:0.3,4"
+   }
+  },
+  {
+   "label": "qk16_s73",
+   "arm": "qk16",
+   "pair": "qk16",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_QK_GAIN": "1.6"
+   }
+  },
+  {
+   "label": "qk16_s58",
+   "arm": "qk16",
+   "pair": "qk16",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_QK_GAIN": "1.6"
+   }
+  },
+  {
+   "label": "wu40_s58",
+   "arm": "wu40",
+   "pair": "warmup40",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_WARMUP": "40"
+   }
+  },
+  {
+   "label": "wu40_s73",
+   "arm": "wu40",
+   "pair": "warmup40",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_WARMUP": "40"
+   }
+  },
+  {
+   "label": "wds1_s73",
+   "arm": "wds1",
+   "pair": "wd_sched1",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_WD_SCHED": "1"
+   }
+  },
+  {
+   "label": "wds1_s58",
+   "arm": "wds1",
+   "pair": "wd_sched1",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_WD_SCHED": "1"
+   }
+  },
+  {
+   "label": "sc165_s73",
+   "arm": "sc165",
+   "pair": "softcap165",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_SOFTCAP_A": "16.5",
+    "FF_SOFTCAP_B": "0"
+   }
+  },
+  {
+   "label": "sc165_s58",
+   "arm": "sc165",
+   "pair": "softcap165",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_SOFTCAP_A": "16.5",
+    "FF_SOFTCAP_B": "0"
+   }
+  },
+  {
+   "label": "elr36_s58",
+   "arm": "elr36",
+   "pair": "emb_lr036",
+   "seed": 58,
+   "steps": 2314,
+   "env": {
+    "FF_EMB_LR": "0.36"
+   }
+  },
+  {
+   "label": "elr36_s73",
+   "arm": "elr36",
+   "pair": "emb_lr036",
+   "seed": 73,
+   "steps": 2314,
+   "env": {
+    "FF_EMB_LR": "0.36"
+   }
+  }
+ ],
+ "pairs": [
+  {
+   "pair_id": "lk35_vs_relu2",
+   "family": "leaky_slope",
+   "treatment_arm": "k60",
+   "control_arm": "relu2",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "lk35_vs_k57_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00134 T 2326/C 2314 (0816_R_g7lk35_s73 vs 0626_R_g7_s73)"
+    },
+    {
+     "pair_id": "lk35_vs_k57_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00170 T 2327/C 2310 (0913_R_g7lk35_s58 vs 0054_R_g6acc_s58)"
+    },
+    {
+     "pair_id": "lk35_vs_k57_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00221 T 2325/C 2313 (0945_R_g7lk35_s67 vs 0202_R_g6acc_s67)"
+    },
+    {
+     "pair_id": "reh_k59_vs_k57t",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00117 T 2357/C 2359 (C40_cold_K59 vs C37_cold_K57T)"
+    }
+   ],
+   "note": "LK slope 0.35 (fnm) vs relu^2; T = K60 base; C = pair control knobs {FF_LEAKY_RELU2=0, FF_RELU2_FN=0}"
+  },
+  {
+   "pair_id": "rf_vs_relu2",
+   "family": "relu2_fn",
+   "treatment_arm": "rf",
+   "control_arm": "relu2",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "rf_vs_k57_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00109 T 2365/C 2314 (0253_R_g7rf_s73 vs 0626_R_g7_s73)"
+    },
+    {
+     "pair_id": "rf_vs_k57_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00127 T 2355/C 2310 (0637_R_g7rf_s58 vs 0054_R_g6acc_s58)"
+    },
+    {
+     "pair_id": "rf_vs_k57_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00101 T 2360/C 2313 (0714_R_g7rf_s67 vs 0202_R_g6acc_s67)"
+    }
+   ],
+   "note": "RF custom backward vs relu^2. Trainium win is throughput (+1.8% steps); equal-step delta is ~0, so calibrate marks it non-decisive: a null-expected pair"
+  },
+  {
+   "pair_id": "lk35_vs_rf",
+   "family": "leaky_slope",
+   "treatment_arm": "k60",
+   "control_arm": "rf",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "lk35_vs_rf_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00026 T 2326/C 2365 (0816_R_g7lk35_s73 vs 0253_R_g7rf_s73)"
+    },
+    {
+     "pair_id": "lk35_vs_rf_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00043 T 2327/C 2355 (0913_R_g7lk35_s58 vs 0637_R_g7rf_s58)"
+    },
+    {
+     "pair_id": "lk35_vs_rf_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00120 T 2325/C 2360 (0945_R_g7lk35_s67 vs 0714_R_g7rf_s67)"
+    }
+   ]
+  },
+  {
+   "pair_id": "lk35_vs_lk05",
+   "family": "leaky_slope",
+   "treatment_arm": "k60",
+   "control_arm": "lk05",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "lk35_vs_lk05_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00125 T 2327/C 2314 (0913_R_g7lk35_s58 vs 0529_R_g7lkm_s58)"
+    },
+    {
+     "pair_id": "lk35_vs_lk05_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00010 T 2326/C 2340 (0816_R_g7lk35_s73 vs 0222_R_g7lkm_s73)"
+    },
+    {
+     "pair_id": "lk35_vs_lk05_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00034 T 2325/C 2341 (0945_R_g7lk35_s67 vs 0745_R_g7lkm_s67)"
+    }
+   ]
+  },
+  {
+   "pair_id": "asa",
+   "family": "attn_src",
+   "treatment_arm": "k60",
+   "control_arm": "as0",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "m14_asa_D_s73",
+     "note": "validation-pairs.json: chip D s73 delta_raw -0.00173 T 2155/C 2153 (1552_R_m14asa_s73 vs 1202_R_g7lk35_s73)"
+    },
+    {
+     "pair_id": "asa_C_s73",
+     "delta_raw": -0.00181,
+     "treatment_steps": 2315,
+     "control_steps": 2326,
+     "seed": 73,
+     "chip": "C",
+     "source": "spec Data updates 29 Sep 17:50 UTC (1639_R_m14asa_s73 vs 0816_R_g7lk35_s73)"
+    },
+    {
+     "pair_id": "asa_C_s67",
+     "delta_raw": -0.00136,
+     "treatment_steps": null,
+     "control_steps": null,
+     "seed": 67,
+     "chip": "C",
+     "source": "spec Data updates 29 Sep 17:50 UTC (chip C s67; step counts not recorded)"
+    }
+   ],
+   "note": "FF_ATTN_SRC=5:6,7,8 (AS-a) vs off; T = K60 base; C sets FF_ATTN_SRC empty. 4 AS pairs in all with asb"
+  },
+  {
+   "pair_id": "asb",
+   "family": "attn_src",
+   "treatment_arm": "asb",
+   "control_arm": "as0",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "asb_D_s73",
+     "delta_raw": -0.00086,
+     "treatment_steps": null,
+     "control_steps": 2153,
+     "seed": 73,
+     "chip": "D",
+     "source": "spec Data updates 29 Sep 17:50 UTC (variant 4:5,6,7,8, chip D s73; S60 +0.7% step time)"
+    }
+   ]
+  },
+  {
+   "pair_id": "mp97",
+   "family": "mom_peak",
+   "treatment_arm": "mp97",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "mom_peak097_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw +0.00198 T 2311/C 2314 (1759_R_g7mp97_s73 vs 0626_R_g7_s73)"
+    }
+   ]
+  },
+  {
+   "pair_id": "mp93",
+   "family": "mom_peak",
+   "treatment_arm": "mp93",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "mom_peak093_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw +0.00054 T 2309/C 2314 (2017_R_g7mp93_s73 vs 0626_R_g7_s73)"
+    }
+   ]
+  },
+  {
+   "pair_id": "ko03",
+   "family": "key_offset_rad",
+   "treatment_arm": "k60",
+   "control_arm": "ko01",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "ko03_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00051 T 2286/C 2286 (2103_R_g5ko03_s67 vs 2032_R_g5ctl_s67)"
+    },
+    {
+     "pair_id": "ko03_s53",
+     "note": "validation-pairs.json: chip C s53 delta_raw -0.00023 T 2282/C 2300 (1902_R_g5ko03_s53 vs 1728_R_g5ctl_s53)"
+    },
+    {
+     "pair_id": "ko03_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00005 T 2300/C 2301 (1524_R_g5ko03_s58 vs 1200_R_g5_s58)"
+    }
+   ]
+  },
+  {
+   "pair_id": "ramp3",
+   "family": "accum_sched",
+   "treatment_arm": "k60",
+   "control_arm": "noramp",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "ramp3_g4_C_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00037 T 2287/C 2150 (0915_R_g4r3_s58 vs 0806_R_g4_s58)"
+    },
+    {
+     "pair_id": "ramp3_g4_C_s53",
+     "note": "validation-pairs.json: chip C s53 delta_raw -0.00029 T 2278/C 2150 (1048_R_g4r3_s53 vs 0946_R_g4_s53)"
+    },
+    {
+     "pair_id": "ramp3_g3_C_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00032 T 2219/C 2093 (0538_R_g3ramp3_s58 vs 0127_R_g2zero_s58)"
+    },
+    {
+     "pair_id": "ramp3_g3_C_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw +0.00004 T 2216/C 2091 (0653_R_g3ramp3_s67 vs 0245_R_g2zero_s67)"
+    }
+   ],
+   "note": "ramp3 wins on Trainium only through +6% steps; at EQUAL steps it trains on fewer tokens, so the corrected target is ~+0.003 (a loss). Tests the equal-step correction itself"
+  },
+  {
+   "pair_id": "r3p30",
+   "family": "accum_sched",
+   "treatment_arm": "r3p30",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "ramp3_p30_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw +0.00002 T 2453/C 2301 (1555_R_g5r3p30_s58 vs 1200_R_g5_s58)"
+    },
+    {
+     "pair_id": "ramp3_p30_s53",
+     "note": "validation-pairs.json: chip C s53 delta_raw -0.00006 T 2445/C 2300 (1933_R_g5r3p30_s53 vs 1728_R_g5ctl_s53)"
+    }
+   ],
+   "note": "k2 phase to 30%: +6.5% steps on Trainium, ~0 raw; corrected target ~+0.0035"
+  },
+  {
+   "pair_id": "qk16",
+   "family": "qk_gain",
+   "treatment_arm": "qk16",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "qk16_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw +0.00077 T 2308/C 2314 (0958_R_g7qk16_s73 vs 0626_R_g7_s73)"
+    },
+    {
+     "pair_id": "qk16_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00028 T 2313/C 2310 (0844_R_g7qk16_s58 vs 0054_R_g6acc_s58)"
+    },
+    {
+     "pair_id": "qk16_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw -0.00024 T 2313/C 2313 (1029_R_g7qk16_s67 vs 0202_R_g6acc_s67)"
+    }
+   ]
+  },
+  {
+   "pair_id": "warmup40",
+   "family": "warmup",
+   "treatment_arm": "wu40",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "warmup40_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw +0.00066 T 2272/C 2310 (1100_R_g7wu40_s58 vs 0054_R_g6acc_s58)"
+    }
+   ],
+   "note": "raw +0.00066 but the treatment ran 1.6% fewer steps (chip jitter); corrected sign is not stable, so non-decisive"
+  },
+  {
+   "pair_id": "wd_sched1",
+   "family": "wd_sched",
+   "treatment_arm": "wds1",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "wd_sched1_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw +0.00009 T 2307/C 2314 (1836_R_g7wds1_s73 vs 0626_R_g7_s73)"
+    },
+    {
+     "pair_id": "wd_sched1_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw -0.00003 T 2299/C 2310 (2048_R_g7wds1_s58 vs 0054_R_g6acc_s58)"
+    },
+    {
+     "pair_id": "wd_sched1_s67",
+     "note": "validation-pairs.json: chip C s67 delta_raw +0.00006 T 2309/C 2313 (2119_R_g7wds1_s67 vs 0202_R_g6acc_s67)"
+    }
+   ],
+   "note": "null-expected"
+  },
+  {
+   "pair_id": "softcap165",
+   "family": "softcap_asym",
+   "treatment_arm": "sc165",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "softcap165_vs_lk35_s73",
+     "note": "validation-pairs.json: chip C s73 delta_raw -0.00022 T 2323/C 2326 (1427_R_g7lk35sc165_s73 vs 0816_R_g7lk35_s73)"
+    },
+    {
+     "pair_id": "softcap165_vs_lk35_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw +0.00006 T 2321/C 2327 (1539_R_g7lk35sc165_s58 vs 0913_R_g7lk35_s58)"
+    }
+   ],
+   "note": "null-expected"
+  },
+  {
+   "pair_id": "emb_lr036",
+   "family": "lr",
+   "treatment_arm": "elr36",
+   "control_arm": "k60",
+   "gating": true,
+   "trainium": [
+    {
+     "pair_id": "emb_lr036_s58",
+     "note": "validation-pairs.json: chip C s58 delta_raw +0.00003 T 2305/C 2310 (1134_R_g7elr36_s58 vs 0054_R_g6acc_s58)"
+    }
+   ],
+   "note": "null-expected"
+  }
+ ]
+}

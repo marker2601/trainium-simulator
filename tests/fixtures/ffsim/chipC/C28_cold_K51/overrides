@@ -1,0 +1,5 @@
+FF_SEED=58
+FF_SEED=67
+FF_TIME_TARGET=1788
+FF_CODE_DIR=/root/ff-claude/code_k51
+FF_CC_FLAGS=--model-type=transformer -O3 --auto-cast=matmult

@@ -1,0 +1,119 @@
+{
+ "name": "k59-wide",
+ "description": "Random 1-3-knob combinations around K59 over every knob the fitted quality model has seen varied in the M9+ era (support_detail(), 29 Sep 23:16Z fit). Values are the ones the campaign ran (or lie between them, 'interp'); a value seen in only one M9+ run is flagged 'weak' by the support check and a pair of knobs never co-observed is flagged 'interaction'. Not included: FF_ATTN_SRC (needs the M14 code: see space-k60-local), FF_RELU2_FN=1 (train.py refuses it next to FF_LEAKY_RELU2=0.35), FF_TIME_TARGET (the upload budget, not a lever), FF_ACC_IN_GRAPH / MTP (era-confounded: no coefficient). Run with --gen random --n-random 400 --workers 8.",
+ "base": {
+  "recipe": "recipe-K59.json"
+ },
+ "dims": [
+  {
+   "knob": "FF_LEAKY_RELU2",
+   "values": [
+    0.25,
+    0.3,
+    0.4,
+    0.5
+   ]
+  },
+  {
+   "knob": "FF_WD_SCHED",
+   "values": [
+    0.5,
+    1.0,
+    2.0
+   ]
+  },
+  {
+   "knob": "FF_SOFTCAP_A",
+   "values": [
+    16.5
+   ]
+  },
+  {
+   "knob": "FF_SOFTCAP",
+   "values": [
+    13,
+    18
+   ]
+  },
+  {
+   "knob": "FF_QK_GAIN",
+   "values": [
+    1.2,
+    1.6
+   ]
+  },
+  {
+   "knob": "FF_MOM_PEAK",
+   "values": [
+    0.93,
+    0.97
+   ]
+  },
+  {
+   "knob": "FF_SCALAR_LR",
+   "values": [
+    0.1664,
+    0.25
+   ]
+  },
+  {
+   "knob": "FF_EMB_LR",
+   "values": [
+    0.25,
+    0.36
+   ]
+  },
+  {
+   "knob": "FF_MUON_BETA2",
+   "values": [
+    0.8,
+    0.95
+   ]
+  },
+  {
+   "knob": "FF_WARMUP",
+   "values": [
+    40
+   ]
+  },
+  {
+   "knob": "FF_ROPE_BASE",
+   "values": [
+    300000
+   ]
+  },
+  {
+   "knob": "FF_SCALAR_BETA2",
+   "values": [
+    0.99
+   ]
+  },
+  {
+   "knob": "FF_UNEMB_LR",
+   "values": [
+    0.0072
+   ]
+  },
+  {
+   "knob": "FF_MTP_W",
+   "values": [
+    "1,0.6,0.3"
+   ]
+  },
+  {
+   "knob": "FF_COOLDOWN_FRAC",
+   "values": [
+    0.5,
+    0.7
+   ]
+  },
+  {
+   "knob": "FF_KEY_OFFSET_RAD",
+   "values": [
+    0.1,
+    0.5
+   ]
+  }
+ ],
+ "max_changes": 3
+}

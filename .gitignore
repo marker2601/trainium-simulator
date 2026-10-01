@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Fitted models are pickles: build your own with `python -m ffsim fit`, never load someone else's
+research/sim-data/models.pkl
+
+# GPU proxy run outputs and local state
+runs/
+out/
+research/sim-data/gpu/
+research/sim-data/gpu-*.json
+research/sim-data/cloud-*/
+
+# The organiser's kit is not redistributed: copy it in locally for the GPU proxy, never commit it
+/prepare.py
+/artifacts/
+/data/
+
+# Raw chip harvests carry host details; keep them out of the public tree
+research/sim-data/chipD/
+research/sim-data/chipC/*
+!research/sim-data/chipC/C40_cold_K59/
+!research/sim-data/chipC/1639_R_m14asa_s73/
+!research/sim-data/chipC/0816_R_g7lk35_s73/
+!research/sim-data/chipC/_meta/

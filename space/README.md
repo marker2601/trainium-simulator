@@ -47,7 +47,7 @@ Every button is an endpoint (`/predict`, `/predict_overrides`, `/speed_to_score`
 
 ```python
 from gradio_client import Client
-c = Client("jaggu6408/trainium-simulator")
+c = Client("http://127.0.0.1:7860/")
 c.predict("K82s4", "FF_COOLDOWN_FRAC=0.6 FF_MATRIX_LR_SCALE=2.3", 73, "C", 2000, api_name="/predict_overrides")
 c.predict(0.9617, 10, api_name="/speed_to_score")
 c.predict(0.9617, 0.9555, api_name="/score_to_speed")

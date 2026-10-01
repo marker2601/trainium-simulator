@@ -51,7 +51,7 @@ which only prove the pipeline runs: every candidate then scores the same.
 ```bash
 # dry run: read-only checks + the exact commands, nothing launched
 bash ffsim/cloud/ec2_launch.sh --profile "$AWS_PROFILE" --region us-east-1 --bucket MY-BUCKET \
-    --instance-profile ffsim-s3-writer --spot --space ffsim/examples/space-k59-local.json --gen local
+    --instance-profile <INSTANCE_PROFILE> --spot --space ffsim/examples/space-k59-local.json --gen local
 
 # execute
 bash ffsim/cloud/ec2_launch.sh ... --yes

@@ -1,6 +1,6 @@
 # FrontierForge: a Trainium run simulator and our Phase 1 recipe
 
-**Try the simulator in your browser:** https://huggingface.co/spaces/jaggu6408/trainium-simulator (Gradio UI + API)
+**Try the simulator UI locally:** `pip install -r space/requirements.txt` then `python space/app.py`, and open http://127.0.0.1:7860 (Gradio UI + API)
 
 
 This is what team FrontierForge built for Phase 1 of the AWS Trainium Frontier challenge (15 Sep - 1 Oct 2026):

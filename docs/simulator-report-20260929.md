@@ -295,9 +295,9 @@ docker run --rm -v "$PWD/research/sim-data:/work/research/sim-data" ffsim \
 
 # EC2: dry run (read-only checks + the exact commands), then execute
 bash ffsim/cloud/ec2_launch.sh --profile "$AWS_PROFILE" --region us-east-1 --bucket MY-BUCKET \
-    --instance-profile ffsim-s3-writer --spot --space ffsim/examples/space-k60-local.json --gen local
+    --instance-profile <INSTANCE_PROFILE> --spot --space ffsim/examples/space-k60-local.json --gen local
 bash ffsim/cloud/ec2_launch.sh --profile "$AWS_PROFILE" --region us-east-1 --bucket MY-BUCKET \
-    --instance-profile ffsim-s3-writer --spot --space ffsim/examples/space-k60-local.json --gen local --yes
+    --instance-profile <INSTANCE_PROFILE> --spot --space ffsim/examples/space-k60-local.json --gen local --yes
 aws --profile "$AWS_PROFILE" --region us-east-1 s3 sync s3://MY-BUCKET/ffsim/<stamp>/results/ research/sim-data/cloud-<stamp>/
 ```
 

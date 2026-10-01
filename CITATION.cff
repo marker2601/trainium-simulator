@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "FrontierForge: a Trainium run simulator and exact-oracle score prediction"
+abstract: >-
+  ffsim predicts the steps, step time and validation bits-per-byte of a
+  language-model training recipe on AWS Trainium without spending chip time.
+  It combines a numpy surrogate fitted on 1,206 Trainium run records with a
+  GPU proxy that replays the Trainium schedule step for step. The release also
+  documents the exact-oracle method (a deterministic cold chip rehearsal plus a
+  near-constant offset predicts the official score), the best Phase 1 recipe
+  from the AWS Trainium Frontier challenge, and the findings behind it.
+authors:
+  - name: "FrontierForge team"
+repository-code: "https://github.com/marker2601/trainium-simulator"
+url: "https://github.com/marker2601/trainium-simulator"
+license: MIT
+version: "1.0.0"
+date-released: "2026-10-01"
+keywords:
+  - AWS Trainium
+  - simulator
+  - language model training
+  - surrogate model
+  - val_bpb
+preferred-citation:
+  type: software
+  title: "FrontierForge: a Trainium run simulator and exact-oracle score prediction"
+  authors:
+    - name: "FrontierForge team"
+  year: 2026
+  version: "1.0.0"
+  repository-code: "https://github.com/marker2601/trainium-simulator"
+  url: "https://github.com/marker2601/trainium-simulator"
+  license: MIT

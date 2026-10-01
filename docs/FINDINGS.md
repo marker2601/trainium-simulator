@@ -1,8 +1,8 @@
 # Findings: AWS Trainium Frontier, Phase 1
 
-FrontierForge, 15 Sep - 1 Oct 2026. Our best scored upload was **0.9617** (K77a), outside the top 10. Our last
-uploads had not been scored when this was written. At our last check (about 11 PM CDT on 30 Sep), #10 was 0.9555
-and #1 was 0.9328. All numbers below come from our own chip runs and the public leaderboard.
+FrontierForge, 15 Sep - 1 Oct 2026. Our best scored upload was **0.96136** (K82s4), outside the top 10. In the final
+leaderboard snapshot (about 7:40 AM CDT on 1 Oct), #10 was 0.9554 and #1 was 0.9328. All numbers below come from our
+own chip runs and the public leaderboard.
 Times are US Central (CDT).
 
 "Rehearsal" means a full 30-minute run of the exact upload file on our own Trainium chip, scored on the first 2M
@@ -23,8 +23,9 @@ micro-batch per optimizer update.
 | 30 Sep, 9:25 AM | K63 | 0.9647 | EMA off, cooldown 0.7, lower LR in the small-batch phases |
 | 30 Sep, 4:37 PM | K70a | 0.9625 | **row-pool data sampling (256 batches)** |
 | 30 Sep, 6:30 PM | K73s4 | 0.9620 | optimizer fusion + XU 48 + c_proj LR 0.8, shuffle salt 4 |
-| 30 Sep, 8:20 PM | K77a | **0.9617** | + EMA blend 0.6 (best official) |
-| 30 Sep, 10:55 PM | K82s4 | not yet scored | + EMA prewarm; rehearsal 0.954472, projected 0.9611-0.9619 |
+| 30 Sep, 8:20 PM | K77a | 0.9617 | + EMA blend 0.6 |
+| 30 Sep, 10:55 PM | K82s4 | **0.96136** | + EMA prewarm (best official); rehearsal 0.954472, projected 0.9614-0.9615 |
+| 1 Oct, 1:41 AM | K82s7 | 0.96140 | K82s4 with shuffle salt 7; best rehearsal (0.954379), projected about 0.9614 |
 
 Every scored upload is in [`results/official-scores.csv`](../results/official-scores.csv). Two scores are left
 out: an organiser-side rerun of K44 and a truncated duplicate run of F6.
@@ -62,14 +63,14 @@ setting below is a default in the file:
 
 | lever | effect | evidence |
 |---|---|---|
-| **Row pool, 256 batches** | **-0.0023** on chip, -0.0022 officially | Chip E: 0.957259 vs 0.959523 on the same chip. Official: 0.9625 vs 0.9647. A pool of 1,024 gave the same result as 256; a pool of 64 helped less. The pool starts at micro-batch 96, so the first 96 micro-batches (the warm-up) are unchanged. |
+| **Row pool, 256 batches** | **-0.0023** on chip, -0.0022 officially | Chip E: 0.957259 at 2,318 steps vs 0.959523 at 2,329 on the same chip, so it cost about 0.5% of steps (about -0.0026 step-normalised). Official: 0.9625 vs 0.9647. A pool of 1,024 gave the same result as 256; a pool of 64 helped less. The pool starts at micro-batch 96, so the first 96 micro-batches (the warm-up) are unchanged. |
 | Attention-source reuse | -0.0015 | Four same-seed pairs: -0.00181, -0.00136, -0.00106, -0.00173. Step cost under 0.1%. |
 | Cooldown 0.7 + small-batch LR 0.35/0.6 | -0.0006 (step-normalised) | Three chip pairs, all three negative. Official: K63 0.9647 vs K60 0.9655 (K63 also turned the EMA off and added 2 s of budget). |
-| EMA blend 0.6 | about -0.0005 | One chip pair. Official: K77a 0.9617 vs K73s4 0.9620. |
-| EMA prewarm | recovers 15-30 steps (about -0.0003) | The first EMA run on a fresh chip compiles the EMA kernels inside charged time: 2,375 steps vs 2,392-2,402 without EMA. With prewarm the same recipe ran 2,388 steps. |
+| EMA blend 0.6 | about -0.0005 | One chip pair, without prewarm. Official: K77a 0.9617 vs K73s4 0.9620. |
+| EMA prewarm | recovers 15-30 steps; about -0.0003 officially | Without it, the first EMA run on a fresh chip compiles the EMA kernels inside charged time. Same chip G: 2,398 steps without EMA (K73s6), 2,375 with EMA (K77a), 2,405 with EMA and prewarm (K82s7; the salt differs, which does not change step time). Chip H: 2,390 without EMA (K73s4), 2,388 with both (K82s4). Official, one pair: K82s4 0.96136 vs K77a 0.9617. |
 | Optimizer fusion + XU 48 | +0.8% steps | -0.0006 raw in a run that also had 2 s more budget; almost all of it is steps. On the row-pool base, fusion plus c_proj 0.8 added 0.0002 or less. |
 | c_proj LR x0.8 | about -0.0004 (step-normalised) | Consistent on seed 73. LR x0.7 flipped sign on other seeds and was dropped. |
-| Shuffle salt | sd about 0.0003-0.0004 | Four salts spanned 0.0008 on chip. Salt 4 kept its edge officially (0.9620 vs 0.9625); salt 6 did not (0.9625). A selected draw partly regresses. |
+| Shuffle salt | sd about 0.0003-0.0004 | Four salts spanned 0.0008 on chip. Salt 4 kept its edge officially (0.9620 vs 0.9625); salt 6 did not (0.9625). Salt 7 had the best rehearsal on the final recipe but scored 0.96140, a tie with salt 4's 0.96136. A selected draw partly regresses. |
 
 ## 4. Seeds and the warm-up coin flip
 
@@ -105,16 +106,17 @@ take a "spike" path: the loss falls fast to step 4, then climbs about 0.7 nats. 
 Near our operating point, score follows compute:
 
 ```
-delta_bpb ~= 0.063 * ln(effective compute ratio)      (about 0.00057 bpb per 1% more steps)
+delta_bpb ~= 0.063 * ln(effective compute ratio)
 ```
 
-We fitted this on a 24 Sep run trained for 2,288 s instead of 1,788 s: +28% compute bought -0.0155. The same
-per-step rate was measured on two chips.
+We fitted this on a 24 Sep run trained for 2,288 s instead of 1,788 s: +28% compute bought -0.0155. The fit's own
+slope near our operating point is about 0.00063 bpb per 1%; the per-step rate we measured directly on two chips is
+about 0.00057 bpb per 1% more steps.
 
-| target (last check) | gap from our best official 0.9617 | compute needed |
+| target (final snapshot) | gap from our best official 0.96136 | compute needed |
 |---|---|---|
-| #10 (0.9555) | 0.0062 | about +10% |
-| #1 (0.9328) | 0.0289 | about +58% |
+| #10 (0.9554) | 0.0060 | about +10% |
+| #1 (0.9328) | 0.0286 | about +57% |
 
 We ran about 285k tokens/s on a 124M-parameter model: roughly 30% MFU, with about 19% of the time idle on host
 dispatch. +10% effective compute was not going to come from settings, so we believe the way to close the gap is

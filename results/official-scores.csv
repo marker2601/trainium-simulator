@@ -30,5 +30,6 @@ K65d,2026-09-30,,,,0.9653,,no,official test: split AdamW cooldown 0.4
 K70a,2026-09-30,E,0.955946,2318,0.9625,+0.0066,yes,"row pool 256; rehearsal normalised to chip-C speed (raw chip E 0.957259, chip E runs 3.5% slow)"
 K73s4,2026-09-30,H,0.955209,2390,0.9620,+0.0068,yes,"pool + OPT_FUSE 3 + XU 48 + c_proj LR 0.8, shuffle salt 4"
 K73s6,2026-09-30,G,0.955138,2398,0.9625,+0.0074,no,shuffle salt 6 (its local edge did not transfer)
-K77a,2026-09-30,G,0.954729,2375,0.9617,+0.0070,yes,salt 4 + EMA blend 0.6 (best official)
-K82s4,2026-09-30,H,0.954472,2388,,,,"salt 4 + EMA blend 0.6 + EMA prewarm; projected 0.9611-0.9619; not yet scored when this release was written"
+K77a,2026-09-30,G,0.954729,2375,0.9617,+0.0070,yes,"K73s4 + EMA blend 0.6 (best official before the final uploads)"
+K82s4,2026-09-30,H,0.954472,2388,0.9613617,+0.0069,yes,"K77a + EMA prewarm; projected 0.9614-0.9615 (range 0.9611-0.9619); best official of the campaign"
+K82s7,2026-10-01,G,0.954379,2405,0.9613955,+0.0070,no,"K82s4 with shuffle salt 7 (best rehearsal of the campaign); projected about 0.9614"

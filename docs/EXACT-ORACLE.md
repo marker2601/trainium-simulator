@@ -6,10 +6,11 @@ The most useful tool we had was not a model. It was a rule:
 > cold start. Score the trained weights on the first 2,097,152 tokens of the public validation shard. The official
 > score will be that number **plus about +0.0066 to +0.0070**, with an sd of about 0.0004.
 
-We used this rule to pick every upload from 26 Sep on. Over the 13 scored uploads since K50 the offset averaged
+We used this rule to pick every upload from 26 Sep on. Over the 15 scored uploads since K50 the offset averaged
 +0.0067 with an sd of 0.0004 (range +0.0061 to +0.0074). The largest miss against a written projection was
-0.0006: K73s6, a salt-selected draw, was projected at 0.9619 and scored 0.9625. Over all 28 uploads with a
-rehearsal, including the early chip-A/B era, the offset ranged from +0.0053 to +0.0077.
+0.0006: K73s6, a salt-selected draw, was projected at 0.9619 and scored 0.9625. The two final uploads landed within
+0.0001 of their projections. Over all 30 uploads with a rehearsal, including the early chip-A/B era, the offset
+ranged from +0.0053 to +0.0077.
 
 ## Why it works
 
@@ -26,9 +27,14 @@ rehearsal, including the early chip-A/B era, the offset ranged from +0.0053 to +
 | period | uploads | offset mean | sd | range |
 |---|---|---|---|---|
 | chip-C rehearsals K51-K60 (the simulator's offset model) | 7 | +0.00654 | 0.00040 | +0.0061 .. +0.0072 |
-| final day, chips C/E/G/H (K63-K77a) | 5 | +0.00686 | 0.00036 | +0.0065 .. +0.0074 |
-| everything since K50 | 13 | +0.00669 | 0.00039 | +0.0061 .. +0.0074 |
-| every scored upload with a rehearsal | 28 | +0.00646 | 0.00061 | +0.0053 .. +0.0077 |
+| final day, chips C/E/G/H (K63-K82s7) | 7 | +0.00687 | 0.00030 | +0.0065 .. +0.0074 |
+| everything since K50 | 15 | +0.00671 | 0.00038 | +0.0061 .. +0.0074 |
+| every scored upload with a rehearsal | 30 | +0.00648 | 0.00061 | +0.0053 .. +0.0077 |
+
+As a held-out check, freeze the chip-C fit (+0.00653) and predict the seven final-day uploads from their rehearsals:
+the errors (official - rehearsal - 0.00653) are K63 -0.00004, K70a +0.00002, K73s4 +0.00026, K73s6 +0.00083
+(salt-selected), K77a +0.00044, K82s4 +0.00036 and K82s7 +0.00049. That is an MAE of 0.00035 and a bias of +0.00034:
+the final-day chips ran a little hotter than chip C. K70a's rehearsal was normalised to chip-C speed.
 
 Per-upload values are in [`results/official-scores.csv`](../results/official-scores.csv), and the table the
 simulator fits on is `research/sim-data/official-uploads.csv`. Two organiser-side anomalies are excluded:
@@ -53,7 +59,8 @@ official score was 0.9655, an offset of +0.0064.
 ## The traps
 
 - **Cold means cold.** One-time compiles inside charged time cost steps. The first EMA run on a fresh chip paid
-  the EMA kernel compile inside the clock: 15-30 fewer steps than later, warm EMA runs on the same chip. A warm
+  the EMA kernel compile inside the clock: 15-30 fewer steps than later, warm EMA runs on the same chip. On chip G,
+  K77a (EMA, no prewarm) ran 2,375 steps and K82s7 (EMA with prewarm, another salt) ran 2,405. A warm
   rehearsal therefore looked 0.0002-0.0006 better than the cold official run would be. `FF_EMA_PREWARM` moves that
   compile into the excluded startup.
 - **Chip speed.** Our chips differed by up to 3.5% in step time, and one on an older Neuron runtime was 7-12%
@@ -77,6 +84,5 @@ python -c "from ffsim.offset import OffsetModel; m = OffsetModel().fit('research
 ```
 
 For K82s4, the chip rehearsal was 0.954472 at 2,388 steps. The final-day mean offset (+0.0069 to +0.0070)
-projects that to about 0.9614-0.9615, with a likely range of 0.9611-0.9619; its official score was not yet
-available when this was written. The command above prints the simulator's offset, which is fitted on the seven
-chip-C points K51-K60 (+0.00653).
+projected that to about 0.9614-0.9615, with a likely range of 0.9611-0.9619. It scored 0.96136 (offset +0.0069).
+The command above prints the simulator's offset, which is fitted on the seven chip-C points K51-K60 (+0.00653).

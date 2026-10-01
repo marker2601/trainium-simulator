@@ -1,4 +1,11 @@
 submission,upload_date_utc,rehearsal_run,rehearsal_bpb,rehearsal_steps,official_bpb,offset,code_version,recipe_note
+K82s7,2026-10-01,chipG_cold_K82s7,0.954379,2405,0.9613955,+0.00702,,"K82s4 with shuffle salt 7; chip-G cold rehearsal (final upload)"
+K82s4,2026-10-01,chipH_cold_K82s4,0.954472,2388,0.9613617,+0.00689,,"K77a + FF_EMA_PREWARM (recipes/K82s4/train.py), seed 73; chip-H cold rehearsal; best official of the campaign"
+K77a,2026-10-01,chipG_cold_K77a,0.954729,2375,0.9617,+0.0070,,"K73s4 + FF_EMA_BLEND=0.6; chip-G cold rehearsal"
+K73s6,2026-10-01,chipG_cold_K73s6,0.955138,2398,0.9625,+0.0074,,"K72a + shuffle salt 6 (salt-selected draw); chip-G cold rehearsal"
+K73s4,2026-09-30,chipH_cold_K73s4,0.955209,2390,0.9620,+0.0068,,"K72a (K70a + FF_OPT_FUSE=3 + XU 48 + c_proj LR 0.8) + shuffle salt 4; chip-H cold rehearsal"
+K70a,2026-09-30,chipE_cold_K70a,0.955946,2318,0.9625,+0.0066,,"K63 + row pool FF_ROW_SHUFFLE=256 from micro-batch 96; rehearsal normalised to chip-C speed (raw chip E 0.957259 at 2,318 steps)"
+K63,2026-09-30,C43_cold_K63,0.95821,2385,0.9647,+0.0065,,"K60 + EMA off + TT 1795 + cooldown 0.7 + small-batch LR 0.35/0.6; chip-C cold rehearsal"
 K60,2026-09-29,C41_cold_K60,0.9591028698885415,2361,0.9655,+0.0064,M14,"K59 + attention-source reuse FF_ATTN_SRC=5:6,7,8 (M14 code), seed 73, TT 1793; chip-C cold rehearsal"
 K59,2026-09-29,C40_cold_K59,0.960920033619009,2357,0.9671,+0.0062,M12,"K57T recipe on M12 + FF_LEAKY_RELU2=0.35 FF_LEAKY_FORM=fnm, seed 73, TT 1793; chip-C cold rehearsal"
 K57,2026-09-28,C36_cold_K57,0.96192670224815,2359,0.9686,+0.00667,M9,K56 with seed 73; chip-C cold rehearsal

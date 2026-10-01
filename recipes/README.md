@@ -7,15 +7,15 @@ because it imports the kit's `prepare.py`.
 
 | file | bytes | sha256 | chip rehearsal (seed 73) | official |
 |---|---|---|---|---|
-| `K82s4/train.py` | 252,013 | `8e21ce19411095cb498bb41bfa22c1327a10f8b524d6f7f43c026dbf831efae8` | 0.954472 @ 2,388 steps | not yet scored when this was written (projected 0.9611-0.9619) |
+| `K82s4/train.py` | 252,013 | `8e21ce19411095cb498bb41bfa22c1327a10f8b524d6f7f43c026dbf831efae8` | 0.954472 @ 2,388 steps | 0.96136 (best official) |
 | `K60/train.py` | 237,050 | `ae396432c31fe83122a91339916accffaa68aff10fdf47432cee46d3074953cc` | 0.95910 @ 2,361 steps | 0.9655 |
 
-Our best official score, 0.9617, came from K77a. K77a is K82s4 without `FF_EMA_PREWARM`, so it pays the EMA
+K82s4 is our best official score, 0.96136. K77a (0.9617) is K82s4 without `FF_EMA_PREWARM`, so it pays the EMA
 compile inside charged time. Pass `FF_EMA_PREWARM=0` to K82s4 to reproduce it.
 
 The best rehearsal of the campaign was K82s7: this K82s4 file with the shuffle salt changed from 4 to 7 (one
 line, `7777 * 4` -> `7777 * 7` in the row-pool RNG seed). It rehearsed 0.954379 at 2,405 steps on a different
-chip, and was the leading candidate for our final pre-close upload. Salt gains partly regress officially
+chip and was our final pre-close upload. It scored 0.96140, a tie with K82s4: salt gains partly regress officially
 (see `../docs/FINDINGS.md`, section 3), so we publish K82s4 as the best file.
 
 ## K82s4: the best recipe we publish
@@ -30,7 +30,7 @@ K70a = K63 + row pool 256 from micro-batch 96 (FF_ROW_SHUFFLE)                of
 K72a = K70a + fused Newton-Schulz (FF_OPT_FUSE=3) + XU queue 48 + c_proj LR 0.8
 K73s4 = K72a + shuffle salt 4                                                  official 0.9620
 K77a = K73s4 + EMA on, blend 0.6 (FF_EMA_BLEND)                               official 0.9617
-K82s4 = K77a + EMA prewarm (FF_EMA_PREWARM)                                   rehearsal 0.954472
+K82s4 = K77a + EMA prewarm (FF_EMA_PREWARM)                                   official 0.96136
 ```
 
 These `FF_*` variables let you switch a lever off to measure it, for example `FF_ROW_SHUFFLE=0`,

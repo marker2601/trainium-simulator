@@ -124,7 +124,7 @@ search space adds `dims` and `max_changes`. Read every result with the decision 
 - anything `EXTRAP`, `NEVER-VARIED` or "cost unknown" needs a speed screen first.
 
 `P(beat best)` compares against `--best`, which defaults to 0.9655: K60, the best official score when the
-simulator was built. Pass `--best 0.9617` to compare against the final best.
+simulator was built. Pass `--best 0.96136` (K82s4) to compare against the final best.
 
 The release ships the outputs of these three searches (`research/sim-data/search-*`). `models.pkl` is not shipped:
 it is a pickle, so build it yourself with `fit` and do not load one from someone else.

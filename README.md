@@ -301,7 +301,7 @@ in preparation; its outline and claims ledger are in [`paper/OUTLINE.md`](paper/
 
 ```bibtex
 @software{frontierforge_2026,
-  author  = {{FrontierForge team}},
+  author  = {Gorla, Jagadeesh Kumar},
   title   = {FrontierForge: a Trainium run simulator and exact-oracle score prediction},
   year    = {2026},
   version = {1.0.0},

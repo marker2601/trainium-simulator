@@ -11,7 +11,9 @@ abstract: >-
   near-constant offset predicts the official score), the best Phase 1 recipe
   from the AWS Trainium Frontier challenge, and the findings behind it.
 authors:
-  - name: "FrontierForge team"
+  - given-names: "Jagadeesh Kumar"
+    family-names: "Gorla"
+    affiliation: "Independent researcher (team FrontierForge)"
 repository-code: "https://github.com/marker2601/trainium-simulator"
 url: "https://github.com/marker2601/trainium-simulator"
 license: MIT
@@ -27,7 +29,9 @@ preferred-citation:
   type: software
   title: "FrontierForge: a Trainium run simulator and exact-oracle score prediction"
   authors:
-    - name: "FrontierForge team"
+    - given-names: "Jagadeesh Kumar"
+      family-names: "Gorla"
+      affiliation: "Independent researcher (team FrontierForge)"
   year: 2026
   version: "1.0.0"
   repository-code: "https://github.com/marker2601/trainium-simulator"

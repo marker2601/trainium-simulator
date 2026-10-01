@@ -131,6 +131,13 @@ def bib_keys() -> Set[str]:
                 depth = 0
     if depth:
         errors.append(f"refs.bib: {depth} unclosed '{{'")
+    if "\t" in text:
+        errors.append(f"refs.bib: tab character near line {text.count(chr(10), 0, text.index(chr(9))) + 1}")
+    # BibTeX copies these fields into main.bbl as LaTeX text, where a bare _ # & % breaks the build.
+    for m in re.finditer(r"^\s*(title|booktitle|journal|note|howpublished|publisher|organization|institution|"
+                         r"school|series|author|editor)\s*=\s*(.+)$", text, flags=re.M | re.I):
+        if re.search(r"(?<!\\)[_#&%]", m.group(2)):
+            errors.append(f"refs.bib:{text.count(chr(10), 0, m.start()) + 1}: unescaped _ # & or % in {m.group(1)}")
     return set(keys)
 
 

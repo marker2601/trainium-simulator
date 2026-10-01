@@ -10,7 +10,7 @@ one that destroys anything; both refuse without `--yes`. `plan`, `status` and `f
 would run. Every box is tagged `Name=ffsim-gpu`, so `status` and `down` find it even without the state file
 (`~/.ffsim-gpu/<region>.env`). The box powers itself off after `--max-hours` (default 12) no matter what.
 
-## Facts verified read-only on 2026-09-29T23:32Z (the team's account; re-check your own with `launch.sh plan`)
+## Example quota facts from one account (2026-09-29; re-check your own with `launch.sh plan`)
 
 | fact | value |
 |---|---|

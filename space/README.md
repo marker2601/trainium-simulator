@@ -29,6 +29,12 @@ team FrontierForge built during Phase 1 (15 Sep - 1 Oct 2026). Full code, data a
 - **Speed -> score calculator**: `delta_bpb = 0.063 x ln(compute ratio)` both ways (throughput gain -> score,
   target score -> throughput needed), next to the fitted quality model's own (flatter) step slope and the
   0.00057-per-1% rule of thumb.
+- **Add my runs**: share a run you already did so the simulator learns from it. The tab checks the record (schema,
+  secret / personal-data scan, duplicates, and the current model's prediction for it), shows the exact JSON that
+  would be shared, and builds a pre-filled GitHub issue link. Nothing is sent from the app. Merged runs refit the
+  models in the repository; a hosted copy of this app uses them once its maintainers redeploy it (see
+  `CONTRIBUTING.md` in the repository). API: `/contrib_record` (inputs are capped at 20,000 characters, the queue at
+  64 requests).
 - **About**: how it works and how accurate it is.
 
 ## Accuracy, in one paragraph
@@ -43,7 +49,8 @@ step-time charge (whatever the direction) and an unfitted quality prior.
 
 ## API
 
-Every button is an endpoint (`/predict`, `/predict_overrides`, `/speed_to_score`, `/score_to_speed`):
+Every button is an endpoint (`/predict`, `/predict_overrides`, `/speed_to_score`, `/score_to_speed`,
+`/contrib_record`):
 
 ```python
 from gradio_client import Client
@@ -51,6 +58,8 @@ c = Client("http://127.0.0.1:7860/")
 c.predict("K82s4", "FF_COOLDOWN_FRAC=0.6 FF_MATRIX_LR_SCALE=2.3", 73, "C", 2000, api_name="/predict_overrides")
 c.predict(0.9617, 10, api_name="/speed_to_score")
 c.predict(0.9617, 0.9555, api_name="/score_to_speed")
+c.predict("trn2.3xlarge", "", 1800, "K82s4", "", "FF_COOLDOWN_FRAC=0.65", 58, 0.9551, 2097152, None, 2390, None,
+          "", "", "", True, api_name="/contrib_record")   # check one of your runs; returns the record + issue link
 ```
 
 `predict_overrides(base, overrides, seed, chip, n_draws)`: base `K82s4` or `K60`; overrides as `KEY=VALUE` pairs or a
@@ -68,6 +77,7 @@ leaderboard #10 0.9555 at about 11 PM CDT.
 |---|---|
 | `app.py` | the Gradio app; fits the three models at start-up (~0.1 s), no pickle shipped or loaded |
 | `ffsim/` | the route-1 simulator package, copied from the release (`gpu/`, `cloud/`, `harvest.py` and `CONTRACT.md` left out) |
+| `research/sim-data/contrib/` | `runs-contrib.jsonl`: merged community runs, fitted at start-up (synced from the repository by the refit workflow) |
 | `research/sim-data/` | `runs.jsonl` (1,206 chip run records; the unused `FF_CODE_DIR` path knob removed), `validation-pairs.json` (99 pairs), `official-uploads.csv` |
 | `recipes/recipe-K82s4.json` | K82s4's knob values (from `recipes/K82s4/train.py` in the release) |
 | `LICENSE` | MIT, as in the release |

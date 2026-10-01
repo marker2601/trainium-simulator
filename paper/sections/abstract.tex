@@ -1,0 +1,19 @@
+% sections/abstract.tex
+\begin{abstract}
+In a wall-clock training contest, every idea costs a full run on the target hardware and the official score is
+scarce. We report a 17-day campaign in a 30-minute language-model training contest on AWS Trainium, in which our
+official validation bits per byte fell from \val{first-official} to \val{best-official}, and we quantify the
+measurement practices that steered it. (C1) Training on the accelerator is deterministic for a given file and seed,
+so a cold, full-length \emph{rehearsal} of the exact submission predicts its official score up to an offset. The
+offset is mostly a property of the evaluation text but also depends measurably on which instance ran the
+rehearsal. A calibration frozen before the last day predicted the final seven uploads with a mean absolute error of
+\val{holdout-mae} bpb, at the cost of a small, chip-dependent bias; the oracle resolves differences between two
+uploads of about \val{diff-95} bpb, not smaller. (C2) \ffsim{}, a run simulator, separates the steps a recipe
+fits into the budget from what each step is worth. Its ridge surrogate, fitted on \val{q-nfit} fully specified
+runs, predicts the sign of held-out recipe changes \val{lopo-rec-sign} of the time, against \val{base-steps-rec-sign}
+for a steps-only baseline, but only at chance level on genuinely new mechanisms: it screens out noise, it does not
+find wins. (C3) One price, \val{xr-step-rate} bpb per 1\% more optimizer steps, turns every change into a step
+count. It exposes a compilation-accounting trap that only cold rehearsals reveal, shows that seed and order noise
+is as large as most late improvements, and prices our gap to the top ten at \val{gap-ten-range} more effective
+compute. (C4) We release the code, run data, recipes and a guarded pipeline for adding runs to the simulator.
+\end{abstract}

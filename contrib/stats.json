@@ -1,0 +1,38 @@
+{
+ "base_recipes": {},
+ "builtin": {
+  "n_quality_fit": 131,
+  "n_records": 1206,
+  "quality_sigma": 0.0003
+ },
+ "contrib_offset_mean": null,
+ "data_sha256": "42f94488a87064960e3a4da1012de571dac31fbb34125b2327d7a88608179879",
+ "guard": {
+  "base_prediction_shift": 0.0,
+  "builtin_insample_mae_after": 0.000123217,
+  "builtin_insample_mae_before": 0.000123217,
+  "max_base_shift": 0.001,
+  "max_worse": 0.0001,
+  "ok": true,
+  "pair_mae_after": 0.000392063,
+  "pair_mae_before": 0.000392063,
+  "worst_change": 0.0
+ },
+ "hardware": {},
+ "loo_min_records": 5,
+ "mae_after_loo": null,
+ "mae_before": null,
+ "max_fit_per_contributor": 25,
+ "model": "ffsim/model/params.json",
+ "n_anonymous_records": 0,
+ "n_contributors": 0,
+ "n_flagged_outlier": 0,
+ "n_imputed_from_official": 0,
+ "n_records": 0,
+ "n_scored": 0,
+ "n_used_in_fit": 0,
+ "n_with_official": 0,
+ "note": "mae_before: built-in-only model on contributed runs, with the app's anchor shift for an anchored base recipe (K82s4); mae_after_loo: leave-one-out over contributed runs with built-in data plus the other contributions (null below 5 usable runs); each (hardware, base recipe) has its own fixed effect, so part of the before/after gap is that effect being learned. guard: built-in in-sample and pair-validation MAE without/with the contributions (refit --guard refuses a change worse than 0.0001). Units: val_bpb on the first 2,097,152 public tokens. params.json is a published snapshot of the fit; the app and the CLI refit from the data.",
+ "quality_fit_n": 131,
+ "schema_version": "1"
+}

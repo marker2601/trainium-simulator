@@ -1,0 +1,246 @@
+% sections/findings.tex
+\section{C3: What moved the score, priced in steps}
+\label{sec:findings}
+
+More optimizer steps in the same 30 minutes (\cref{sec:steps}) and a handful of structural changes drove most of the
+descent in \cref{fig:history}. This section prices the changes with $\kappa$ (\cref{sec:price}), gives each one a
+noise scale (\cref{sec:levers}), examines the row pool, attention-source reuse and the EMA prewarm
+(\cref{sec:rowpool,sec:asr,sec:prewarm}) and the noise and selection effects (\cref{sec:seeds,sec:salts}), and ends
+with what did not work (\cref{sec:negative}) and what the remaining gap would cost (\cref{sec:gap}).
+
+\subsection{Levers, their noise and their price}
+\label{sec:levers}
+
+\Cref{tab:levers} lists the changes that helped. The noise column is the SD of a single measured difference under the
+order-redraw noise model of \cref{sec:seeds}: $\sqrt2$ times the shuffle-salt SD for a chip pair
+(\val{noise-chip-pair}), plus the offset noise of two uploads for an official pair (\val{noise-official-pair}),
+divided by $\sqrt n$ for $n$ pairs. It is the right scale for changes that act after the warm-up; a change that
+re-rolls the warm-up path faces the larger seed noise. The four largest effects come from the campaign log and have
+no run identifiers in the repository; the late levers are single pairs at seed~73. Only the row pool, the
+attention-source reuse and the earlier, larger levers clear about three noise SDs.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Levers that worked.} $\Delta$: change in \valbpb{} against the lever's control, in $10^{-3}$
+    (negative is better). Noise SD: SD of the measured difference ($10^{-3}$, see text). Evidence: ``chip pair'',
+    same-seed same-chip rehearsals, raw; ``step-norm.'', normalised for a step-count difference; ``official pair'',
+    two uploads that differ by this change. Steps: the step equivalent $\exp(|\Delta|/\kappa)-1$ at
+    $\kappa=\val{kappa}$. \textsuperscript{$\dagger$}\,Listed in \texttt{docs/FINDINGS.md} without run identifiers,
+    mostly on earlier recipe bases. \textsuperscript{$\ddagger$}\,The batch warm-up changes the step count itself, so
+    a step equivalent would double-count.}
+  \label{tab:levers}
+  \input{tables/levers}
+\end{table}
+
+Three entries need a word. \emph{LeakyReLU(0.35)$^2$} appears with three sizes because they are three comparisons:
+\val{lever-leaky}\docnum{} in the campaign log on an earlier base, \val{leaky-chip-c}\docnum{} in a chip-C pair against
+ReLU$^2$ at equal steps (the comparison the GPU proxy reproduces), and \val{leaky-official} officially
+(\upl{K59}$-$\upl{K57}). \emph{Cooldown~0.7} is reported here together with the lower small-batch learning rate, as three
+step-normalised chip pairs\docnum{}, all three negative; \cref{tab:gpu} uses two raw chip pairs of the cooldown change alone,
+of opposite sign. The official \upl{K63}$-$\upl{K60} delta (\val{cooldown-official}) is confounded, because
+\upl{K63} also turned the EMA off and added 2~s of budget. \emph{Official deltas} between uploads published to four
+decimals carry a rounding error of up to $\pm2\times$\val{official-rounding}.
+
+\subsection{The row pool: decorrelating a streaming loader}
+\label{sec:rowpool}
+
+\paragraph{Mechanism.} The kit's loader fills each row of a micro-batch from one of several parallel token streams,
+so the rows of consecutive micro-batches are contiguous slices of the same few streams. From
+micro-batch~\val{rowpool-from} on, our loader instead draws rows without replacement from a look-ahead pool of
+\val{rowpool-size} micro-batches (\knob{FF_ROW_SHUFFLE}), a shuffle buffer at row granularity
+\citep[cf.][]{xu2022corgipile,mishchenko2020reshuffling}. The first \val{rowpool-from} micro-batches, which cover the
+warm-up, are unchanged, so that the seed's warm-up path (\cref{sec:seeds}) is not re-rolled. The shuffle has its own
+RNG with a salt, which re-draws the order after micro-batch~\val{rowpool-from} without touching initialisation.
+
+\paragraph{Evidence.} On chip E, the pool scored \val{rowpool-chip-treat}\docnum{} at \val{rowpool-steps-treat}\docnum{}
+steps against \val{rowpool-chip-ctrl}\docnum{} at \val{rowpool-steps-ctrl}\docnum{} for the same file without it:
+\val{rowpool-chip} raw, about \val{rowpool-stepnorm}\docnum{} after normalising for the \val{rowpool-step-cost}\docnum{}
+of steps the pool cost, and about \val{rowpool-z} noise SDs. Officially, \upl{K70a} scored \val{official-k70a} against
+\upl{K63}'s \val{official-k63}, a difference of \val{rowpool-official}. That agreement is what determinism predicts and
+is not independent evidence that the effect generalises: both numbers come from the same trajectory pair at seed~73.
+And because the pool changes the data order, its measured effect contains one draw of the order noise (SD about
+\val{salt-sd}\docnum{}). A pool of \val{pool-large}\docnum{} gave the same result as \val{rowpool-size}; a pool of
+\val{pool-small}\docnum{} helped less. Other order manipulations were null within $\pm\val{rowpool-null}$\docnum{}:
+larger pools, epoch reshuffles, pool-aware accumulation and document reordering.
+
+\paragraph{What we do not know.} The evidence is one chip pair at one seed and one salt. It is probably real at about
+\val{rowpool-z} order-noise SDs, but it is not replicated, and the pair is not in the released run data. Our working hypothesis is
+that the pool reduces within-batch correlation between rows of the same stream, and with it gradient variance, in the
+spirit of shuffling results for SGD \citep{gurbuzbalaban2019reshuffling}. We have \emph{not} measured this; the checks
+are listed in \cref{sec:limits}.
+
+\subsection{Attention-source reuse}
+\label{sec:asr}
+
+Blocks 6, 7 and 8 reuse the attention source computed by block~5 (\knob{FF_ATTN_SRC=5:6,7,8}), in the spirit of
+cross-layer attention sharing \citep{brandon2024cla,xiao2019sharing}. It is our best-replicated structural effect:
+four same-seed chip pairs at different seeds gave \val{asr-pairs}\docnum{} (mean \val{asr-mean}), at a step cost under
+\val{asr-step-cost}\docnum{}. Officially, \upl{K60} improved on \upl{K59} by \val{asr-official}. The surrogate, whose
+coefficient for this feature then rested on two runs, predicted the right sign on four of five post-fit
+attention-source pairs but overestimated the size by about \val{asr-overestimate}\docnum{} (\cref{tab:postfit}).
+
+\subsection{The EMA blend and the prewarm accounting trap}
+\label{sec:prewarm}
+
+\paragraph{The trap.} Our final weights are a 0.6 blend of the live weights with an exponential moving average
+\citep{polyak1992averaging,moralesbrotons2024ema}. The EMA update is a separate graph. On a fresh instance, the first
+EMA update compiles that graph \emph{inside} the charged clock and costs \val{ema-compile-steps}\docnum{} steps. A warm
+rehearsal, run after an earlier EMA run on the same instance, finds the graph in the compiler cache and does not pay.
+Warm rehearsals therefore looked \val{ema-warm-bias}\docnum{} bpb better than the cold official run would be.
+
+\paragraph{A regression, not a discovery.} The fix, \knob{FF_EMA_PREWARM}, runs one EMA update during the excluded
+start-up. It was not new on the final day: the ledger lists the EMA prewarm already in \upl{\val{first-prewarm}}
+(26~September). It disappeared when \upl{\val{prewarm-dropped}} turned the EMA off, and \upl{K77a} re-enabled the EMA
+without it. Only cold rehearsals exposed the regression, which is the general lesson below.
+
+\paragraph{Evidence.} Step counts on one instance show the cost (\cref{tab:prewarm}). On chip~G the recipe without EMA
+ran \val{steps-k73s6} steps, with EMA but without prewarm \val{steps-k77a}, and with both \val{steps-k82s7}; on chip~H,
+without EMA \val{steps-k73s4} and with both \val{steps-k82s4}. These are single runs, and step counts jitter by
+\val{jitter-range-lo}--\val{jitter-range-hi} steps within a seed sweep (SD \val{jitter-sd-lo}--\val{jitter-sd-hi};
+\cref{sec:determinism}). The chip-G drop of \val{prewarm-g-drop} steps without prewarm is several times that jitter,
+while the difference between prewarm and no EMA (\val{prewarm-g-gain} steps on chip G, \val{prewarm-h-gain} on chip H) is
+inside it. The salts differ between some of these files, which changes the data order but not the step time.
+Officially, \upl{K82s4} (prewarm) scored \val{prewarm-official} against \upl{K77a} (no prewarm): one pair, below the
+oracle's resolution (\cref{sec:resolution}), consistent with the step-based estimate. The EMA blend itself is a separate
+effect of about \val{ema-blend-chip}\docnum{} in one chip pair without prewarm; officially \upl{K77a} improved on
+\upl{K73s4} by \val{ema-blend-official}.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Step counts around the compile trap} (single cold rehearsals, from
+    \texttt{results/official-scores.csv}). Compare within a chip only; within-chip jitter is
+    \val{jitter-range-lo}--\val{jitter-range-hi} steps.}
+  \label{tab:prewarm}
+  \small
+  \begin{tabular}{llccr}
+    \toprule
+    Chip & Upload & EMA blend & EMA prewarm & Steps \\
+    \midrule
+    \val{chip-k73s6} & \upl{K73s6} & -- & -- & \val{steps-k73s6} \\
+    \val{chip-k77a} & \upl{K77a} & \checkmark & -- & \val{steps-k77a} \\
+    \val{chip-k82s7} & \upl{K82s7} & \checkmark & \checkmark & \val{steps-k82s7} \\
+    \midrule
+    \val{chip-k73s4} & \upl{K73s4} & -- & -- & \val{steps-k73s4} \\
+    \val{chip-k82s4} & \upl{K82s4} & \checkmark & \checkmark & \val{steps-k82s4} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{The general lesson.} Any lazily compiled path that first runs after the clock starts is a hidden cost: EMA
+updates, evaluation-mode switches, a late schedule phase with a new batch shape. On a compiled accelerator the compile
+cost can exceed the benefit of the feature that triggers it, and only a \emph{cold} rehearsal reveals it. We recommend
+that speed-run harnesses either compile all graphs before the clock starts or report compile time separately.
+
+\subsection{Seeds and the warm-up coin flip}
+\label{sec:seeds}
+
+The largest single source of variance in our data was not a setting. In warm-up steps 3--10, some seeds take a
+\emph{spike path}: the loss falls faster to step~4 and then much more slowly, ending step~10 roughly
+\val{spike-gap-nats} nats higher than the good path (\cref{fig:warmup}a). The logged training loss is the weighted
+multi-token-prediction sum (weights 1/0.5/0.25), not per-token cross-entropy, which is why it is near 13~nats. We
+classify a run as spike-path when its step-10 loss is at least \val{spike-l10} nats. Good-path runs of these recipes
+reach \val{l10-good} nats at step~10 and spike-path runs \val{l10-spike}; we chose the threshold after seeing the data,
+in the empty gap between them, and one run at \val{l10-mid} is reported as intermediate. On the three clean seed sweeps
+of a fixed recipe in our data (\cref{tab:seeds}), \val{spike-k} of \val{spike-n} seeds with a logged curve took the
+spike path, \val{spike-frac} (Wilson 95\% interval \val{spike-wilson-lo}--\val{spike-wilson-hi}). The sweeps share
+\val{spike-shared-seeds} seed, and the path may be a property of the seed, recipe and hardware together, so the runs
+are not fully independent; counting each of the \val{spike-distinct-seeds} distinct seeds once gives
+\val{spike-seed-k} spike seeds (\val{spike-seed-wilson}). Spike-path runs ended \val{spike-delta} worse on average
+(95\% CI \val{spike-delta-lo} to \val{spike-delta-hi}), smaller than the \val{spike-penalty-doc}\docnum{} we had quoted
+during the campaign from a broader, less controlled set of about \val{harvested-runs-doc}\docnum{} runs. We consider the
+controlled estimate the better one.
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics{warmup_paths.pdf}
+  \caption{\textbf{The warm-up coin flip.} (a) Training loss (the weighted multi-token sum) over the first 20 steps
+    for the \val{g7-nseeds} seeds of one recipe on one chip: spike-path seeds (dashed, triangles) drop faster to
+    step~4, then stall. (b) Final score by path in the three seed sweeps; hollow points have no logged curve.}
+  \label{fig:warmup}
+\end{figure}
+
+\paragraph{The variance budget.} Seeds re-draw the initialisation, the warm-up path and the data order. Within a
+sweep, the seed SD is \val{seed-sd-all-lo}--\val{seed-sd-all-hi} including spike paths and
+\val{seed-sd-good-lo}--\val{seed-sd-good-hi} among good-path seeds only. Shuffle salts re-draw only the order after
+micro-batch~\val{rowpool-from}, with an SD of about \val{salt-sd}\docnum{}. Both are as large as most late
+improvements (\cref{tab:levers}).
+
+\paragraph{Selection.} Our seed, 73, was itself chosen by a lottery. In the 13-seed sweep of the \upl{K57} recipe it
+ranks \val{g7-s73-rank} of \val{g7-nseeds}, \val{g7-s73-gap} better than the good-path mean, and every later
+same-seed comparison is measured on that lottery winner. Effects measured on a selected seed need not hold at other
+seeds \citep{cawley2010overfitting}. We followed two rules: a lever must act after step~19, so that it cannot re-roll
+the warm-up path, and an effect under 0.0003 needs three seeds; the second was often not affordable. Our one official
+test of a change to the first steps illustrates the first rule: an attention-input shift in blocks 6--8 (\upl{K65a})
+scored \val{xshift-official} against its base, a re-rolled seed rather than a measured effect.
+
+\subsection{Salt lotteries and the winner's curse}
+\label{sec:salts}
+
+Because rehearsals are deterministic, a lottery over shuffle salts can be run on chip and the best rehearsal uploaded.
+Four salts of the \upl{K73} recipe spanned \val{salt-span}\docnum{} on chip, and salt~4 was uploaded as \upl{K73s4};
+the later uploads \upl{K77a} and \upl{K82s4} inherit it. A second lottery on the final recipe picked salt~7
+(\upl{K82s7}); its size is not recorded in the released files. Where a lottery's draws ran on different chips, salt
+and chip speed are confounded. Selection was only partly rewarded. Salt~4 kept its edge officially, but salt~6,
+selected later as a better rehearsal, scored \val{salt6-vs-salt4} against it (\upl{K73s6}). Salt~7 gave the best
+rehearsal of the campaign (\val{salt7-rehearsal}) and tied salt~4 officially (\val{salt7-vs-salt4}).
+
+A simple model explains the pattern. A salt's rehearsal advantage is its true effect (SD about \val{salt-sd-mid}) plus a
+part that does not transfer to the official run, with SD $s_\eta$. The expected share of a selected advantage that
+survives is the reliability ratio $\lambda$ (\cref{app:derivations}). With $s_\eta$ equal to the final-day offset SD,
+$\lambda\approx\val{salt-shrink}$; that SD includes chip-to-chip variation, so we also use the within-chip offset SD
+($\lambda=\val{salt-shrink-within}$), the since-\upl{K50} SD and a smaller 0.0002; together they give
+$\lambda$ between \val{salt-shrink-lo} and \val{salt-shrink-hi}.
+Lotteries are worth running when draws are cheap, but the projected gain should be shrunk by roughly a quarter to a half,
+and if the official shard overlaps the public text (\cref{sec:contest}) part of what survives is selection on the
+evaluation set itself \citep{dwork2015reusable,blum2015ladder}.
+
+\subsection{What did not work}
+\label{sec:negative}
+
+\Cref{tab:negative} lists the changes that lost. Two patterns stand out. First, \emph{capacity changes lost in both
+directions}: depth~10 and two key/value heads lost while running \val{depth10-steps}\docnum{} fewer steps, and depth~8
+lost despite \val{depth8-steps}\docnum{} more steps. We read this as the 9-block model being a local optimum of the
+capacity-for-steps trade at our kernels' speed, but it rests on one or two chip pairs without an equal-step comparison,
+so we cannot say whether depth~10 lost \emph{only} because of its steps. Second, \emph{scalar retuning did not pay}:
+none of \val{scalar-keys}\docnum{} scalar knob keys (learning-rate scales, betas, weight decay, initialisation,
+momentum, soft cap, RoPE base, cooldown $\pm0.1$) won a confirmation. The four official tests on the final day
+(\upl{K65a}--\upl{K65d}) were all worse than or tied with their base.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{What lost.} $\Delta$ against the control (positive is worse); evidence as in \cref{tab:levers}.
+    Official deltas are against \upl{K63}. Source: \texttt{docs/FINDINGS.md} \S5\docnum{} and
+    \texttt{results/official-scores.csv}.}
+  \label{tab:negative}
+  \input{tables/negative}
+\end{table}
+
+\subsection{Pricing the gap in compute}
+\label{sec:gap}
+
+\Cref{tab:gap} converts the distance from our best official score, \val{best-official}, to reference points on the final
+public leaderboard snapshot (about \val{leaderboard-time}\docnum{}; ranks only) into effective compute through
+\cref{eq:exchange}. Closing the \val{gap-ten} gap to \#10 would have needed about \val{gap-ten-range} more effective
+compute across our two calibrations of $\kappa$. The gap to \#1, \val{gap-one-range}, extrapolates far beyond the
+\val{xr-anchor-pct} anchor and is an order of magnitude only.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{What each leaderboard reference would cost in effective compute}, from our best official score
+    (\val{best-official}, \upl{K82s4}), as $\exp(\text{gap}/\kappa)-1$ for the price used ($\kappa=\val{kappa}$) and
+    for the long-run calibration. Leaderboard values are from the final public snapshot, referred to by rank.}
+  \label{tab:gap}
+  \input{tables/gap}
+\end{table}
+
+\paragraph{A hypothesis, not a finding.} The final recipe trained at about \val{tokens-per-s}\docnum{} tokens/s on a
+\val{params}\docnum{}-parameter model, which we estimated at roughly \val{mfu}\docnum{} model-FLOPs utilisation
+\citep{chowdhery2023palm} with about \val{idle}\docnum{} of wall time idle on host dispatch; both are approximate
+profiles. At an equal recipe, \cref{eq:exchange} values \val{tput-lo-pct}--\val{tput-hi-pct}\% more tokens per second
+at \val{tput-range}~bpb, more than our whole gap to \#10, while late recipe changes were worth about
+\val{late-change}\docnum{} each. We therefore \emph{hypothesise} that the cheapest way to close the gap was kernel
+throughput: custom NKI kernels \citep{aws_nki_docs} for attention, the fused MLP and the optimizer updates. Nothing in
+our data rules out the alternative that better-ranked teams had better recipes or data handling, and the conversion
+assumes that every team sits on our compute curve. A test would be to write one kernel, measure its step time with a
+short chip screen, price it with \cref{eq:exchange} and confirm it with a cold rehearsal; we did not reach that stage
+in Phase~1.

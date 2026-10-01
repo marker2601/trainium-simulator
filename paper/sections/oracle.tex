@@ -1,0 +1,210 @@
+% sections/oracle.tex
+\section{C1: How well deterministic rehearsal predicts the leaderboard}
+\label{sec:oracle}
+
+\subsection{Protocol}
+
+The rule we followed for every upload from 26~September on is short:
+\begin{quote}
+  Run the \emph{exact upload file}, at the upload seed, on your own Trainium instance, for the full charged budget,
+  starting \emph{cold}. Score the trained weights on the first \val{eval-tokens} tokens of the public validation
+  data. The official score will be that number plus an offset.
+\end{quote}
+Each shuffle salt is a code constant, so every salt is its own file with its own hash, and its rehearsal is a
+rehearsal of that file. One upload breaks the rule: the rehearsal of \upl{K70a} ran on chip~E, which is slow, and was
+normalised to chip-C speed before use (\cref{sec:k70a}). For upload $i$ with rehearsal score $r_i$ on chip $c(i)$ and
+official score $y_i$ we write
+\begin{equation}
+  \label{eq:offset}
+  y_i = r_i + \mu + \gamma_{c(i)} + \varepsilon_i, \qquad \varepsilon_i \sim \mathcal{N}(0, \sigma_{\text{off}}^2),
+\end{equation}
+where $\mu$ is the part of the offset that belongs to the evaluation text and $\gamma_c$ a per-chip part. During
+the campaign we used the special case $\gamma\equiv0$: estimate $\hat\mu$ and $s$ from $n$ earlier uploads and
+predict $y_{\text{new}}$ with the interval $r_{\text{new}} + \hat\mu \pm t_{n-1,0.975}\, s\sqrt{1 + 1/n}$
+(\cref{app:derivations}). A file was uploaded only after its cold rehearsal had exited cleanly, with no graph breaks,
+charged time inside the budget and the file under the size limit. The repository records written projections for
+three uploads (\cref{sec:projections}).
+
+\paragraph{Why it should work, and why not exactly.} If training is deterministic (\cref{sec:determinism}), the
+official run follows the rehearsal's trajectory for as many steps as it gets. The text then contributes a constant:
+the first 2M public tokens are easier than typical text, by \val{text-gap}\docnum{} on 20M public tokens in one
+measurement ($n=1$), which is the size of the offset. But the official host need not run at the rehearsal chip's
+speed. A host that is $x\%$ faster or slower gives $x\%$ more or fewer steps, worth $\rho x$ at the price of
+\cref{sec:price}. That is the term $\gamma_c$: it is a property of the \emph{rehearsal chip}, relative to the
+official host, not of the text.
+
+\subsection{What the offset is made of}
+
+\Cref{tab:offset-periods} gives the offset by period. Since \upl{K50} the official score has been the rehearsal plus
+\val{off-mean-since} (SD \val{off-sd-since}, range \val{off-min-since} to \val{off-max-since},
+$n=\val{off-n-since}$). The early uploads, rehearsed on chips A and B with older code and some warm rehearsals, are
+noisier (SD \val{off-sd-early}). Two checks support an offset that does not depend on the recipe. The rehearsals
+since \upl{K50} span \val{since-rehearsal-span} bpb, and over that range the least-squares slope of official on
+rehearsal is \val{reg-slope} (95\% CI \val{reg-lo} to \val{reg-hi}; $r=\val{reg-r}$), consistent with~1
+(\cref{fig:oracle}a). The offset shows no significant drift with upload order: \val{trend-slope}$\times10^{-5}$ bpb per
+upload (95\% CI \val{trend-lo} to \val{trend-hi}).
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Offset $=$ official $-$ rehearsal, by period} ($10^{-3}$ bpb). The 95\% CI is the half-width for
+    the mean (Student $t$). Ranges are rounded half-up from the exact differences. Official scores are published to
+    four decimals, so every offset carries a rounding error of up to $\pm$\val{official-rounding}.}
+  \label{tab:offset-periods}
+  \input{tables/offset_periods}
+\end{table}
+
+The offset is \emph{not} the same on every chip (\cref{tab:offset-chips}). Chip~C, on which the calibration uploads
+were rehearsed, averaged \val{chip-off-c} ($n=\val{chip-off-n-c}$); chip~H \val{chip-off-h} ($n=2$); chip~G, the
+fastest final-day instance, \val{chip-off-g} ($n=3$). Within chips the SD is \val{off-sd-within}, smaller than the
+pooled \val{off-sd-since}. Predicting each upload leave-one-out from the other uploads on its own chip, where there
+is one, gives an MAE of \val{loo-chip-mae} against \val{loo-pooled-mae} for the pooled mean ($n=\val{loo-n}$). The
+offset is therefore better described as text plus chip, as in \cref{eq:offset}, than as a property of the text
+alone. With two or three uploads per new chip, $\gamma_c$ cannot be estimated well; a step-normalised rehearsal
+would remove it at the source.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Offset by rehearsal chip since \upl{K50}} ($10^{-3}$ bpb). ``Frozen-fit error'': mean error of the
+    frozen chip-C calibration (\cref{tab:offset-holdout}) on that chip's final-day uploads.
+    \textsuperscript{s}\,salt chosen by a lottery; \textsuperscript{i}\,salt inherited from a lottery winner;
+    \textsuperscript{n}\,rehearsal normalised to chip-C speed.}
+  \label{tab:offset-chips}
+  \input{tables/offset_chips}
+\end{table}
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics{oracle_calibration.pdf}
+  \caption{\textbf{Rehearsal and official score.} (a) Rehearsal against official for the \val{off-n-since} uploads
+    since \upl{K50}; the solid line is official $=$ rehearsal $+$ \val{off-mean-since-short} with a $\pm2$\,SD band,
+    the dashed line is identity. (b) The offset per upload in upload order; grey marks the early chip-A/B uploads.
+    Marker shape is the rehearsal chip.}
+  \label{fig:oracle}
+\end{figure}
+
+\subsection{Pseudo-prospective checks}
+\label{sec:oracle-holdout}
+
+Calibration on the uploads it describes is not a test. We therefore predict each upload only from uploads that came
+before it. These analyses are computed now from the released ledger, without access to later data, so they are
+leakage-free \emph{retrospective} simulations of the protocol, not archived prospective predictions.
+
+\paragraph{Frozen calibration.} The simulator's offset model is fitted on the seven chip-C calibration uploads
+\upl{K51}--\upl{K60} ($\hat\mu = \val{frozen-offset}$), the last of them scored on 29~September, before any final-day
+upload. \Cref{tab:offset-holdout}
+applies it, frozen, to the seven final-day uploads, which were rehearsed on four chips. The MAE is
+\val{holdout-mae}~bpb, against \val{nooffset-mae} for no offset at all. The bias is \val{holdout-bias}: \val{holdout-npos}
+of the 7 errors are positive (one-sided sign test $p=\val{holdout-signp}$), and the mean error is
+\val{chip-ferr-c} on chip~C, \val{chip-ferr-h} on chip~H and \val{chip-ferr-g} on chip~G. This is the pattern
+\cref{eq:offset} predicts for a calibration that sets $\gamma_c$ to chip C's value: the faster final-day chips
+look ``hotter''.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Frozen chip-C calibration} ($\hat\mu=\val{frozen-offset}$, fitted on \upl{K51}--\upl{K60}) applied to
+    the final-day uploads. Error $=$ official $-$ (rehearsal $+\hat\mu$), in $10^{-3}$ bpb. Marks as in
+    \cref{tab:offset-chips}. \upl{K82s4} and \upl{K82s7} were published to seven decimals
+    (\val{best-official-long} and \val{salt7-official-long}).}
+  \label{tab:offset-holdout}
+  \input{tables/offset_holdout}
+\end{table}
+
+\paragraph{Selection.} Salt lotteries select draws whose rehearsal advantage partly does not transfer
+(\cref{sec:salts}), so selected uploads should miss upward. Three final-day uploads had their salt chosen by a
+lottery (\upl{K73s4}, \upl{K73s6}, \upl{K82s7}; MAE \val{holdout-mae-direct}); two inherit the winning salt~4
+(\upl{K77a}, \upl{K82s4}; \val{holdout-mae-inherited}); only \upl{K63} and \upl{K70a} come from no lottery
+(\val{holdout-mae-none}), and one of those is normalised. Chip and selection are confounded here: two of the three
+chip-G uploads are lottery winners.
+
+\paragraph{The normalised rehearsal of \upl{K70a}.}
+\label{sec:k70a}
+Chip~E ran about \val{chip-spread}\docnum{} slower in step time than chip~C. \upl{K70a}'s raw chip-E
+rehearsal, \val{k70a-raw}, was converted to chip-C speed by subtracting $\rho$ times its step deficit, which gave
+\val{k70a-norm}: an adjustment of \val{k70a-adj}, i.e.\ \val{k70a-adj-pct} of steps at $\rho$ (not all of a
+step-time deficit becomes a step deficit, because the schedule is clock-keyed). Its raw offset would be
+\val{k70a-raw-offset}, an outlier. The repository does not show whether the normalised value was computed before the
+upload: no time-stamped projection exists, so we treat it as a post-hoc adjustment. \Cref{tab:oracle-sens} gives every oracle statistic three ways. With the raw rehearsal the
+since-\upl{K50} SD rises from \val{sens-used-sd} to \val{sens-raw-sd}, the frozen MAE from \val{sens-used-mae} to
+\val{sens-raw-mae}, and the expanding-window count falls to \val{sens-raw-inside}; excluding \upl{K70a} changes
+little. The headline numbers therefore depend on the normalisation, which is itself an application of $\rho$.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Sensitivity of the oracle statistics to \upl{K70a}} ($10^{-3}$ bpb). ``Frozen'': the chip-C
+    calibration on the final-day uploads. ``In 95\% PI'' and ``Seq.\ MAE'': the expanding window with a burn-in of
+    three uploads.}
+  \label{tab:oracle-sens}
+  \input{tables/oracle_sensitivity}
+\end{table}
+
+\paragraph{Expanding window.} \Cref{fig:offset-prospective} predicts each upload from the mean offset of all earlier
+uploads since \upl{K50}, with a $t$ prediction interval, starting once three earlier points exist. All
+\val{seq-inside} of \val{seq-n} predictions fall inside their 95\% interval (\val{seq-expected} expected); the MAE is
+\val{seq-mae} and the bias \val{seq-bias}. With so few points this is weak evidence: at a burn-in of three the
+interval uses $t_{2,0.975}=\val{t-two}$ and is very wide. \Cref{tab:coverage} (appendix) reports coverage at 50, 80 and 95\%
+for burn-ins of three and five uploads: at 50\% the intervals cover \val{cov-50-b3} and \val{cov-50-b5}, close to
+nominal, and at 80\% \val{cov-80-b3} and \val{cov-80-b5}, slightly conservative.
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics{offset_prospective.pdf}
+  \caption{\textbf{Pseudo-prospective offset prediction.} Each point is an upload's offset (marker: rehearsal chip;
+    grey: the three burn-in uploads). The solid line is the mean offset of all earlier uploads since \upl{K50}, the
+    band its 95\% prediction interval, and the dashed line the frozen chip-C fit. Generated by
+    \texttt{paper/analysis/oracle.py}.}
+  \label{fig:offset-prospective}
+\end{figure}
+
+\paragraph{The written projections.}
+\label{sec:projections}
+The repository records three projections written before upload (\texttt{results/official-scores.csv},
+\texttt{docs/EXACT-ORACLE.md}). \upl{K73s6} was projected at \val{k73s6-projected}\docnum{} and scored
+\val{official-k73s6}, the largest miss (\val{k73s6-miss}). \upl{K82s4} was projected at
+\val{k82s4-projected}\docnum{} and scored \val{best-official}; \upl{K82s7} was projected at about \val{k82s7-projected}\docnum{} and
+scored \val{salt7-official}. These two projections did \emph{not} use the frozen chip-C offset, which misses them by
+\val{ferr-k82s4} and \val{ferr-k82s7} (\cref{tab:offset-holdout}). They added an offset of \val{k82-proj-offset}\docnum{}
+read off the final-day uploads already scored, most of them on the faster chips G and H; the exact rule was not
+recorded. That is the text-plus-chip correction applied informally, and it is why those two landed close. It is
+also a reason to treat their closeness as anecdote rather than as a test.
+
+\subsection{Resolution}
+\label{sec:resolution}
+
+The oracle predicts one upload with a 95\% half-width of about \val{pi-half}~bpb ($n=\val{off-n-since}$). A
+\emph{difference} between two uploads, if their errors are independent, has SD $\sqrt2\,s=\val{diff-sd}$, so the
+oracle resolves official differences of about \val{diff-95}~bpb at 95\%, or \val{diff-sd-within} SD when both
+uploads were rehearsed on the same chip. Most late levers are \val{late-lever-range}~bpb (\cref{tab:levers}). The oracle could
+not have \emph{measured} them; what it did was translate chip comparisons, which do not carry the offset's noise,
+onto the official scale. The levers themselves were judged on same-seed chip pairs, whose noise is discussed in
+\cref{sec:seeds}.
+
+\subsection{Traps}
+\label{sec:traps}
+
+The protocol is exact only if the rehearsal is a faithful replica of the official run. Four ways in which it was not
+cost us before we understood them.
+\begin{enumerate}
+  \item \textbf{Cold means cold.} Any one-time compilation that happens after the clock starts costs steps in the
+    official run. A warm rehearsal, which reuses compiled graphs, does not pay that cost. \Cref{sec:prewarm}
+    quantifies one instance: warm rehearsals of an EMA recipe looked \val{ema-warm-bias}\docnum{} bpb better than the
+    cold official run would be.
+  \item \textbf{Chip speed.} A rehearsal predicts the official score only if the official host runs at the
+    rehearsal chip's speed; otherwise $\gamma_c\neq0$. We normalised same-recipe runs to chip-C speed at $\rho$ and
+    never across a change that alters step time. The organisers' rerun of one file on a slower host did
+    \val{rerun-steps}\docnum{} fewer steps and scored \val{rerun-delta}\docnum{} worse, consistent with $\rho$
+    ($n=1$).
+  \item \textbf{The warm-up coin flip.} A change that touches steps 0--19 can move a seed onto a different early
+    trajectory (\cref{sec:seeds}). The rehearsal still predicts the official score, because the official run takes
+    the same path, but the measured difference is then a seed effect rather than the change's effect.
+  \item \textbf{The time target is a budget, not a promise.} The training clock stops when the next step would
+    cross the target; the median reserve was \val{reserve-s}\docnum{}~s over \val{reserve-n} completed runs, and we
+    kept \val{headroom}\docnum{}~s of headroom under the cap.
+\end{enumerate}
+Two organiser-side anomalies are excluded from all calibration statistics and listed in
+\texttt{research/sim-data/official-uploads.csv}: the slower-host rerun above, and a duplicate scoring run that was cut
+off before its learning-rate decay.
+
+\paragraph{How we used it.} Beyond gating uploads, the oracle let us treat our instances as an official test bench:
+on the final day, four instances rehearsed complete upload files at seed~73, and a structural change was compared on
+chip, against a same-chip control, without spending an upload. We also ran lotteries over shuffle salts and seeds and
+uploaded the best rehearsal. \Cref{sec:salts} shows that a selected draw gives back part of its edge.

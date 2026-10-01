@@ -1,0 +1,180 @@
+% sections/simulator.tex
+\section{C2: \texorpdfstring{\ffsim}{ffsim}, a run simulator}
+\label{sec:sim}
+
+The oracle answers ``what will this file score?'' for the price of a full chip run. \ffsim{} tries to answer it for
+the price of a millisecond, and to say when it cannot.
+
+\subsection{Decomposition}
+\label{sec:decomp}
+
+Because the contest charges wall-clock time, a recipe's score has two sources: how many optimizer steps fit in the
+budget, and how much each step learns. \ffsim{} models them separately:
+\begin{align}
+  y &= q(\text{recipe}, S, \text{seed}) + \mu, \label{eq:decomp}\\
+  S &= \operatorname{walk}\bigl(\text{schedule},\; T - t_{\text{res}},\; \{\bar t_k\}_{k\in\{1,2,4\}}\bigr), \notag
+\end{align}
+where $y$ is the official score, $q$ the rehearsal \valbpb{} after $S$ steps, $\mu$ the offset of \cref{eq:offset}
+(with $\gamma_c=0$ for chip~C), $T$ the charged-time target, $t_{\text{res}}=\val{reserve-s}$\docnum{}~s the
+measured stop reserve, and $\bar t_k$ the step time of the phase that accumulates $k$ micro-batches. The walk
+replays the training script's clock logic: warm-up at the full batch until step~20, each accumulation phase until
+its fraction of $T$, the cooldown and the stop rule. \Cref{eq:decomp} makes the trade of \cref{sec:price} explicit:
+a change enters through $\bar t_k$ (and so $S$) and through $q$.
+
+\subsection{Data}
+\label{sec:simdata}
+
+\texttt{research/sim-data/runs.jsonl} holds \val{ds-n} run records from \val{ds-chips} Trainium instances (chips
+A--D): \val{ds-full} full runs and \val{ds-screens} short screens (\cref{tab:dataset}). They were merged from a run
+table, the campaign ledger and harvested chip logs. Each record carries the effective \texttt{FF\_*} environment,
+steps, charged and start-up seconds, median step time per accumulation phase, the early loss curve where logged
+(\val{ds-loss-curves} records), and the \valbpb{} on the first 2M public tokens. \texttt{validation-pairs.json}
+holds \val{ds-pairs} same-seed treatment/control pairs from \val{ds-pair-families} families: \val{ds-pairs-recipe}
+recipe changes and \val{ds-pairs-noise} seed or chip comparisons. The quality model is fitted only on the
+\val{q-nfit} full chip runs whose complete environment is known; the other records are screens, runs from the
+earliest chips without a recorded code version, rows whose base recipe is unknown, or runs without a final score.
+The final-day runs on chips E, G and H are not in the dataset.
+
+\subsection{Step time and the step walk}
+
+The step-time model regresses the median $k\!=\!1,2,4$ step times on code-lineage effects and knob features (depth,
+width, batch, fused paths). It is deliberately empirical, because the Neuron compiler is far from linear in
+operation count: removing one elementwise pass over the MLP activation saved \val{st-onepass}\docnum{}, fusing the
+QKV projection, which has fewer operations, was \val{st-qkv}\docnum{} \emph{slower}, and a 96-parameter gate cost
+\val{st-gate}\docnum{}. A mechanism that no fitted run carries is charged a \val{st-novel-prior}\docnum{} prior and
+flagged ``cost unknown''. Medians are scaled by the measured median-to-mean overhead (\val{overhead}) before the walk.
+Left one code lineage out, the model predicts the $k\!=\!4$ step time of runs whose mechanisms another lineage
+carried with an MAE of \val{st-lolo-reach} (\val{st-lolo-nreach} runs; \cref{tab:sim-other}), and the walk reproduces
+a rehearsal's phase switches to within \val{walk-phase-err}\docnum{} steps.
+
+\subsection{The quality surrogate}
+\label{sec:quality}
+
+The quality model is a Bayesian ridge (MAP) regression of the rehearsal score,
+\begin{equation}
+  \label{eq:quality}
+  q = \alpha_{\text{era}} + \gamma_{\text{chip}} + b L + c L^2 + \sum_j \beta_j x_j(\text{knobs}) + u_{\text{seed}} + \varepsilon,
+  \qquad L = \ln(S/2300),
+\end{equation}
+where 2{,}300 steps is the typical step count of the late recipes, so the intercepts are scores at that step count.
+Every coefficient has a Gaussian prior. The components are:
+\begin{itemize}
+  \item \textbf{Era effects} $\alpha$, one per code era (a group of code versions, \cref{app:sim}). A leakage guard
+    merges an era with fewer than two runs into its parent lineage, so that a single-run treatment cannot be absorbed
+    by ``its'' era.
+  \item \textbf{Chip effects} $\gamma$ (prior SD \val{q-prior-chip}) for every instance other than chip~C.
+  \item \textbf{A step term} with a strong prior, $b\sim\mathcal{N}(\val{q-prior-b}, \val{q-prior-b-sd}^2)$ and
+    $c\sim\mathcal{N}(\val{q-prior-c}, \val{q-prior-c-sd}^2)$, centred on the price of \cref{sec:price}. The prior is
+    strong because within an era the step count varies mostly through mechanisms that also change quality. The
+    posterior slope, \val{q-slope} per unit $L$, stays close to it and is not independent evidence for $\kappa$.
+  \item \textbf{Knob features} $x_j$: \val{q-nbase-features} documented encodings of the knobs that varied, each
+    centred on a reference recipe and scaled so that one unit is a typical campaign move (prior SD
+    \val{q-prior-knob} bpb per unit; \cref{tab:features}), plus \val{q-nbowl-features} ``bowl'' terms that give tuned
+    scalars a non-negative curvature.
+  \item \textbf{Seed effects} $u$ (prior SD \val{q-prior-seed}).
+\end{itemize}
+The fit is not one closed-form solve. For a given residual SD $\sigma_q$, the MAP estimate solves
+$(X^\top X + \sigma_q^2 D)\hat\beta = X^\top y + \sigma_q^2 D m$ with $D=\mathrm{diag}(1/s_j^2)$ for prior SDs $s_j$
+and prior means $m$. A bowl coefficient that comes out negative is pinned at zero and the system re-solved (an
+active-set solution of the non-negativity constraint). $\sigma_q$ is then re-estimated by empirical Bayes from the
+residuals and effective degrees of freedom, three times, and floored at \val{q-sigma-floor}. Seed effects are
+estimated jointly, as best linear unbiased predictors. The fit uses \val{q-nfit} runs, \val{q-ncols} columns and
+\val{q-neras} eras, with \val{q-edf} effective degrees of freedom. The final $\hat\sigma_q=\val{q-sigma}$ sits on the
+floor; without the floor the estimate is \val{q-sigma-nofloor}. For every candidate the model also reports
+\emph{support}: whether each changed value was seen in the data, interpolated, extrapolated or never varied. In the
+decision rule we used, only a supported candidate whose paired difference from the base is $-0.0003$ or better earns
+a chip run.
+
+\paragraph{Paired Monte Carlo.} \texttt{simulate} and \texttt{search} propagate chip jitter, seed luck, coefficient
+uncertainty, residuals and the offset by Monte Carlo with common random numbers, so that wherever two recipes agree
+the noise cancels and a paired $P(\text{candidate} < \text{base})$ is a calibrated statement. An identical recipe
+reproduces the base exactly.
+
+\subsection{Validation, with baselines}
+\label{sec:simval}
+
+\Cref{tab:sim-calibration} collects the checks. Every row predicts the difference $\Delta$ between the two arms of a
+same-seed pair, and sign agreement counts a predicted sign that matches the measured one. Three baselines use the same
+pairs and the same leave-one-pair-out protocol: a leave-one-out majority sign, the zero predictor, and the same model
+with every knob effect switched off (era, chip, steps and seed only). Intervals are cluster bootstraps over the
+\val{lopo-boot-clusters} control runs, many of which anchor several pairs.
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{Quality-surrogate calibration and baselines.} Sign agreement on same-seed pairs; MAE of the
+    predicted difference in $10^{-3}$ bpb. $\hat\Delta$: predicted, $\Delta$: measured difference. ``Recipe pairs''
+    exclude the \val{ds-pairs-noise} seed and chip pairs, on which sign agreement is meaningless.
+    \textsuperscript{$\dagger$}\,Per-pair values from \texttt{docs/simulator-report-20260929.md}, scored by
+    \texttt{paper/analysis/simulator.py} (\cref{tab:postfit}).}
+  \label{tab:sim-calibration}
+  \input{tables/sim_calibration}
+\end{table}
+
+\paragraph{Leave one pair out (LOPO).} For each pair, refit without its two runs and predict their difference. On
+the \val{lopo-rec-n} recipe pairs the full surrogate agrees on sign \val{lopo-rec-sign} of the time (95\% CI
+\val{base-full-rec-signci}) with MAE \val{lopo-rec-mae}. The steps-only baseline scores \val{base-steps-rec-sign}
+(\val{base-steps-rec-signci}) and MAE \val{base-steps-rec-mae}; the paired difference is \val{base-diff-sign-ci} of
+sign agreement and \val{base-diff-mae-ci}$\times10^{-3}$ of MAE in the surrogate's favour. A majority sign scores
+\val{base-major-rec-sign} and the zero predictor has MAE \val{base-zero-rec-mae} (\cref{fig:pairs} plots every pair). Within the replicate setting of
+LOPO, then, the knob features carry real information. Two caveats. ``Decisive'' pairs defined by the measured outcome
+($|\Delta|\ge0.0003$) favour large step-count changes, so we also report pairs on which the \emph{prediction} is
+decisive, which is what the decision rule uses: \val{lopo-rec-signpdec} on \val{lopo-rec-npdec} pairs. And the MAE
+is above the noise floor: two single runs of one recipe differ by $\mathbb{E}|\mathcal{N}(0,2\sigma_q^2)|$, which is
+\val{pair-noise-floor} at the floored $\hat\sigma_q$ and \val{pair-noise-floor-nofloor} without the floor.
+
+\paragraph{Leave one knob value out (LOKVO).} LOPO measures replicate prediction, since the same knob values usually
+stay in the fit through other seeds. LOKVO also drops every run that carries the pair's untried value, so the model
+must predict a value it has never seen, which is the question the search asks. Sign agreement on recipe pairs stays
+at \val{lokvo-rec-sign}, but the MAE rises to \val{lokvo-rec-mae} (per family in \cref{tab:lopo-family}).
+
+\paragraph{Forward in time.} Fit only on runs before a cutoff and predict every pair dated on or after it, as the
+campaign would have (\cref{tab:temporal}). With a cutoff of 29~September the model scores \val{temp-b-sign} on
+\val{temp-b-n} pairs, MAE \val{temp-b-mae}; with 28~September, fitted on \val{temp-a-nfit} runs, \val{temp-a-sign}
+and MAE \val{temp-a-mae}. Here the knob features add little. With the 28~September cutoff, the
+\val{temp-a-sup-n} pairs whose moved features the restricted fit had seen score \val{temp-a-sup-sign}, and the
+\val{temp-a-uns-n} pairs that only the prior can answer score \val{temp-a-uns-sign}; with 29~September the two
+groups score \val{temp-b-sup-sign} and \val{temp-b-uns-sign}. Signs transfer forward mostly through the step term and
+the era and seed effects. The temporal set also excludes the incomplete-knob runs that tested the newest mechanisms,
+which biases it towards supported pairs.
+
+\paragraph{Genuinely new mechanisms.} On the \val{postfit-n} pairs that finished after the release fit, which tested
+attention-source variants and new learning-rate settings (\cref{tab:postfit}), sign agreement was \val{postfit-sign}
+(\val{postfit-k} of \val{postfit-n}; Wilson 95\% interval \val{postfit-wilson}), indistinguishable from chance, and
+the MAE \val{postfit-mae} was worse than the zero predictor's \val{postfit-zero-mae}. The surrogate can say which knob
+moves are inside the noise; it cannot say whether a new mechanism will work. During the campaign we used it for
+negative screening: none of the \val{search-n}\docnum{} local candidates around \upl{K60} cleared the
+chip-confirmation bar, and we ran none of them. Because they were never run, this is not evidence that they were bad,
+only that the surrogate saw no reason to spend chip time on them. Every later win came from mechanisms the data had
+never seen (the row pool, the EMA blend and the prewarm).
+
+\subsection{The GPU proxy}
+\label{sec:gpu}
+
+The second route runs the actual competition \texttt{train.py} on a CUDA GPU, driven so that it follows the chip's
+optimizer trajectory step for step: a generated fork of the recipe (\val{gpu-patches}\docnum{} checked textual
+patches), a virtual charged clock that fires every clock-keyed switch at the step at which it fired on chip,
+emulation of the organiser loader's eight-rank sharding on one device, and a rule that no GPU verdict may influence a
+chip run until the proxy has reproduced pairs the campaign already paid for (details in \cref{app:gpu}). It measures
+per-step quality only; step time must come from the chip.
+
+\Cref{tab:gpu} compares it with Trainium on an L40S GPU. Two of the four comparisons are informative equal-step
+chip pairs (attention-source reuse and LeakyReLU$^2$), and the GPU matched them to within \val{gpu-maxdiff-inf}\docnum{}.
+The cooldown-0.7 reference is the mean of two chip pairs of opposite sign, and the split-AdamW reference is an
+official upload delta at a different step count, so neither is a test. The noise is larger than the agreement: in
+default CUDA mode two runs of one configuration on two GPU boxes differed by \val{gpu-box-diff}\docnum{}, because the
+flash-attention backward pass is nondeterministic, and the campaign documents do not record which of the four
+comparisons ran in deterministic mode. Forcing deterministic algorithms made runs identical at every logged step, at
+\val{gpu-tps-det}\docnum{} instead of \val{gpu-tps-default}\docnum{} tokens/s. Hardware can also flip the warm-up
+path: seed~58 takes the good path on chip and a spike path on the GPU. With $n=\val{gpu-n-inf}$ informative pairs and
+noise above the agreement, the proxy is a feasibility demonstration, consistent with the chip in sign and magnitude,
+not a validated instrument. A run of the full schedule cost about \val{gpu-hours}\docnum{}~GPU-hours (about
+\$\val{gpu-cost-run}\docnum{}).
+
+\begin{table}[tbp]
+  \centering
+  \caption{\textbf{GPU proxy vs Trainium} at equal steps, seed 73 ($10^{-3}$ bpb except the last row; values from
+    \texttt{docs/SIMULATOR.md}\docnum{}). \textsuperscript{*}\,Not an informative comparison: the Trainium value is
+    the mean of two chip pairs of opposite sign (\val{gpu-cd-pairs}), or an official delta at a different step count.}
+  \label{tab:gpu}
+  \input{tables/gpu_parity}
+\end{table}

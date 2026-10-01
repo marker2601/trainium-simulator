@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How contributions work
+    url: https://github.com/marker2601/trainium-simulator/blob/main/CONTRIBUTING.md
+    about: What a run record holds, what is shared, and how review and the automatic refit work.
+  - name: Record format (JSON Schema)
+    url: https://github.com/marker2601/trainium-simulator/blob/main/contrib/schema.json
+    about: The fields of one contributed run.

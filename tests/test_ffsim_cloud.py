@@ -99,7 +99,9 @@ def _launch(tmp_path: Path, *args: str):
     tmpdir.mkdir()
     paths = {"log": tmp_path / "aws-calls.log", "userdata_copy": tmp_path / "userdata-as-read.sh", "tmpdir": tmpdir}
     env = dict(os.environ)
-    env["PATH"] = str(shim) + os.pathsep + env.get("PATH", "")
+    # The bash executable's own folder (Git's usr/bin on Windows) holds date, sed and the other tools the scripts
+    # call; PowerShell sessions often lack it on PATH.
+    env["PATH"] = os.pathsep.join([str(shim), str(Path(bash).parent), env.get("PATH", "")])
     env["TMPDIR"] = _posix(tmpdir)
     env["FAKE_AWS_LOG"] = paths["log"].as_posix()
     env["FAKE_AWS_PY"] = fake_py.as_posix()

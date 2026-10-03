@@ -21,7 +21,9 @@ rehearsal val_bpb and/or the official score, and a consent flag. The pipeline:
    after (leave-one-out over the contributions, when there are at least ``LOO_MIN`` usable ones), and the GUARD:
    the built-in in-sample and pair-validation error with and without the contributions, and how far the published
    base recipes' predictions move. ``refit --guard`` refuses to write anything when either error gets worse by more
-   than ``GUARD_MAX_WORSE`` or a base prediction moves by more than ``GUARD_MAX_BASE_SHIFT``.
+   than ``GUARD_MAX_WORSE`` or a base prediction moves by more than ``GUARD_MAX_BASE_SHIFT``. A published file
+   whose numbers the new fit only moves by floating-point noise (``PARAMS_NOISE`` / ``STATS_NOISE``: the same data
+   refitted on another machine's BLAS) is left byte for byte as it is, so the refit workflow opens nothing.
 
 Every reader of the contributed file goes through ``load_contrib``, which skips unreadable lines, drops duplicate
 content hashes and drops any record whose numbers or feature vector are not finite or not plausible (``record_problem``),
@@ -94,6 +96,8 @@ MAX_JSON_DEPTH = 10
 MAX_FIT_PER_CONTRIBUTOR = 25      # records one handle (or the anonymous bucket) may add to one fit
 GUARD_MAX_WORSE = 0.0001          # refit --guard: max worsening of the built-in in-sample / pair-validation MAE (bpb)
 GUARD_MAX_BASE_SHIFT = 0.001      # refit --guard: max move of the published base recipes' predictions on chip C (bpb)
+PARAMS_NOISE = (1e-6, 1e-12)      # refit: (rel, abs) float noise in params.json; other BLAS builds move it ~3e-8 rel
+STATS_NOISE = (1e-4, 1e-9)        # refit: the same for stats.json (bpb), whose floats have 6 significant digits
 KNOWN_LINEAGES = tuple(f"M{i}" for i in range(1, 16)) + ("custom",)
 APPROVAL_LABEL = "contrib-approved"
 # Bases whose newest levers are outside the fitted data: (measured rehearsal bpb_2m, steps, seed). The app anchors the
@@ -1200,12 +1204,39 @@ def _write_json(path: Path, obj: Any) -> bool:
     return True
 
 
+def json_close(a: Any, b: Any, rel: float, abs_: float) -> bool:
+    """True when two JSON values have the same structure and the same strings, booleans, nulls and integers (when
+    both sides are integers), and every other pair of numbers agrees to ``rel`` (relative) or ``abs_`` (absolute,
+    for numbers that are zero up to noise)."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(json_close(a[k], b[k], rel, abs_) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(json_close(x, y, rel, abs_) for x, y in zip(a, b))
+    if isinstance(a, float) or isinstance(b, float):
+        return (all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (a, b))
+                and math.isclose(a, b, rel_tol=rel, abs_tol=abs_))
+    return type(a) is type(b) and a == b
+
+
+def _noise_only(path: Path, new: Any, tol: Tuple[float, float]) -> Optional[Any]:
+    """The JSON published at ``path`` when ``new`` differs from it, but only by floating-point noise (``json_close``
+    within ``tol``); None when they are equal, differ materially, or the file is missing or unreadable."""
+    try:
+        old = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return old if old != new and json_close(old, new, *tol) else None
+
+
 def refit(runs: Path = DEFAULT_RUNS, contrib: Path = DEFAULT_CONTRIB, pairs: Path = DEFAULT_PAIRS,
           uploads: Path = DEFAULT_UPLOADS, params_out: Optional[Path] = DEFAULT_PARAMS,
           stats_out: Optional[Path] = DEFAULT_STATS, readme: Optional[Path] = None,
           space_contrib: Optional[Path] = None, loo: bool = True, guard: bool = False) -> Dict[str, Any]:
     """Fit the three models on built-in + contributed data, export params.json and stats.json. With ``guard``,
-    nothing is written when ``model_guard`` fails (``out["guard_failed"]``)."""
+    nothing is written when ``model_guard`` fails (``out["guard_failed"]``). An output the new fit only moves by
+    floating-point noise is not rewritten (its name goes to ``out["noise_only"]``), and the README line is then
+    taken from the published stats.json. New or changed runs (built-in or contributed) change the data hashes in
+    both files, so they are always written."""
     from .offset import OffsetModel
     from .params import export_params, write_params
     from .quality import QualityModel
@@ -1222,19 +1253,29 @@ def refit(runs: Path = DEFAULT_RUNS, contrib: Path = DEFAULT_CONTRIB, pairs: Pat
             "n_builtin_records": len(ctx.builtin), "n_contrib_records": len(ctx.contrib), "quality_fit_n": q.n}
     data_sha = hashlib.sha256((str(meta["runs_sha256"]) + str(meta["contrib_sha256"])).encode()).hexdigest()
     out: Dict[str, Any] = {"params_changed": False, "stats_changed": False, "readme_changed": False,
-                           "space_synced": False, "guard_failed": False}
+                           "space_synced": False, "guard_failed": False, "noise_only": []}
     stats = compute_stats(ctx, q, loo=loo, data_sha=data_sha)
     out["stats"] = stats
     out["quality_fit_n"] = q.n
     if guard and not stats["guard"].get("ok", True):
         out["guard_failed"] = True
         return out
+    shown = stats
     if params_out is not None:
-        out["params_changed"] = write_params(export_params(st, q, off, meta), Path(params_out))
+        params = export_params(st, q, off, meta)
+        if _noise_only(Path(params_out), params, PARAMS_NOISE) is not None:
+            out["noise_only"].append(Path(params_out).name)
+        else:
+            out["params_changed"] = write_params(params, Path(params_out))
     if stats_out is not None:
-        out["stats_changed"] = _write_json(Path(stats_out), stats)
+        published = _noise_only(Path(stats_out), stats, STATS_NOISE)
+        if published is not None:
+            out["noise_only"].append(Path(stats_out).name)
+            shown = published
+        else:
+            out["stats_changed"] = _write_json(Path(stats_out), stats)
     if readme is not None:
-        out["readme_changed"] = update_readme(Path(readme), stats)
+        out["readme_changed"] = update_readme(Path(readme), shown)
     if space_contrib is not None and Path(contrib).exists():
         sp = Path(space_contrib)
         if sp.parent.parent.exists():
@@ -1655,6 +1696,9 @@ def cmd_refit(a: argparse.Namespace) -> int:
         print("  refit refused: the contributions worsen the model on the team's own runs; nothing was written",
               file=sys.stderr)
         return 3
+    if out["noise_only"]:
+        print(f"  no material change: left {', '.join(out['noise_only'])} untouched (the new fit differs from the "
+              f"published numbers by floating-point noise only)")
     changed = [k for k in ("params_changed", "stats_changed", "readme_changed", "space_synced") if out[k]]
     print("  changed: " + (", ".join(changed) or "nothing"))
     return 0

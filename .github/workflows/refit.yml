@@ -5,6 +5,8 @@
 # * `--guard` makes the refit fail (and open nothing) when the contributions worsen the model on the team's own
 #   runs (built-in in-sample or pair-validation MAE) by more than 0.0001 bpb, or move a published base recipe's
 #   prediction by more than 0.001 bpb. See ffsim/contrib.py model_guard.
+# * A refit that moves the published numbers by floating-point noise only (the same data on this runner's BLAS)
+#   leaves the files untouched, so no pull request is opened. See ffsim/contrib.py PARAMS_NOISE.
 # * The token is never written to disk (persist-credentials: false); create-pull-request is the only step that
 #   receives it, after the install and the refit have finished. numpy comes from a hash-locked file, no cache.
 # * The refit pull request touches ffsim/model, contrib/stats.json, README.md and the space copy of the data, never

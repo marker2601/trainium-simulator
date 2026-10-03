@@ -26,3 +26,5 @@ Hey everyone 👋 FrontierForge here. Phase 1 is a wrap, and we've opened up the
 ⭐ **If it saves you even one chip hour, please star the repo.** Our simulator predicts that each star lowers our val_bpb by 0.0001 (MAE: ±infinity; we're still calibrating 😄). Stars are the only gradients we accept this phase.
 
 Congrats to the top 10, and good luck in Phase 2! 🏁
+
+_This is independent work. It is not affiliated with, sponsored by or endorsed by Amazon Web Services or the AWS Trainium Frontier organisers._

@@ -29,3 +29,8 @@ are byte-identical to the files we uploaded to the challenge (sha256 in
 recipes/README.md), so no further notice was inserted into them.
 
 The organiser's prepare.py, README, tokenizer and data are not redistributed.
+
+Exception: recipes/K82s4/train.py, recipes/K60/train.py and
+ffsim/gpu/train_gpu.py are modified versions of Apache-2.0 files from the
+organiser's kit and remain under the Apache License 2.0
+(recipes/LICENSE-APACHE-2.0).

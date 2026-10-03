@@ -328,13 +328,10 @@ paid is an owner TODO in a LaTeX comment.
 
 ## Decisions recorded
 
-1. **Acknowledgements and the "no personal names" rule.** The workflow's computed task said "never personal names of
-   other people", but the owner's own request asked to thank Shiv and Danish for helping, and Ritwika for her paper
-   (she did not help). The owner's request takes precedence. The acknowledgement now reads: "We thank Danish Ali and
-   Shiv for their help during the campaign, and Ritwika Kancharla, whose public write-up of her own approach to the
-   contest [cite] we learned from." It does not say she helped. The names appear only in the acknowledgements, which
-   `\anonymoustrue` hides. **Owner to confirm:** the spelling "Danish Ali", Shiv's surname, and that all three agree
-   to be named.
+1. **Acknowledgements and personal names.** The owner decided (2 Oct 2026) not to name other participants: the help
+   was informal discussion, and they should not be drawn into the paper. The acknowledgement now thanks "fellow
+   participants for informal discussions during the challenge" without names. The one public write-up we learned from
+   stays cited as an ordinary reference in Related Work.
 2. **Ritwika Kancharla's write-up** was found on her public portfolio: *Trainium of Thought: Model and Kernel
    Co-Design under a 30-Minute Training Budget*. It is cited in related work as an example of another participant's
    write-up. None of its scores or ranks are reported.

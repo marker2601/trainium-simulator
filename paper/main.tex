@@ -1,0 +1,100 @@
+% main.tex -- FrontierForge Phase 1 paper (revision 1, 1 October 2026; see RESPONSE.md for the changes).
+%
+% Venue-agnostic article layout. To move it into an arXiv, TMLR or workshop template, keep the body
+% (\input{sections/...}), numbers.tex and the \ffdef / \val definitions below, and swap the preamble.
+% Build:   latexmk -pdf main.tex      (from paper/; see README.md)
+% Numbers: every data-derived number is \val{key}, defined in numbers.tex, which
+%          paper/analysis/make_all.py regenerates from the repository's data. Do not type numbers by hand.
+% Figures: every figure is generated at its printed width by paper/analysis (figures/*.pdf); place it at that width.
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[letterpaper,margin=1in]{geometry}   % text width 6.5 in = 469.75 pt; the figures are drawn for it
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[round]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage[nameinlink]{cleveref}
+
+\usepackage[section]{placeins}   % floats never drift past the end of their section
+
+\graphicspath{{figures/}}
+\setlist{nosep,leftmargin=*}
+\setlength{\parskip}{0.25em}
+
+% Float placement: let pages fill with floats rather than defer them.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+
+% ---------------------------------------------------------------- double-blind switch
+% \anonymoustrue for MLSys / TMLR / other double-blind venues: hides the author block, the acknowledgements and
+% the repository URL (the reproducibility statement then points to "an anonymised repository").
+% \anonymousfalse (default) for arXiv and the camera-ready version.
+\newif\ifanonymous
+\anonymousfalse
+
+% ---------------------------------------------------------------- generated numbers
+% \ffdef{key}{value} stores a value; \val{key} prints it, or a loud ??key?? and a warning if it is undefined.
+\newcommand{\ffdef}[2]{\expandafter\def\csname ffv@#1\endcsname{#2}}
+\DeclareRobustCommand{\val}[1]{%
+  \ifcsname ffv@#1\endcsname\csname ffv@#1\endcsname
+  \else\textbf{??#1??}\PackageWarning{ffnumbers}{Undefined value `#1'}\fi}
+\input{numbers}
+
+% ---------------------------------------------------------------- notation (Appendix~\ref{app:notation})
+\newcommand{\valbpb}{val\_bpb}
+\newcommand{\ffsim}{\texttt{ffsim}}
+% \knob{FF_X=a,b}: a knob setting in running text. It is a url-style command, so underscores need no escaping and
+% the line may break after , : = or _. Keep it out of captions and section titles (moving arguments).
+\DeclareUrlCommand\knob{\urlstyle{tt}\def\UrlBreaks{\do\,\do\:\do\=\do\_}}
+\newcommand{\upl}[1]{\textsf{#1}}   % an upload / recipe name, e.g. \upl{K82s4}
+\newcommand{\docnum}{\textsuperscript{$\dagger$}}   % marks a number quoted from a campaign document (Appendix~\ref{app:docfacts})
+
+\title{Rehearse, Don't Guess:\\[2pt]
+  \large Deterministic Rehearsal, a Run Simulator and the Price of a Step on AWS Trainium}
+
+\ifanonymous
+  \author{Anonymous authors}
+\else
+  % Add an e-mail inside \thanks{} if the venue asks for one.
+  \author{Jagadeesh Kumar Gorla\thanks{Independent researcher (team FrontierForge, AWS Trainium Frontier challenge).}}
+\fi
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+
+\input{sections/introduction}
+\input{sections/related}
+\input{sections/setting}
+\input{sections/oracle}
+\input{sections/simulator}
+\input{sections/findings}
+\input{sections/contrib}
+\input{sections/limitations}
+\input{sections/conclusion}
+\input{sections/statements}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\clearpage
+\appendix
+\input{sections/appendix}
+
+\end{document}

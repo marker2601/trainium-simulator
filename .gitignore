@@ -28,3 +28,20 @@ research/sim-data/chipC/*
 !research/sim-data/chipC/1639_R_m14asa_s73/
 !research/sim-data/chipC/0816_R_g7lk35_s73/
 !research/sim-data/chipC/_meta/
+
+# Contribution-check workflow scratch output
+contrib-check/
+
+# Paper build outputs (LaTeX aux files, local PDF, Overleaf/arXiv bundle)
+paper/build/
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/*.toc
+paper/main.pdf
+paper/analysis/__pycache__/

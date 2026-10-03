@@ -1,0 +1,66 @@
+# After contributed runs land on main: refit the simulator and open (or update) a pull request with the refreshed
+# JSON model, statistics and README line. It never pushes to main: a maintainer merges the refit like any change,
+# and that merge is an ordinary push that runs CI.
+#
+# * `--guard` makes the refit fail (and open nothing) when the contributions worsen the model on the team's own
+#   runs (built-in in-sample or pair-validation MAE) by more than 0.0001 bpb, or move a published base recipe's
+#   prediction by more than 0.001 bpb. See ffsim/contrib.py model_guard.
+# * The token is never written to disk (persist-credentials: false); create-pull-request is the only step that
+#   receives it, after the install and the refit have finished. numpy comes from a hash-locked file, no cache.
+# * The refit pull request touches ffsim/model, contrib/stats.json, README.md and the space copy of the data, never
+#   research/sim-data/contrib, so merging it does not trigger this workflow again.
+name: Refit on contributed runs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/sim-data/contrib/**"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: refit
+  cancel-in-progress: false
+
+jobs:
+  refit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: Install (hash-locked, binary wheels only)
+        run: 'python -m pip install --require-hashes --only-binary :all: -r requirements-lock.txt'
+      - name: Refit (built-in + contributed runs), refusing a change that hurts the built-in fit
+        run: python -m ffsim contrib refit --readme README.md --sync-space --guard
+      - name: Open or update the refit pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ github.token }}
+          branch: refit/contrib
+          base: main
+          add-paths: |
+            ffsim/model/params.json
+            contrib/stats.json
+            README.md
+            space/research/sim-data/contrib/runs-contrib.jsonl
+          commit-message: "Refit the simulator on contributed runs"
+          title: "Refit the simulator on contributed runs"
+          body: |
+            Automatic refit after contributed runs were merged (`python -m ffsim contrib refit --guard`).
+            The guard passed: the model's error on the team's own runs did not get worse by more than the
+            threshold. `contrib/stats.json` has the numbers. Close and reopen this pull request to run CI
+            before merging (pull requests opened with the workflow token do not start it).
+          labels: contrib
+          delete-branch: true
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"

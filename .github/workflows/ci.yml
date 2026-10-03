@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: tests (numpy surrogate, no GPU or Trainium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: python -m pip install -r requirements.txt pytest
+      - name: Test suite
+        # Nothing here needs a GPU, torch or a Trainium chip: the GPU-proxy tests use fake runners, tests that need
+        # the private chip harvest skip themselves, and the app tests skip without gradio (the next job runs them).
+        run: python -m pytest -q -p no:cacheprovider tests
+      - name: Contribution schema and statistics are consistent
+        run: |
+          python -m ffsim contrib schema --out contrib/schema.json
+          git diff --exit-code contrib/schema.json
+          python -m ffsim contrib stats
+
+  app:
+    name: Gradio app imports and serves its API
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: python -m pip install -r space/requirements.txt pytest
+      - name: Import the app (fits the models and builds the UI; does not launch a server)
+        working-directory: space
+        run: >-
+          python -c "import app; names = {d.get('api_name') for d in app.demo.config['dependencies']};
+          missing = {'predict', 'predict_overrides', 'speed_to_score', 'score_to_speed', 'contrib_record'} - names;
+          assert not missing, missing; print('app ok:', sorted(n for n in names if n))"
+      - name: App and contribution tests
+        run: python -m pytest -q -p no:cacheprovider tests/test_contrib.py

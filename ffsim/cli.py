@@ -1,4 +1,4 @@
-"""python -m ffsim: harvest | build-dataset | fit | validate | simulate | search | report | gpu <sub>.
+"""python -m ffsim: harvest | build-dataset | fit | validate | simulate | search | report | contrib <sub> | gpu <sub>.
 
 Every subcommand runs with numpy + stdlib only and prints a one-screen summary. The modules other
 agents own (dataset, parse_*, steptime, quality, offset, harvest) are imported lazily inside the
@@ -37,6 +37,7 @@ DEFAULT_PAIRS = SIM_DATA / "validation-pairs.json"
 DEFAULT_UPLOADS = SIM_DATA / "official-uploads.csv"
 DEFAULT_MODELS = SIM_DATA / "models.pkl"
 DEFAULT_MONITOR = SIM_DATA / "monitor-runs.csv"
+DEFAULT_CONTRIB = SIM_DATA / "contrib" / "runs-contrib.jsonl"   # community runs (ffsim/contrib.py)
 DEFAULT_EXPERIMENTS = REPO / "research" / "experiments.csv"
 EXAMPLES = Path(__file__).resolve().parent / "examples"
 
@@ -288,6 +289,14 @@ def _load_inputs(args: argparse.Namespace) -> Dict[str, Any]:
     ds = _import("ffsim.dataset")
     load = _first(ds, NAMES["load"], "load runs.jsonl")
     records = _as_list(load(str(runs)))
+    contrib = str(getattr(args, "contrib", None) or "none")
+    n_contrib = 0
+    if contrib.lower() != "none" and Path(contrib).exists():
+        from ffsim.contrib import load_contrib
+        extra = [r for r, _ in load_contrib(Path(contrib))]
+        n_contrib = len(extra)
+        records = records + extra
+        _p(f"contrib: + {n_contrib} contributed runs from {contrib}")
     pairs: Any = []
     pp = _resolve(str(getattr(args, "pairs", None) or DEFAULT_PAIRS))
     if pp.exists():
@@ -481,6 +490,10 @@ def gpu_argv(rest: Sequence[str]) -> List[str]:
     return out
 
 
+def cmd_contrib(args: argparse.Namespace) -> int:
+    return int(_import("ffsim.contrib").main(gpu_argv(list(args.rest))) or 0)
+
+
 def cmd_gpu(args: argparse.Namespace) -> int:
     sub = args.gpu_cmd
     rest = gpu_argv(list(args.rest))
@@ -524,6 +537,8 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--runs", default=str(DEFAULT_RUNS), help="runs.jsonl from build-dataset")
         p.add_argument("--pairs", default=str(DEFAULT_PAIRS), help="validation-pairs.json")
         p.add_argument("--uploads", default=str(DEFAULT_UPLOADS), help="official-uploads.csv")
+        p.add_argument("--contrib", default=str(DEFAULT_CONTRIB),
+                       help="contributed runs appended to --runs when the file exists ('none' = built-in data only)")
 
     def data_args(p: argparse.ArgumentParser) -> None:
         fit_args(p)
@@ -578,6 +593,11 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--top", type=int, default=20)
     r.add_argument("--confirm-seeds", type=int, nargs="+", default=[73, 58, 67])
     r.set_defaults(fn=cmd_report)
+
+    c = sub.add_parser("contrib", help="community runs: validate | ingest | refit | stats | schema | issue-url <args>",
+                       description="Delegates to ffsim.contrib.main; `contrib <sub> --help` shows its options.")
+    c.add_argument("rest", nargs=argparse.REMAINDER, help="passed through to ffsim.contrib")
+    c.set_defaults(fn=cmd_contrib)
 
     g = sub.add_parser("gpu", help="route 2, the equal-steps GPU proxy (ffsim/gpu): plan | schedule | run | report | "
                                    "verdict | from-search | prices | calibrate | make-train | launch <args>",

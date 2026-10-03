@@ -1,6 +1,8 @@
 """Build every figure for the README and the paper from the repository's own data.
 
-    python docs/figures/make_figures.py      # writes <name>.svg, <name>.png (200 dpi) and <name>.pdf for each figure
+    python docs/figures/make_figures.py          # writes <name>.svg, <name>.png (200 dpi) and <name>.pdf for each figure
+    python docs/figures/make_figures.py --paper  # writes paper/<name>.pdf only: no figure title, subtitle or footnote
+                                                 # (the LaTeX caption carries them); used by paper/main.tex
 
 One script and one style serve both the README (SVG) and the paper (PDF). Inputs (nothing else is read):
     results/official-scores.csv                  official val_bpb per upload, chip rehearsal, steps, offset
@@ -116,12 +118,15 @@ LINE_W = 2.0
 DOT = 7.5          # marker size in points
 RING = 1.6         # surface ring around dots
 META = {"svg": {"Date": None}, "png": {"Software": None}, "pdf": {"CreationDate": None, "ModDate": None}}
+PAPER = False      # --paper: PDF only, into docs/figures/paper/, without the in-figure title block and footnote
 
 
 def save(fig, name: str) -> list:
     out = []
-    for ext in ("svg", "png", "pdf"):
-        p = HERE / f"{name}.{ext}"
+    if PAPER:
+        (HERE / "paper").mkdir(exist_ok=True)
+    for ext in (("pdf",) if PAPER else ("svg", "png", "pdf")):
+        p = (HERE / "paper" / f"{name}.{ext}") if PAPER else (HERE / f"{name}.{ext}")
         kw = {"dpi": 200} if ext == "png" else {}
         fig.savefig(p, format=ext, bbox_inches="tight", pad_inches=0.25, metadata=META[ext], **kw)
         out.append(p)
@@ -130,12 +135,16 @@ def save(fig, name: str) -> list:
 
 
 def header(fig, title: str, subtitle: str) -> None:
+    if PAPER:
+        return
     fig.text(0.0, 1.0, title, ha="left", va="bottom", fontsize=13.5, fontweight="bold", color=INK,
              transform=fig.transFigure)
     fig.text(0.0, 0.985, subtitle, ha="left", va="top", fontsize=9.5, color=INK_2, transform=fig.transFigure)
 
 
 def footnote(fig, text: str, y: float = -0.02) -> None:
+    if PAPER:
+        return
     fig.text(0.0, y, text, ha="left", va="top", fontsize=8, color=INK_3, transform=fig.transFigure,
              linespacing=1.5)
 
@@ -691,7 +700,9 @@ def fig_simulator() -> list:
     return save(fig, "simulator_pairs")
 
 
-def main() -> int:
+def main(argv: list = None) -> int:
+    global PAPER
+    PAPER = "--paper" in (sys.argv[1:] if argv is None else argv)
     rows = load_scores()
     written = []
     written += fig_score_history(rows)

@@ -398,6 +398,79 @@ def test_ingest_refit_stats_end_to_end(tmp_path):
 
     again = C.refit(RUNS, contrib, PAIRS, UPLOADS, params, stats, readme, space)
     assert not any(again[k] for k in ("params_changed", "stats_changed", "readme_changed", "space_synced"))
+    assert again["noise_only"] == []
+
+
+def test_json_close_tolerates_float_noise_only():
+    # a coefficient and a zero-up-to-noise step-time coefficient as the first automatic refit pull request moved them
+    a = {"beta": [0.9643896967, -4.067522268e-05, 6.718584022e-15], "n": 131, "sha": "ab", "ok": True, "x": None}
+    noisy = copy.deepcopy(a)
+    noisy["beta"][1:] = [-4.067522171e-05, -2.029626467e-15]
+    assert C.json_close(a, noisy, *C.PARAMS_NOISE)
+    for over in ({"n": 132}, {"sha": "ac"}, {"ok": False}, {"x": 0.0}, {"extra": 1}, {"beta": [0.9643896967]},
+                 {"beta": [0.9644896967, -4.067522268e-05, 6.718584022e-15]}, {"ok": 1}):
+        assert not C.json_close(a, {**a, **over}, *C.PARAMS_NOISE), over
+
+
+def _nudge(x, rel, abs_):
+    """Every float in a JSON value moved by ``rel`` (relative) plus ``abs_``, as a refit on another BLAS build does."""
+    if isinstance(x, dict):
+        return {k: _nudge(v, rel, abs_) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_nudge(v, rel, abs_) for v in x]
+    return x * (1 + rel) + abs_ if isinstance(x, float) else x
+
+
+@needs_data
+def test_refit_leaves_published_files_alone_when_only_float_noise_differs(tmp_path, capsys):
+    """The same data refitted on another machine moves params.json around its 9th significant digit (the first
+    automatic refit pull request was only that) and can flip the last digit of a stats.json number. Such a refit
+    rewrites nothing, so the refit workflow finds no diff and opens no pull request."""
+    contrib = tmp_path / "c.jsonl"
+    C.ingest_records(_records(6), C.load_context(RUNS, contrib, PAIRS, UPLOADS), contrib)
+    params, stats, readme = tmp_path / "params.json", tmp_path / "stats.json", _readme(tmp_path)
+    C.refit(RUNS, contrib, PAIRS, UPLOADS, params, stats, readme, loo=False)
+    write_params(_nudge(load_params(params), 3e-8, 1e-14), params)
+    C._write_json(stats, _nudge(json.loads(stats.read_text(encoding="utf-8")), 1e-5, 1e-12))
+    published = {f: f.read_bytes() for f in (params, stats, readme)}
+
+    out = C.refit(RUNS, contrib, PAIRS, UPLOADS, params, stats, readme, loo=False)
+    assert out["noise_only"] == ["params.json", "stats.json"]
+    assert not any(out[k] for k in ("params_changed", "stats_changed", "readme_changed"))
+    assert {f: f.read_bytes() for f in published} == published
+    rc = C.main(["refit", "--runs", str(RUNS), "--contrib", str(contrib), "--pairs", str(PAIRS), "--uploads",
+                 str(UPLOADS), "--params-out", str(params), "--stats-out", str(stats), "--readme", str(readme),
+                 "--no-loo", "--guard"])
+    printed = capsys.readouterr().out
+    assert rc == 0 and "no material change: left params.json, stats.json untouched" in printed
+    assert "changed: nothing" in printed and {f: f.read_bytes() for f in published} == published
+
+
+@needs_data
+def test_refit_still_writes_a_material_change(tmp_path):
+    """A new contributed record always reaches params.json, stats.json and the README (the data hashes change; here
+    the fit moves too), and a published number that is off by more than noise is put back."""
+    contrib = tmp_path / "c.jsonl"
+    C.ingest_records(_records(6), C.load_context(RUNS, contrib, PAIRS, UPLOADS), contrib)
+    params, stats, readme = tmp_path / "params.json", tmp_path / "stats.json", _readme(tmp_path)
+    C.refit(RUNS, contrib, PAIRS, UPLOADS, params, stats, readme, loo=False)
+    before = load_params(params)
+    rec = good(recipe={"FF_COOLDOWN_FRAC": 0.7}, seed=67, chip_val_bpb=0.9562, steps=2401, contributor="newcomer")
+    assert all(r.ok for r in C.ingest_records([rec], C.load_context(RUNS, contrib, PAIRS, UPLOADS), contrib))
+
+    out = C.refit(RUNS, contrib, PAIRS, UPLOADS, params, stats, readme, loo=False)
+    assert out["params_changed"] and out["stats_changed"] and out["readme_changed"] and out["noise_only"] == []
+    after = load_params(params)
+    assert after["data"]["n_contrib_records"] == 7
+    assert not C.json_close(before["quality"]["beta"], after["quality"]["beta"], *C.PARAMS_NOISE)
+    assert json.loads(stats.read_text(encoding="utf-8"))["n_records"] == 7
+    assert "**7** from **4** named contributors" in readme.read_text(encoding="utf-8")
+
+    stale = copy.deepcopy(after)
+    stale["quality"]["beta"][0] *= 1 + 1e-5
+    write_params(stale, params)
+    out = C.refit(RUNS, contrib, PAIRS, UPLOADS, params, stats, readme, loo=False)
+    assert out["params_changed"] and out["noise_only"] == [] and load_params(params) == after
 
 
 @needs_data

@@ -13,3 +13,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Raise a requirement only when a release falls outside its range: the lower bounds in requirements*.txt
+    # stay as they are and the hash-locked numpy pin still gets new versions.
+    versioning-strategy: increase-if-necessary
+    ignore:
+      # numpy 2.5 needs Python >= 3.12; the workflows (and the paper's numbers) use Python 3.11.
+      - dependency-name: numpy
+        versions: [">=2.5"]

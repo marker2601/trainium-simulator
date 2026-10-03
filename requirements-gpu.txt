@@ -2,7 +2,7 @@
 # Install a CUDA build of PyTorch for your driver first (https://pytorch.org/get-started/locally/).
 # The organiser's prepare.py (github.com/aws-neuron/trainium-frontier) must be importable from the repo root.
 -r requirements.txt
-torch>=2.7
+torch>=2.14.0
 pyarrow
 tiktoken
 requests

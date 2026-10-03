@@ -1,0 +1,299 @@
+% sections/appendix.tex
+\section{The full upload ledger}
+\label{app:ledger}
+
+\Cref{tab:uploads} lists every scored upload (\val{n-scored} in total; \val{n-rehearsed} with a rehearsal). Dates
+are the upload day in US Central time, and a tilde marks a day reconstructed from the campaign ledger. Two
+organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a truncated duplicate run of
+\upl{F6} (\cref{sec:traps}). \Cref{fig:steps} shows the rehearsal step counts.
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Every scored upload} (\texttt{results/official-scores.csv}). Rehearsal and official in bpb
+    (official to four decimals; \upl{K82s4} and \upl{K82s7} were published to seven, \val{best-official-long} and
+    \val{salt7-official-long}). Offset $=$ official $-$ rehearsal, rounded half-up. $\bullet$: new best at the
+    time. \textsuperscript{s}\,salt chosen by a lottery; \textsuperscript{i}\,salt inherited from a lottery winner;
+    \textsuperscript{n}\,rehearsal normalised to chip-C speed. \upl{K65a}--\upl{K65d} were official tests and were
+    not rehearsed. The change descriptions spell out the ledger's internal shorthand.}
+  \label{tab:uploads}
+  \input{tables/uploads}
+\end{table}
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics{step_counts.pdf}
+  \caption{\textbf{Optimizer steps in the 30-minute budget}, from the cold rehearsal of each upload; the letter is
+    the chip. Shading marks the batch regime: a 131k-token batch before \upl{K24}, a constant 262k batch from
+    \upl{K24}, and from \upl{K50} a batch warm-up through 65k and 131k phases, which adds steps early in the run.
+    Step counts are comparable only within a regime and within a chip; hatched bars are chip~E, which ran slow.}
+  \label{fig:steps}
+\end{figure}
+
+\clearpage
+\section{Oracle details}
+\label{app:oracle}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Coverage of the expanding-window prediction intervals}: uploads inside the interval, with the
+    expected count in brackets, for two burn-in lengths (\cref{sec:oracle-holdout}).}
+  \label{tab:coverage}
+  \input{tables/oracle_coverage}
+\end{table}
+
+\section{Simulator internals}
+\label{app:sim}
+
+\subsection{Dataset}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Run records by instance} (\texttt{research/sim-data/runs.jsonl}). Chips A and B are the early
+    instances whose records come from a run table without a code version; chip D ran an older runtime. The final-day
+    chips E, G and H are not in the dataset.}
+  \label{tab:dataset}
+  \input{tables/dataset}
+\end{table}
+
+\subsection{Features and code eras}
+
+The quality surrogate reads \val{q-nbase-features} base features (\cref{tab:features}) and \val{q-nbowl-features}
+non-negative curvature (``bowl'') terms for tuned scalars, the squares of the corresponding base features. Every
+feature is centred on the \upl{K59} reference recipe, so the era intercept of the current code family is that recipe's
+predicted score at 2{,}300 steps on chip~C. The scale is the size of a typical campaign move; the ridge prior applies
+per scaled unit. \emph{Code eras} are groups of versions of our training script: M3 to M14 number the main lineage in
+order, and ``M9+'' groups the flag-gated versions from M9 on, whose new mechanisms are off unless a knob turns them on.
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Knob features of the quality surrogate} (\texttt{ffsim/quality.py}, \texttt{FEATURES}).}
+  \label{tab:features}
+  \input{tables/features}
+\end{table}
+
+\subsection{What the surrogate learned}
+
+\Cref{tab:coefficients} lists the knob coefficients furthest from zero in posterior-SD units. Read it with the
+support columns. A feature varied in a single run (\texttt{ce\_bf16}, \texttt{accum\_lr1}) or only inside early eras
+(\texttt{key\_offset\_off}, varied only in M3 and M4) is identified mostly by those runs and partly absorbs era
+differences. Such coefficients are bookkeeping for prediction, not causal effect sizes. The attention-source
+coefficient (\texttt{attn\_src}) rests on two runs, which is why the post-fit attention-source pairs were
+over-predicted (\cref{tab:postfit}).
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{The \val{coef-ntop} knob coefficients furthest from zero} in posterior-SD units, in $10^{-3}$ bpb
+    per scaled unit. ``Runs $\neq0$'' counts fitted runs in which the feature is non-zero, and ``Code eras'' the eras
+    those runs come from. Knob names omit the \texttt{FF\_} prefix.}
+  \label{tab:coefficients}
+  \input{tables/coefficients}
+\end{table}
+
+\subsection{Pair validation by family, forward in time, and on new mechanisms}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Leave one pair out (LOPO) and leave one knob value out (LOKVO) by pair family}, in $10^{-3}$ bpb.
+    The ``seed'' and ``chip'' families compare identical recipes and measure noise; ``cold upload rehearsals'' pairs
+    compare upload rehearsals.}
+  \label{tab:lopo-family}
+  \input{tables/lopo_family}
+\end{table}
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics{simulator_pairs.pdf}
+  \caption{\textbf{The quality surrogate on pairs it did not see} (leave one pair out, all \val{lopo-all-n} pairs;
+    values beyond $\pm4\times10^{-3}$ are drawn at the edge). Shaded quadrants mark a wrong predicted sign. Squares
+    are seed and chip pairs, which measure run-to-run noise rather than a recipe effect.}
+  \label{fig:pairs}
+\end{figure}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Temporal hold-out of the quality surrogate.} ``Supported'' pairs move only features that some run
+    in the restricted fit varied; ``prior-only'' pairs move a feature that no such run varied, so the model can only
+    return its prior for it. Cells give $n$: sign agreement.}
+  \label{tab:temporal}
+  \input{tables/temporal}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{The \val{postfit-n} pairs that finished after the release fit} ($10^{-3}$ bpb). Observed and
+    predicted values per pair are from \texttt{docs/simulator-report-20260929.md} \S5\docnum{} (the model was the
+    release fit, in the candidate convention); sign agreement, the Wilson interval and the MAE are computed by
+    \texttt{paper/analysis/simulator.py}. AS: attention-source variants; ALR: AdamW learning-rate change.}
+  \label{tab:postfit}
+  \input{tables/postfit}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Step-time model, end-to-end anchors and the offset model.} End-to-end rows compare the Monte Carlo
+    prediction at seed~73 with the measured upload (\texttt{docs/SIMULATOR.md}\docnum{}).}
+  \label{tab:sim-other}
+  \input{tables/sim_other}
+\end{table}
+
+The full validation reports, including support grading for every knob value, the leakage guard and every
+configuration tried, are \texttt{research/sim-data/steptime-validation.md}, \texttt{simulate-validation.md},
+\texttt{quality-validation.md} and \texttt{dataset-qa.md}.
+
+\subsection{The GPU proxy}
+\label{app:gpu}
+
+The proxy is built from four parts. \emph{A generated fork}: a patcher applies \val{gpu-patches}\docnum{} checked
+textual patches to the recipe, a check verifies that the committed fork is byte-identical to a fresh build, and the
+patcher refuses any anchor it cannot find exactly. \emph{A virtual charged clock}: every clock-keyed switch
+(accumulation phases, the eight multi-token prediction stages, cooldown levels, the EMA save and the stop) fires at the
+step number at which it fired on chip, computed from a chip log's per-phase step times; real GPU time is ignored.
+\emph{Data-world emulation}: the trainer reproduces the organiser loader's eight-rank sharding on one device, so each
+step sees the same tokens. \emph{Calibration before use}: no GPU verdict may influence a chip run until the proxy has
+reproduced pairs the campaign already paid for; an earlier proxy was rejected under this rule when one of its verdicts
+flipped sign. A GPU pair is void when its step-10 loss sits on a different warm-up path from its control. The shipped
+\texttt{--deterministic} flag uses PyTorch's \texttt{warn\_only=True}; paired verdicts need \texttt{warn\_only=False}.
+The protocol, runbook and patch notes are in \texttt{ffsim/gpu/}.
+
+\section{Seed sweeps}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Warm-up paths in three seed sweeps of a fixed recipe} (full chip runs that differ only in the
+    seed; $10^{-3}$ bpb). ``Spike'': step-10 loss $\ge$\val{spike-l10} nats; ``Interm.'': between \val{l10-interm-lo} and
+    \val{spike-l10}. The difference is a Welch mean difference with 95\% CI. Generated by
+    \texttt{paper/analysis/seeds.py}.}
+  \label{tab:seeds}
+  \input{tables/seed_paths}
+\end{table}
+
+\clearpage
+\section{The contribution pipeline}
+\label{app:contrib}
+
+\paragraph{The record.} One JSON object per run with a published schema: hardware, time budget, an optional
+published base recipe (\upl{K82s4}, \upl{K60}, \upl{K59}) plus only the knobs that were changed, seed, steps, the
+local rehearsal score and/or the official score, and an explicit consent flag. A run can be submitted through the
+local app, a GitHub issue form or the command line; the app and the command line only \emph{build} a pre-filled issue
+link and never send anything themselves.
+
+\paragraph{Validation.} A schema check run by a small built-in interpreter; a scan for anything that looks like a
+secret or personal data (access keys, account and resource identifiers, tokens, private keys, e-mail and host IP
+addresses), with the field named but the value never repeated; plausible ranges for every knob the model reads,
+rejection of non-finite numbers, and a finite feature vector and prediction; duplicate detection by a content hash;
+and an outlier check against the current model, which flags a record with $|z|>\val{guard-outlier-z}$ for the
+reviewer.
+
+\paragraph{Entering the fit.} Each (hardware, base recipe) combination gets its own fixed effect with the same prior
+as a chip. Runs shorter than \val{guard-min-steps} steps are stored but never fitted. A published base whose newest
+levers lie outside the data (\upl{K82s4}) is anchored to its measured rehearsal (\val{guard-anchor}) until its effect
+has data of its own.
+
+\paragraph{Review and merge.} Only a label added by an account with write access approves a record, and editing the
+issue afterwards removes it. The approval opens a pull request that appends the record exactly as approved, on a
+branch named by its content hash. Merging triggers a guarded refit whose output arrives as a second pull request;
+nothing pushes to the main branch. Workflows run with read-only tokens wherever possible, pin every action to a commit
+hash and never execute contributed content.
+
+\paragraph{Stress test.} \Cref{tab:guard} pushes synthetic records through the real validation and guard code in
+memory (\texttt{paper/analysis/contrib\_guard.py}). Honest records are the model's own prediction plus a hardware
+bias and seed-sized noise, on knob values the data has seen; they moved the base predictions by at most
+\val{guard-honest-c-shift} and were accepted. A single record 0.01~bpb worse than predicted was absorbed by its own
+hardware effect (base shift \val{guard-outlier-shift}) and was not flagged, because an unseen hardware effect widens
+the predictive SD. The coordinated attack was refused at every size tried, down to two records, which moved a
+published base prediction by \val{guard-attack-two-shift}.
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Refit-guard stress test.} Changes in $10^{-3}$ bpb: built-in in-sample MAE, pair-validation MAE
+    (leave one pair out), and the largest move of a published base recipe's prediction. ``Flagged'': records with
+    $|z|>\val{guard-outlier-z}$. The guard refuses a refit when either MAE worsens by more than
+    \val{guard-max-worse} or a base prediction moves by more than \val{guard-max-shift}.}
+  \label{tab:guard}
+  \input{tables/guard}
+\end{table}
+
+\clearpage
+\section{The final recipe}
+\label{app:recipe}
+
+\Cref{tab:hyper} lists the settings of \upl{K82s4} that the paper refers to, read from
+\texttt{ffsim/examples/recipe-K82s4.json}, which records all \val{k82-nknobs} knobs of
+\texttt{recipes/K82s4/train.py}. Most of the rest are switches for mechanisms that are off, or for profiling. The
+shuffle salt is a code constant, not a knob: \upl{K82s7} differs from \upl{K82s4} in that one line, and so is a
+different file with a different hash.
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Settings of the final recipe \upl{K82s4}.}}
+  \label{tab:hyper}
+  \input{tables/hyperparams}
+\end{table}
+
+\section{Derivations}
+\label{app:derivations}
+
+\paragraph{Step equivalents.} At the price $\kappa$ of \cref{eq:exchange}, a change $\Delta$ is worth the same as
+multiplying the step count by $\exp(|\Delta|/\kappa)$; the step equivalent in \cref{tab:levers} is that factor minus
+one.
+
+\paragraph{Compute needed for a gap.} Inverting \cref{eq:exchange}, closing a gap $g$ needs a compute ratio of
+$\exp(g/\kappa)$ (\cref{tab:gap}).
+
+\paragraph{Pair noise floor.} If each run's score has independent residual noise of SD $\sigma_q$, the difference of
+two single runs has SD $\sqrt2\,\sigma_q$ and mean absolute value $\sqrt2\,\sigma_q\sqrt{2/\pi}$, which is
+\val{pair-noise-floor} at $\hat\sigma_q=\val{q-sigma}$ and \val{pair-noise-floor-nofloor} at the unfloored estimate. No
+pair predictor can have a lower expected MAE on single-run pairs.
+
+\paragraph{Resolution of a difference.} If two uploads' oracle errors are independent with SD $s$, their difference
+has SD $\sqrt2\,s$ and a 95\% half-width of $1.96\sqrt2\,s$ (\cref{sec:resolution}).
+
+\paragraph{The winner's curse for salts.} Write a salt's rehearsal advantage as $a = \theta + \eta$, with true effect
+$\theta \sim \mathcal{N}(0, s_\theta^2)$ and a part $\eta\sim\mathcal{N}(0, s_\eta^2)$ that does not transfer to the
+official run. Then $\mathbb{E}[\theta \mid a] = \lambda a$ with $\lambda = s_\theta^2/(s_\theta^2 + s_\eta^2)$. With
+$s_\theta=\val{salt-sd-mid}$ and $s_\eta$ from 0.0002 to the since-\upl{K50} offset SD,
+$\lambda$ lies in \val{salt-shrink-lo}--\val{salt-shrink-hi} (\cref{sec:salts}).
+
+\paragraph{Prediction interval for the offset.} Under \cref{eq:offset} with $\gamma\equiv0$, and $\hat\mu$ and $s$
+estimated from $n$ uploads, $(y_{\text{new}} - r_{\text{new}} - \hat\mu)/(s\sqrt{1+1/n})$ follows a Student $t$
+distribution with $n-1$ degrees of freedom, which gives the bands of \cref{fig:offset-prospective} and the coverage
+levels of \cref{tab:coverage}.
+
+\section{Numbers quoted from campaign documents}
+\label{app:docfacts}
+
+Numbers marked \docnum{} in the text are quoted from the campaign documents in \texttt{docs/} (and two validation
+reports in \texttt{research/sim-data/}) because the records behind them are not released. They are registered once in
+\texttt{paper/analysis/docfacts.py}, \texttt{exchange.py} and \texttt{simulator.py}. \Cref{tab:docfacts} lists them.
+
+{\footnotesize
+\input{tables/docfacts}
+}
+
+\section{Notation}
+\label{app:notation}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Notation.}}
+  \label{tab:notation}
+  \small
+  \begin{tabular}{@{}lp{12.4cm}@{}}
+    \toprule
+    Symbol & Meaning \\
+    \midrule
+    $S$ & optimizer steps in the budget \\
+    $k$ & micro-batches (65{,}536 tokens each) accumulated per optimizer step; $\bar t_k$ the step time of that phase \\
+    $\kappa$, $\rho$ & the price of a step: $\kappa=\val{kappa}$ bpb per unit $\ln S$; $\rho=\kappa/100$ per 1\% of steps (\cref{eq:exchange}) \\
+    $r_i$, $y_i$ & rehearsal and official score of upload $i$ \\
+    $\mu$, $\gamma_c$ & text part and chip part of the offset (\cref{eq:offset}) \\
+    $\sigma_{\text{off}}$, $s$ & SD of the offset residual, and its sample estimate \\
+    $T$, $t_{\text{res}}$ & charged-time target and the stop reserve (\cref{eq:decomp}) \\
+    $q$, $L$ & rehearsal score predicted by the surrogate, and $L=\ln(S/2300)$ (\cref{eq:quality}) \\
+    $\alpha$, $\gamma$, $b$, $c$, $\beta_j$, $u$ & surrogate era, chip, step, curvature, knob and seed effects \\
+    $\sigma_q$, $s_j$, $m$ & surrogate residual SD, prior SDs and prior means \\
+    $\varepsilon$ & residual noise (offset or surrogate, by context) \\
+    $\lambda$, $s_\theta$, $s_\eta$ & winner's-curse shrinkage and its two SDs (\cref{app:derivations}) \\
+    \bottomrule
+  \end{tabular}
+\end{table}

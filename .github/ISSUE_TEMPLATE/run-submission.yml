@@ -1,0 +1,55 @@
+name: Submit a training run
+description: Share one Trainium (or GPU-proxy) run so the simulator can learn from it. Everything you submit becomes public.
+title: "[run] "
+labels: ["run-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping the simulator learn. Paste **one** run record as JSON below
+        (format: [`contrib/schema.json`](https://github.com/marker2601/trainium-simulator/blob/main/contrib/schema.json);
+        the "Add my runs" tab of the app, or `python -m ffsim contrib issue-url my-run.json`, fills this in for you).
+
+        **This issue is public the moment you submit it**, including its edit history. A GitHub Action checks the
+        record and comments the result here; edit the issue to fix anything it reports. A maintainer reviews a valid
+        record and approves it with a label, which opens a pull request; merged runs refit the simulator.
+
+        **Do not include** AWS account ids, instance ids, ARNs, keys, tokens, e-mail or IP addresses, here or in the
+        free-text box below: anything that looks like one is rejected and the issue text is replaced by a notice. If
+        you pasted a real credential, rotate it. `contributor` is optional; if you set it, it must be your own GitHub
+        login.
+  - type: textarea
+    id: record
+    attributes:
+      label: Run record (JSON)
+      description: One JSON object. With a base_recipe (K82s4, K60, K59), list only the FF_* knobs you changed.
+      render: json
+      placeholder: |
+        {
+         "schema_version": "1",
+         "hardware": "trn2.3xlarge",
+         "time_budget_s": 1800,
+         "base_recipe": "K82s4",
+         "recipe": {"FF_COOLDOWN_FRAC": "0.65"},
+         "seed": 58,
+         "chip_val_bpb": 0.9551,
+         "steps": 2390,
+         "contributor": "your-github-login",
+         "consent": true
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else (optional)
+      description: Free text for the reviewer. It is public and scanned like the record, but not added to the dataset.
+    validations:
+      required: false
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Consent
+      options:
+        - label: I agree that this record becomes public in the trainium-simulator repository (data under CC-BY-4.0, code under MIT), that it may be used to fit and evaluate the simulator, and that it contains no secrets, account ids or personal data.
+          required: true

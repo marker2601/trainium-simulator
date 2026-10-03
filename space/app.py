@@ -22,6 +22,9 @@ if str(HERE) not in sys.path:
 
 import numpy as np  # noqa: E402
 
+from ffsim.contrib import (APPROVAL_LABEL, BASE_RECIPES, CONSENT_TEXT, HARDWARE, build_issue_url,  # noqa: E402
+                           build_plain_issue_url, contrib_fit_records, contributor_counts, load_contrib,
+                           validate_record)
 from ffsim.dataset import load_runs  # noqa: E402
 from ffsim.offset import OffsetModel  # noqa: E402
 from ffsim.quality import FEATURES, QualityModel, knob_features  # noqa: E402
@@ -36,6 +39,7 @@ SIM_DATA = HERE / "research" / "sim-data"
 RUNS = SIM_DATA / "runs.jsonl"
 PAIRS = SIM_DATA / "validation-pairs.json"
 UPLOADS = SIM_DATA / "official-uploads.csv"
+CONTRIB = SIM_DATA / "contrib" / "runs-contrib.jsonl"   # merged community runs (synced by the refit workflow)
 
 # Fill these two in before publishing (HF sets SPACE_ID itself inside a running Space).
 GITHUB_REPO_URL = os.environ.get("FF_GITHUB_REPO_URL", "https://github.com/Marker2601/trainium-simulator")
@@ -58,20 +62,39 @@ MAX_SD = 0.01                   # refuse a prediction whose own local-bpb sd exc
 
 
 # --------------------------------------------------------------------------- model fit at start-up
+CONTRIB_SKIPPED: List[str] = []
+try:            # load_contrib already skips bad lines; this guard only keeps a broken file from stopping the app
+    CONTRIB_ROWS = load_contrib(CONTRIB, skipped=CONTRIB_SKIPPED)
+except Exception as _e:  # noqa: BLE001
+    CONTRIB_ROWS, CONTRIB_SKIPPED = [], [f"contributed runs not loaded ({type(_e).__name__})"]
+CONTRIB_HASHES = {m.get("content_hash") for _, m in CONTRIB_ROWS if m.get("content_hash")}
+CONTRIB_COUNTS = contributor_counts(CONTRIB_ROWS)
+MAX_CONTRIB_TEXT = 20000        # characters of any free-text input to /contrib_record, checked before parsing
+
+
 def fit_models() -> Tuple[Models, Dict[str, float]]:
     """Fit the three route-1 models from the shipped tables (same inputs as `python -m ffsim fit`)."""
     t0 = time.perf_counter()
-    records = list(load_runs(str(RUNS)))
+    builtin = list(load_runs(str(RUNS)))
+    contrib = contrib_fit_records(CONTRIB_ROWS)
+    records = builtin + contrib
     with open(PAIRS, "r", encoding="utf-8") as f:
         pairs = json.load(f)
     if isinstance(pairs, dict):
         pairs = pairs.get("pairs", pairs)
     t1 = time.perf_counter()
     st = StepTimeModel()
-    st = st.fit(records) or st
+    st = st.fit(records) or st      # the step-time model never reads contributed runs (no per-phase step times)
     t2 = time.perf_counter()
-    q = QualityModel()
-    q = q.fit(records, pairs) or q
+    try:        # one bad contributed record must never stop the app: fall back to the built-in data
+        q = QualityModel()
+        q = q.fit(records, pairs) or q
+    except Exception as e:  # noqa: BLE001
+        CONTRIB_SKIPPED.append(f"fit with contributed runs failed ({type(e).__name__}): built-in data only")
+        print("app: " + CONTRIB_SKIPPED[-1], file=sys.stderr)
+        records = builtin
+        q = QualityModel()
+        q = q.fit(records, pairs) or q
     t3 = time.perf_counter()
     off = OffsetModel()
     off = off.fit(str(UPLOADS)) or off
@@ -185,6 +208,7 @@ def build_bases(models: Models) -> Dict[str, Base]:
 
 T_START = time.perf_counter()
 MODELS, FIT_TIMINGS = fit_models()
+BUILTIN_RECORDS = list(load_runs(str(RUNS)))
 BASES = build_bases(MODELS)
 BASE_CHOICES = [(b.label, b.key) for b in BASES.values()]
 DEFAULT_BASE = "K82s4"
@@ -826,6 +850,131 @@ def score_to_speed(base_score: float = BEST_OFFICIAL, target_score: float = TOP1
         return f"**Error:** {e}", {"error": str(e)}
 
 
+# --------------------------------------------------------------------------- add my runs (community contributions)
+INT_FIELDS = ("seed", "chip_eval_tokens", "steps")
+NUM_FIELDS = ("time_budget_s", "chip_val_bpb", "official_val_bpb", "step_seconds")
+CONTRIB_SHARED_MD = f"""
+**Help the simulator learn from your runs.** Every merged submission is added to the training data and the models
+in the repository are refitted on it (the refit reports the error on contributed runs before and after,
+leave-one-out, and refuses a change that makes the model worse on the team's own runs).
+
+**What is shared:** exactly the JSON shown below, nothing else: hardware type, time budget, the `FF_*` knob values
+(only the ones you changed when you start from a published recipe), seed, steps, your val_bpb score(s), optional
+step time, date, notes and a public handle. It becomes a public GitHub issue and, after review, a line in
+`research/sim-data/contrib/runs-contrib.jsonl` (data under CC-BY-4.0). This page sends nothing anywhere: the
+button only builds a link; you open it, check it, and submit the issue yourself.
+
+**Never included, and rejected if present:** AWS account ids, instance ids, ARNs, keys or tokens, e-mail or IP
+addresses. Use a public handle, not your name, if you want credit.
+
+**What happens next:** the issue is public as soon as you submit it. A GitHub Action re-checks the record and
+comments the result; a maintainer reviews it and adds the `{APPROVAL_LABEL}` label, which opens a pull request; the
+merge triggers a refit of the repository's model. Unusual results are flagged for the reviewer, never rejected for
+being surprising. A hosted copy of this app picks up merged runs when its maintainers redeploy it. Details:
+`CONTRIBUTING.md` in the repository.
+
+<sub>Consent text: {CONSENT_TEXT}</sub>
+"""
+
+
+def _blank(v: Any) -> bool:
+    if v is None:
+        return True
+    if isinstance(v, str):
+        return not v.strip()
+    if isinstance(v, float):
+        return not math.isfinite(v)
+    return False
+
+
+def _truthy(v: Any) -> bool:
+    if isinstance(v, str):
+        return v.strip().lower() in ("1", "true", "yes", "y", "on", "x")
+    return bool(v)
+
+
+def contrib_record(hardware: str = "trn2.3xlarge", hardware_other: str = "", time_budget_s: float = 1800,
+                   base_recipe: str = "K82s4", code_version: str = "", recipe: str = "", seed: Optional[float] = None,
+                   chip_val_bpb: Optional[float] = None, chip_eval_tokens: Optional[float] = 2097152,
+                   official_val_bpb: Optional[float] = None, steps: Optional[float] = None,
+                   step_seconds: Optional[float] = None, date: str = "", framework_notes: str = "",
+                   contributor: str = "", consent: Any = False) -> Dict[str, Any]:
+    """API: one run's fields -> {"ok", "errors", "warnings", "flags", "record", "content_hash", "prediction",
+    "usable_for_fit", "issue_url", "issue_url_plain"}. recipe: 'FF_KNOB=value ...' or a JSON object (only the knobs
+    you changed when base_recipe is K82s4 / K60 / K59). Nothing is sent anywhere: open issue_url to submit."""
+    try:
+        for name, v in (("recipe", recipe), ("framework_notes", framework_notes), ("hardware_other", hardware_other),
+                        ("code_version", code_version), ("date", date), ("contributor", contributor)):
+            if isinstance(v, str) and len(v) > MAX_CONTRIB_TEXT:
+                return {"ok": False, "errors": [f"{name} is longer than {MAX_CONTRIB_TEXT:,} characters"],
+                        "warnings": [], "flags": [], "record": None, "issue_url": None, "issue_url_plain": None}
+        vals = {"hardware": hardware, "hardware_other": hardware_other, "time_budget_s": time_budget_s,
+                "base_recipe": base_recipe, "code_version": code_version, "seed": seed, "chip_val_bpb": chip_val_bpb,
+                "chip_eval_tokens": chip_eval_tokens, "official_val_bpb": official_val_bpb, "steps": steps,
+                "step_seconds": step_seconds, "date": date, "framework_notes": framework_notes,
+                "contributor": contributor}
+        rec: Dict[str, Any] = {"schema_version": "1"}
+        for k, v in vals.items():
+            if _blank(v):
+                continue
+            if k in INT_FIELDS:
+                f = float(v)
+                rec[k] = int(f) if f.is_integer() else f
+            elif k in NUM_FIELDS:
+                rec[k] = float(v)
+            else:
+                rec[k] = str(v).strip()
+        if _blank(chip_val_bpb):
+            rec.pop("chip_eval_tokens", None)
+        rec["recipe"] = parse_overrides(recipe)
+        rec["consent"] = _truthy(consent)
+        res = validate_record(rec, quality=MODELS.quality, existing_hashes=CONTRIB_HASHES, builtin=BUILTIN_RECORDS,
+                              offset_mean=float(MODELS.offset.mean), contributor_counts=CONTRIB_COUNTS)
+        out = res.to_dict()
+        out.pop("run_record", None)
+        out["issue_url"] = out["issue_url_plain"] = None
+        if res.ok:
+            try:
+                out["issue_url"] = build_issue_url(res.record)
+                out["issue_url_plain"] = build_plain_issue_url(res.record)
+            except ValueError as e:
+                out["warnings"].append(str(e))
+        return out
+    except Exception as e:  # noqa: BLE001 - show the error instead of a stack trace
+        return {"ok": False, "errors": [_err(e)], "warnings": [], "flags": [], "record": None,
+                "issue_url": None, "issue_url_plain": None}
+
+
+def format_contrib(res: Dict[str, Any]) -> str:
+    if not res.get("ok"):
+        return "### Not ready to submit\n\n" + "\n".join(f"- {e}" for e in res.get("errors") or ["unknown error"])
+    lines = ["### Valid: ready to submit", ""]
+    if res.get("issue_url"):
+        lines.append(f"**[Open the pre-filled GitHub issue]({res['issue_url']})** (review it, tick the consent box, "
+                     f"submit). If the form does not open pre-filled, use the [plain issue]({res['issue_url_plain']}) "
+                     "or paste the JSON below into the form.")
+    else:
+        lines.append("Copy the JSON below into the run-submission issue form on GitHub.")
+    p = res.get("prediction")
+    if p:
+        lines += ["", f"The current model predicted {p['predicted_bpb_2m']:.5f} +- {p['sd']:.5f} for this run; you "
+                      f"measured {p['observed_bpb_2m']:.5f} (z = {p['z']:+.1f})."]
+    lines += ["", f"Used for fitting: {'yes' if res.get('usable_for_fit') else 'no (stored only)'}; content hash "
+                  f"`{(res.get('content_hash') or '')[:12]}`."]
+    if res.get("warnings"):
+        lines += ["", "**Notes:**"] + [f"- {w}" for w in res["warnings"]]
+    if res.get("flags"):
+        lines += ["", "Flags for the reviewer: " + ", ".join(f"`{f}`" for f in res["flags"])]
+    return "\n".join(lines)
+
+
+def contrib_ui(*args: Any) -> Tuple[str, str]:
+    res = contrib_record(*args)
+    rec = res.get("record")
+    return format_contrib(res), (json.dumps(rec, indent=1) if rec else "")
+
+
+
 # --------------------------------------------------------------------------- about text
 def about_md() -> str:
     k82 = BASES["K82s4"]
@@ -842,7 +991,7 @@ steps        = the FF_ACCUM_SCHED walk over (FF_TIME_TARGET - 5.5 s) at the pred
 ```
 
 Three small numpy models, fitted when this Space starts ({FIT_TIMINGS['total_s']:.2f} s on
-{int(FIT_TIMINGS['n_records']):,} run records from four Trainium chips; no pickle is shipped):
+{int(FIT_TIMINGS['n_records']):,} run records from four Trainium chips, {len(CONTRIB_ROWS)} of them contributed by the community; no pickle is shipped):
 
 1. **Step time**: median seconds per step for each batch phase (k1/k2/k4 micro-batches), per code lineage, with
    knob features for the mechanisms the fitted runs varied (fused paths, attention variants, MTP layout, ...).
@@ -907,7 +1056,8 @@ as of {BEST_OFFICIAL_ASOF} was {BEST_OFFICIAL} (K77a); K82s4 had been uploaded b
 ## API
 
 Every button is an endpoint: `predict` (all fields), `predict_overrides` (base + `KEY=VALUE` overrides, returns
-JSON), `speed_to_score`, `score_to_speed`. Example with `gradio_client`:
+JSON), `speed_to_score`, `score_to_speed`, and `contrib_record` (checks one of your runs and returns the record and
+a pre-filled GitHub issue link; nothing is sent). Example with `gradio_client`:
 
 ```python
 from gradio_client import Client
@@ -915,6 +1065,8 @@ c = Client("{SPACE_ID}")
 c.predict("K82s4", "FF_COOLDOWN_FRAC=0.6 FF_MATRIX_LR_SCALE=2.3", 73, "C", 2000, api_name="/predict_overrides")
 c.predict({BEST_OFFICIAL}, 10, api_name="/speed_to_score")
 c.predict({BEST_OFFICIAL}, {TOP10_SCORE}, api_name="/score_to_speed")
+c.predict("trn2.3xlarge", "", 1800, "K82s4", "", "FF_COOLDOWN_FRAC=0.65", 58, 0.9551, 2097152, None, 2390, None,
+          "", "", "", True, api_name="/contrib_record")
 ```
 
 `predict_overrides(base, overrides, seed, chip, n_draws)`: seed is one of {', '.join(map(str, KNOWN_SEEDS))}, or
@@ -1027,12 +1179,55 @@ def build_ui() -> Any:
                 b1.click(speed_to_score, [base_score, pct_in], [o1, j1], api_name="speed_to_score")
                 b2.click(score_to_speed, [base_score, tgt_in], [o2, j2], api_name="score_to_speed")
 
+            with gr.Tab("Add my runs"):
+                gr.Markdown(CONTRIB_SHARED_MD)
+                with gr.Row():
+                    c_hw = gr.Dropdown(choices=list(HARDWARE), value="trn2.3xlarge", label="Hardware")
+                    c_hw_other = gr.Textbox(label="Hardware (if other)", placeholder="e.g. trn2u.48xlarge")
+                    c_tb = gr.Number(value=1800, label="Time budget (s)", info="the challenge: 1800")
+                with gr.Row():
+                    c_base = gr.Dropdown(choices=list(BASE_RECIPES), value="K82s4", label="Started from recipe",
+                                         info="custom = list your full FF_* environment below")
+                    c_cv = gr.Textbox(label="Code version (optional)", placeholder="e.g. M14")
+                    c_seed = gr.Number(value=None, label="Seed", info="FF_SEED", precision=0)
+                c_recipe = gr.Textbox(label="Recipe: FF_* knobs you changed", lines=3,
+                                      placeholder="FF_COOLDOWN_FRAC=0.65 FF_WD=0.03   (or a JSON object)")
+                with gr.Row():
+                    c_chip = gr.Number(value=None, label="Local val_bpb (rehearsal)", info="trained weights")
+                    c_tok = gr.Number(value=2097152, label="Local eval tokens", precision=0,
+                                      info="2097152 = the first 2M public tokens (what the model fits)")
+                    c_off = gr.Number(value=None, label="Official val_bpb (if scored)")
+                with gr.Row():
+                    c_steps = gr.Number(value=None, label="Optimizer steps", precision=0)
+                    c_sps = gr.Number(value=None, label="Seconds per step (optional)")
+                    c_date = gr.Textbox(label="Date (optional)", placeholder="YYYY-MM-DD")
+                with gr.Row():
+                    c_notes = gr.Textbox(label="Framework notes (optional)", placeholder="Neuron SDK / runtime versions")
+                    c_who = gr.Textbox(label="Public handle (optional)", placeholder="GitHub-style handle for credit")
+                c_consent = gr.Checkbox(value=False, label="I agree that this record becomes public (see the text above)")
+                c_btn = gr.Button("Check and build my submission", variant="primary")
+                c_md = gr.Markdown()
+                c_json = gr.Code(language="json", label="The record that will be shared")
+                c_inputs = [c_hw, c_hw_other, c_tb, c_base, c_cv, c_recipe, c_seed, c_chip, c_tok, c_off, c_steps,
+                            c_sps, c_date, c_notes, c_who, c_consent]
+                c_btn.click(contrib_ui, c_inputs, [c_md, c_json], api_visibility="private")
+                with gr.Row(visible=False):
+                    a_in = [gr.Textbox(value="trn2.3xlarge"), gr.Textbox(), gr.Number(value=1800),
+                            gr.Textbox(value="K82s4"), gr.Textbox(), gr.Textbox(), gr.Number(), gr.Number(),
+                            gr.Number(value=2097152), gr.Number(), gr.Number(), gr.Number(), gr.Textbox(),
+                            gr.Textbox(), gr.Textbox(), gr.Checkbox()]
+                    a_out = gr.JSON()
+                    a_btn = gr.Button()
+                a_btn.click(contrib_record, a_in, a_out, api_name="contrib_record")
+
             with gr.Tab("About"):
                 gr.Markdown(about_md())
     return demo
 
 
 demo = build_ui()
+
+demo.queue(default_concurrency_limit=4, max_size=64)    # bounded: a public endpoint must not queue without limit
 
 if __name__ == "__main__":
     demo.launch()

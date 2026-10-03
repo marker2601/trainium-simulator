@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/marker2601/trainium-simulator/blob/main/contrib/schema.json",
+  "title": "ffsim contributed run record",
+  "description": "One training run shared with the FrontierForge Trainium simulator. Everything in it becomes public (data CC-BY-4.0). No account ids, instance ids, keys, tokens, e-mail or IP addresses: records containing anything that looks like one are rejected. Generated from ffsim/contrib.py (python -m ffsim contrib schema).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "hardware",
+    "time_budget_s",
+    "recipe",
+    "steps",
+    "consent"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "chip_val_bpb"
+      ]
+    },
+    {
+      "required": [
+        "official_val_bpb"
+      ]
+    }
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "description": "always \"1\""
+    },
+    "hardware": {
+      "enum": [
+        "trn2.3xlarge",
+        "trn2.48xlarge",
+        "trn1.2xlarge",
+        "trn1.32xlarge",
+        "gpu-proxy",
+        "other"
+      ],
+      "description": "instance type the run trained on; gpu-proxy = ffsim/gpu route-2 replay"
+    },
+    "hardware_other": {
+      "type": "string",
+      "maxLength": 60,
+      "pattern": "^[A-Za-z0-9 ._/+()-]*$",
+      "description": "free text when hardware is \"other\" (e.g. \"trn2u.48xlarge\")"
+    },
+    "time_budget_s": {
+      "type": "number",
+      "minimum": 60,
+      "maximum": 7200,
+      "description": "training time budget in seconds (the challenge: 1800)"
+    },
+    "base_recipe": {
+      "enum": [
+        "K82s4",
+        "K60",
+        "K59",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "published recipe the run started from; recipe then lists only the knobs you changed. custom = recipe is the full FF_* environment"
+    },
+    "code_version": {
+      "enum": [
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5",
+        "M6",
+        "M7",
+        "M8",
+        "M9",
+        "M10",
+        "M11",
+        "M12",
+        "M13",
+        "M14",
+        "M15",
+        "custom"
+      ],
+      "description": "optional code lineage: one of the simulator's known lineages (M1-M15) or custom; default from base_recipe"
+    },
+    "recipe": {
+      "type": "object",
+      "maxProperties": 400,
+      "propertyNames": {
+        "pattern": "^FF_[A-Z0-9_]{1,60}$"
+      },
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 200
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "description": "FF_* knob -> value, the names train.py and the simulator read"
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "description": "training seed (FF_SEED)"
+    },
+    "chip_val_bpb": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 2.5,
+      "description": "local rehearsal val_bpb of the trained weights"
+    },
+    "chip_eval_tokens": {
+      "type": "integer",
+      "minimum": 65536,
+      "maximum": 1000000000,
+      "default": 2097152,
+      "description": "tokens the local val_bpb was measured on (default: the first 2,097,152)"
+    },
+    "official_val_bpb": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 2.5,
+      "description": "official leaderboard val_bpb, if the run was scored"
+    },
+    "steps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200000,
+      "description": "optimizer steps completed"
+    },
+    "step_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 60,
+      "description": "optional mean seconds per optimizer step"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^20[2-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+      "description": "optional run date YYYY-MM-DD"
+    },
+    "framework_notes": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "optional: SDK / runtime versions, anything unusual about the run"
+    },
+    "contributor": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$",
+      "description": "optional: your GitHub login, to credit you (through an issue it must be the account that opens it)"
+    },
+    "consent": {
+      "const": true,
+      "description": "I agree that this record becomes public in the trainium-simulator repository (data under CC-BY-4.0, code under MIT), that it may be used to fit and evaluate the simulator, and that it contains no secrets, account ids or personal data."
+    }
+  }
+}

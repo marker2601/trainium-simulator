@@ -1,0 +1,77 @@
+% sections/introduction.tex
+\section{Introduction}
+
+Training speed-runs fix a budget and ask how low a validation loss can go. Community records such as the
+modded-nanoGPT speed-run \citep{jordan2024moddednanogpt}, built on nanoGPT \citep{karpathy2022nanogpt}, academic
+``cramming'' studies \citep{geiping2023cramming,izsak2021academic}, budgeted-training analyses \citep{li2020budgeted}
+and time-to-result benchmarks such as MLPerf Training \citep{mattson2020mlperf} and AlgoPerf
+\citep{dahl2023algoperf} share one property: the quantity being optimised is the quality that a \emph{wall-clock}
+budget buys, not the quality per step or per FLOP. In such a setting two things are scarce. A full trial costs the
+whole budget on the target hardware, and the official score comes from the organisers with limited feedback. Most
+practical decisions therefore rest on proxies, such as short screens, scores on public data and runs on other
+hardware, whose relation to the official score is rarely measured.
+
+This paper reports how one team measured that relation in Phase~1 of the AWS Trainium Frontier challenge
+\citep{trainiumfrontier2026rules}. A language model is trained from scratch for 30~minutes of charged time on one
+\texttt{trn2.3xlarge} instance and scored by validation bits per byte (\valbpb{}) on a pinned validation shard
+computed by the organisers. Over 17~days and \val{n-scored} scored uploads, our official score fell from
+\val{first-official} to \val{best-official} (\cref{fig:history}). Our best upload finished outside the top ten, so
+this is not a paper about a winning recipe. It is a measurement study: every upload was preceded by a full-length
+rehearsal on our own hardware, failures were logged as carefully as successes, and the repository recomputes the
+numbers in this paper from the released data.
+
+\paragraph{What is and is not new.} Replaying a candidate on deterministic hardware and correcting it with a
+hold-out offset is standard validation practice, and a ridge regression with era, chip and seed effects is a
+standard surrogate. Our contribution is the \emph{measurement}: how well that practice predicted a real
+leaderboard, how large its errors and biases were, what limited it, and what a single price per optimizer step says
+about the changes we tried. We think these quantities are useful to anyone running a time-budgeted contest or
+benchmark, and they are rarely reported.
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\linewidth]{score_history.pdf}
+  \caption{\textbf{Official score per upload.} (a) The whole campaign in calendar time; the line is the best score
+    so far and the shaded region is shown in (b). (b) From \upl{K50} on, in upload order. Circles set a new best;
+    squares did not: four official tests of single changes (\upl{K65a}--\upl{K65d}) and two shuffle-salt draws
+    (\upl{K73s6}, \upl{K82s7}). The change behind each new best is listed in \cref{tab:uploads}. Source:
+    \texttt{results/official-scores.csv}.}
+  \label{fig:history}
+\end{figure}
+
+\paragraph{Contributions.} The same four contributions, in this order, structure the paper.
+\begin{itemize}
+  \item \textbf{C1: How well deterministic rehearsal predicts a leaderboard} (\cref{sec:oracle}). A cold,
+    full-budget rehearsal of the exact upload file, scored on the first \val{eval-tokens} public validation tokens,
+    predicted the official score up to an offset of \val{off-mean-since} (SD \val{off-sd-since}, $n=\val{off-n-since}$).
+    The offset is mostly text (the official shard is harder than the first 2M public tokens) but carries a
+    per-instance component of a few $10^{-4}$. A calibration frozen on the chip-C calibration uploads predicted the
+    seven final uploads with MAE \val{holdout-mae} and a positive bias on faster instances; we report how much of
+    this depends on one normalised rehearsal, on salt selection and on the burn-in of the interval.
+  \item \textbf{C2: A run simulator, with baselines} (\cref{sec:sim}). \ffsim{} decomposes a score into steps,
+    computed by replaying the training script's charged-time schedule, and quality per step, from a ridge surrogate
+    fitted on \val{q-nfit} fully specified chip runs out of \val{ds-n} harvested records. Held out pair by pair it
+    beats a steps-only baseline and a majority-sign baseline on recipe changes; forward in time its knob features add
+    little; on new mechanisms it is no better than chance. A GPU proxy that replays the chip's schedule is a
+    feasibility demonstration.
+  \item \textbf{C3: An accounting of what moved the score} (\cref{sec:price,sec:findings}). One price,
+    $\kappa=\val{kappa}$ bpb per unit $\ln(\text{steps})$, converts every change into optimizer steps. With it we
+    report the levers with their noise, a row-level shuffle pool (\val{rowpool-chip} on chip,
+    \val{rowpool-official} officially, one pair each), a compilation-accounting trap that only cold rehearsals
+    reveal, the size of seed and order noise, negative results, and a pricing of the gap to the top ten
+    (\val{gap-ten-range} more effective compute) that we offer as a hypothesis about kernels, not a finding.
+  \item \textbf{C4: Released artifacts} (\cref{sec:contrib}). The simulator, the run dataset, both recipes, a
+    local app and a reviewed, guarded pipeline through which others can add runs to the simulator. No external
+    contributions exist yet.
+\end{itemize}
+
+\paragraph{Scope.} This is one team's campaign on one contest and one hardware type, and most late effects rest on
+one or a few same-seed pairs at a seed that was itself selected. We give $n$ and a noise scale for every effect, mark
+numbers that exist only in campaign documents with a dagger (\docnum{}, listed in \cref{app:docfacts}), and list the
+threats to validity in \cref{sec:limits}. Other teams appear only as rank-indexed scores from the public leaderboard
+snapshot.
+
+\paragraph{Roadmap.} \Cref{sec:related} places the work in context. \Cref{sec:setting} describes the contest, the
+determinism the method relies on, the price of a step and our final recipe (\cref{sec:recipe}). \Cref{sec:oracle,sec:sim} present C1
+and C2, \cref{sec:findings} C3, \cref{sec:contrib} C4 and \cref{sec:limits} the limitations. The appendices hold the
+upload ledger (\cref{app:ledger}), oracle details (\cref{app:oracle}), the simulator internals, the
+contribution pipeline, the final hyperparameters, derivations and a notation table.

@@ -1,0 +1,9 @@
+# Hash-locked install for the workflows that hold a write-capable token (.github/workflows/contrib.yml check job,
+# refit.yml): python -m pip install --require-hashes --only-binary :all: -r requirements-lock.txt
+# ffsim's contribution pipeline needs numpy only. Hashes from PyPI (numpy 2.4.6: the Linux x86_64 CPython 3.11
+# wheel the runners install, and the sdist). Dependabot (pip ecosystem) proposes updates; refresh both hashes
+# together with: pip download numpy==X --no-deps --only-binary :all: --platform manylinux_2_28_x86_64
+# --python-version 3.11 -d wheels && pip hash wheels/*
+numpy==2.4.6 \
+    --hash=sha256:89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93 \
+    --hash=sha256:f3a3570c4a2a16746ac2c31a7c7c7b0c186b95ce902e33db6f28094ed7387dda

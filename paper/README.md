@@ -2,7 +2,7 @@
 
 **Rehearse, Don't Guess: Deterministic Rehearsal, a Run Simulator and the Price of a Step on AWS Trainium.** The LaTeX source of the full-length paper on the FrontierForge
 Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`). The plan it follows is
-[`OUTLINE.md`](OUTLINE.md), and where to submit it is covered in [`VENUES.md`](VENUES.md).
+[`OUTLINE.md`](OUTLINE.md).
 
 ## Layout
 
@@ -16,7 +16,6 @@ Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`).
 | `analysis/*.py` | the scripts that generate all of the above from the repository's data |
 | `refs.bib` | 87 verified references; each entry's `verification` field says how it was checked (BibTeX ignores it) |
 | `check_tex.py` | static checks that need no TeX installation, including estimated table widths and figure scales (`-v` lists every table) |
-| `RESPONSE.md` | revision 1: point-by-point response to the three internal reviews |
 | `make_bundle.py` | a flat, self-contained source folder and zip for Overleaf or arXiv |
 
 The prose never types a data-derived number. It writes `\val{key}`, and `numbers.tex` defines the key. An undefined
@@ -91,9 +90,6 @@ it replaces the author block, hides the acknowledgements and replaces the reposi
 
 ## Before submitting
 
-- Fill in authors and affiliations (`main.tex`), and confirm the acknowledgement names (`sections/statements.tex`).
-- Confirm the compute-funding sentence in `sections/statements.tex` (`TODO(owner)`).
-- Challenge terms: checked on 1 Oct 2026, no publication restriction found (`VENUES.md`).
 - Compile once (CI artifact `paper-pdf` or Overleaf) and read the log for overfull boxes; `check_tex.py` only
   estimates widths.
 - Rerun the three regeneration commands above and `python -m pytest -q tests`, then rebuild.

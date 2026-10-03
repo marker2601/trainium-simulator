@@ -46,5 +46,5 @@ paper/*.toc
 paper/main.pdf
 paper/analysis/__pycache__/
 
-# private publishing notes (drafts to organisers, endorsement emails, visa notes)
+# local notes, not part of the release
 paper/publishing/

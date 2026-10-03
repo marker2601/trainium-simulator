@@ -2,14 +2,13 @@
 
 **Status: nothing has been run on a GPU under this protocol.** The only GPU work the campaign has
 done is the 20-21 Sep proxy (`train_gpu.py`, a fork of the K31-era trainer, 22 runs, ~18.5 GPU-hours,
-~$35 of the $200 GPU allowance), which was **rejected under its own pre-registered rule** on 21 Sep:
+~$35 of GPU time), which was **rejected under its own pre-registered rule** on 21 Sep:
 the U-net verdict flipped sign (GPU -0.0020 at seed 50 vs a +0.031 Trainium loss) and the
-value-embedding effect came out 1.4x too large (-0.0130 vs the corrected target [-0.0095, -0.0003]);
-its g6e.xlarge instance was **stopped, not terminated**, so it
-still carried an EBS volume. That failure is the reason section 3 exists: no GPU verdict influences a
+value-embedding effect came out 1.4x too large (-0.0130 vs the corrected target [-0.0095, -0.0003]).
+That failure is the reason section 3 exists: no GPU verdict influences a
 chip slot until the proxy has reproduced Trainium pairs the campaign already paid for.
 
-This document supersedes the 20 Sep `PROXY_PROTOCOL.md` (not published). What changed: the base
+This document supersedes an earlier, unpublished 20 Sep protocol. What changed: the base
 recipe is K60 (not K31), the trainer is the submission `train.py` itself (not a fork), the schedule is
 driven by a **virtual charged clock** (not `--steps`), the calibration targets are the 99 paired
 Trainium comparisons in `research/sim-data/validation-pairs.json` (not five hand-picked anchors), the
@@ -365,7 +364,7 @@ tenancy; the 20 Sep quotes were $1.861 and $10.491, unchanged):
 |---|---|---|---|---|
 | g6e.xlarge | 1.861 | 1 | 1.861 | yes: 64 G/VT on-demand vCPUs in us-west-2 = up to **16** at once (4 vCPU each); us-east-1 has 8 vCPUs = 2 |
 | g6e.12xlarge | 10.49264 | 4 | 2.623 | yes: 48 vCPUs, one at a time |
-| g6e.48xlarge | 30.13118 | 8 | 3.766 | **no**: 192 vCPUs > 64 (`get-service-quota` L-DB2E81BA: us-west-2 = 64, the 20 Sep request for 96 is CASE_CLOSED; us-east-1 = 8, its request still CASE_OPENED) |
+| g6e.48xlarge | 30.13118 | 8 | 3.766 | **no**: 192 vCPUs > the 64-vCPU quota (`get-service-quota` L-DB2E81BA) |
 
 Per GPU-hour the single-GPU box is cheapest; the bigger boxes buy wall-clock at 1.41x / 2.02x the
 price. The cheap way to buy wall-clock is several g6e.xlarge in parallel (same $/GPU-hour, one data
@@ -425,7 +424,7 @@ then need a 3-seed chip confirmation (~2 h of chip C), a cold rehearsal (~38 min
 The last chip-C hours are already committed to the K62 rehearsals, and no GPU verdict is trusted before
 the gate. Nothing in this directory may take a chip slot before the close.
 
-**Phase 2** (from `research/deadline-checklist-20260927.md` and `BRIEFING.md`): winners notified by
+**Phase 2** (as announced to participants): winners notified by
 8 Oct 06:59 UTC; opens 7 Oct; closes **5 Nov 07:59 UTC**; trn2.48xlarge in us-east-2 (16 chips), a 4-hour
 budget, 3 submissions per week, scored 50% val_bpb + 50% CORE (60-minute CORE timeout), an
 `inference.py` wrapper required; Phase-2 credits are separate.

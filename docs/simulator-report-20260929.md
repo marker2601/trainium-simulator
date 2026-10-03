@@ -324,8 +324,8 @@ equal-steps CUDA fork of the K60 `train.py` (`make_train_gpu.py` -> `train_gpu.p
 `configs/schedule-K60-TT1793.json`: phase 2 at step 336, phase 3 at 829, cooldown at 1214, stop 2361), the fleet
 runner, the calibration rule (`PROTOCOL.md` 3.3, frozen rows, `calibrate --freeze/--rule`) and `launch.sh`. It is
 reachable from this CLI as `python -m ffsim gpu <plan|schedule|run|report|verdict|from-search|prices|calibrate|make-train|launch> ...`
-(lazy imports; numpy + stdlib here, torch only on the box). Nothing has run on a GPU. Read-only facts: us-west-2
-on-demand G/VT quota 64 vCPUs granted (0 in use), the 39-run / 16-pair gate is 90,336 optimizer steps = 115.8 GPU-hours
+(lazy imports; numpy + stdlib here, torch only on the box). Nothing has run on a GPU. Read-only facts: a 64-vCPU
+on-demand G/VT quota in us-west-2, the 39-run / 16-pair gate is 90,336 optimizer steps = 115.8 GPU-hours
 at the estimated 4.5 s/step (about $217 on a g6e.xlarge, $317 on a g6e.12xlarge, 29 Sep list prices). The 20 Sep proxy
 flipped a verdict's sign against Trainium, so no GPU delta may influence a chip slot before `calibrate` accepts.
 **The spend decision belongs to the owner**; `launch up --yes` is the only command that spends. Commands, status and

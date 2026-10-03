@@ -398,36 +398,7 @@ Do not cite anything that has not been found and read. Each line is a search to 
 
 ---
 
-## 8. Target venues (deadlines all [TO-VERIFY])
-
-| Venue | Fit | Notes |
-|---|---|---|
-| **arXiv, cs.LG** (cross-list cs.DC or cs.PF) | Primary. Fast, and it fits the release. | First-time submitters may need an endorsement in cs.LG: check early. Choose a licence (CC BY 4.0 suggested). |
-| ML-systems / efficient-training workshops at NeurIPS, ICLR or ICML (e.g. efficient-ML, "advancing neural network training", ML-for-systems style workshops) | C1, C2, C3b and the throughput gap | 4-page limits are common. Check the 2026-27 calls and whether non-archival submission is allowed. **[TO-VERIFY]** |
-| MLSys conference workshops | Simulator and accounting angle | **[TO-VERIFY]** |
-| Reproducibility or benchmarking tracks (e.g. a datasets-and-benchmarks track) | `runs.jsonl` + ledger as a dataset of about 1,200 accelerator runs | A longer-horizon option; needs a datasheet. **[TO-VERIFY]** |
-
-Before any submission, check:
-- whether the challenge terms say anything about publishing results or the hidden-shard scores;
-- that nothing in the paper uses or infers private validation data.
-
----
-
-## 9. Two-week timeline (1-14 Oct 2026, CDT)
-
-| Days | Work | Exit criterion |
-|---|---|---|
-| **Thu 1 - Fri 2 Oct** | E0 done (1 Oct). Fix the title. Freeze the claims ledger (section 10). Set up the LaTeX skeleton (arXiv template, `paper/main.tex`, still to create) with Figs. 1-7 from the PDFs in `docs/figures/`. | Every number in the abstract has a source row |
-| **Sat 3 - Mon 5 Oct** | No-compute experiments: E8 and the post-fit points for Fig. 7. Write §2-§4. | §3 and §4 drafted with final figures |
-| **Tue 6 - Thu 8 Oct** | Pre-register E1/E2 predictions in the repo. Run E2 on the GPU proxy, then E1 and E7 on chip if capacity allows. Run E3 on CPU. | Fig. 8 drafted; row-pool claim at n ≥ 3 seeds or explicitly scoped to 1 |
-| **Fri 9 - Sat 10 Oct** | Write §5-§8. Look up and verify every related-work pointer, replacing [TO-VERIFY] with real citations. | Full draft |
-| **Sun 11 - Mon 12 Oct** | Internal review: check every number against the repo, read the threats section adversarially, check no names or IDs appear. | Review issues closed |
-| **Tue 13 Oct** | Polish: page budget, figure accessibility (colour-blind-safe palette, direct labels), supplementary zip. | arXiv-ready PDF |
-| **Wed 14 Oct** | Submit to arXiv. Tag the repo release that matches the paper (`v1.0-paper`). | arXiv ID |
-
----
-
-## 10. Claims ledger (verify before submission)
+## 8. Claims ledger (verify before submission)
 
 | Claim | Value | Source | Status |
 |---|---|---|---|

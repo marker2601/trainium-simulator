@@ -45,3 +45,6 @@ paper/*.synctex.gz
 paper/*.toc
 paper/main.pdf
 paper/analysis/__pycache__/
+
+# private publishing notes (drafts to organisers, endorsement emails, visa notes)
+paper/publishing/

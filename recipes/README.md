@@ -41,3 +41,14 @@ Any change that alters steps 0-19 re-rolls the seed's warm-up path; see `../docs
 
 K60 is the 29 Sep recipe. The GPU proxy (`../ffsim/gpu/train_gpu.py`) is generated from it, and the simulator's
 example recipe `../ffsim/examples/recipe-K60.json` describes it.
+
+## Launch command
+
+Every rehearsal and official upload ran with the organiser's launch command, one process per NeuronCore:
+
+```bash
+NEURON_LOGICAL_NC_CONFIG=1 torchrun --standalone --nproc_per_node=8 train.py
+```
+
+Software: the organiser-provided AWS Neuron environment on `trn2.3xlarge` (PyTorch 2.11.0, `torch-neuronx` 2.11.3,
+`neuronx-cc` 2.26, build 2.26.6360.0).

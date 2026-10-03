@@ -17,6 +17,9 @@ The code, data and analysis scripts are in the public repository
   \item \textbf{Code.} The simulator (\texttt{ffsim/}, numpy only), the GPU proxy (\texttt{ffsim/gpu/}), the app
     (\texttt{space/}), the contribution pipeline (\texttt{ffsim/contrib.py}, \texttt{.github/workflows/}), and both
     recipes byte-identical to the uploaded files, with their SHA-256 hashes in \texttt{recipes/README.md}.
+  \item \textbf{Software.} All chip runs used the organiser-provided AWS Neuron environment on \texttt{trn2.3xlarge}:
+    PyTorch~2.11.0, \texttt{torch-neuronx}~2.11.3 and the Neuron compiler \texttt{neuronx-cc}~2.26 (build
+    2.26.6360.0), in eager mode with one process per NeuronCore (launch command in \texttt{recipes/README.md}).
   \item \textbf{Commands.} \texttt{python -m pytest -q tests} runs the test suite;
     \texttt{python paper/analysis/make\_all.py} regenerates \texttt{paper/numbers.tex}, every table in
     \texttt{paper/tables/} and every figure in \texttt{paper/figures/}; \texttt{python paper/check\_tex.py} runs the
@@ -32,6 +35,9 @@ The code, data and analysis scripts are in the public repository
 
 \section*{Ethics and broader impact}
 \addcontentsline{toc}{section}{Ethics and broader impact}
+
+\paragraph{Independence.} This is independent work. It is not affiliated with, sponsored by or endorsed by Amazon
+Web Services or the contest organisers, and any views and errors are the author's own.
 
 \paragraph{Fair competition and the evaluation data.} All results come from our own submissions. We trained only on
 the training data provided by the kit. We scored rehearsals on the first \val{eval-tokens} tokens of the public

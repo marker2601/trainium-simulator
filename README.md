@@ -20,6 +20,9 @@ A simulator, a calibration method and a best recipe from Phase 1 of the AWS Trai
 |:---:|:---:|:---:|:---:|
 | official val_bpb, 24 Sep &rarr; 30 Sep (CDT) | Trainium run records the simulator is fitted on | rehearsal-to-official offset (mean &plusmn; sd, 15 uploads) | measured price of 1% of training steps |
 
+
+> This is independent work. It is not affiliated with, sponsored by or endorsed by Amazon Web Services or the AWS Trainium Frontier organisers.
+
 ## Why you might care
 
 - **Chip time is the bottleneck.** `ffsim` predicts a recipe's steps, step time and val_bpb in seconds on a laptop

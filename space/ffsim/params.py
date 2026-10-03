@@ -11,8 +11,10 @@
 * ``steptime`` per batch phase: columns, coefficients (log step time), n, rmse and lineages. Informational (the
   step-time model also uses a residual nearest-neighbour term over its training runs, which is not exported).
 
-No timestamps are written, so refitting unchanged data reproduces the file byte for byte (the refit workflow
-commits only when something changed). Floats are rounded to 10 significant digits for the same reason.
+No timestamps are written, so refitting unchanged data reproduces the file byte for byte on the same machine (the
+refit workflow commits only when something changed). Floats are rounded to 10 significant digits for the same
+reason; another machine's BLAS can still move the last digits, so ``contrib refit`` keeps the published file when
+the new numbers only differ by that noise (``contrib.PARAMS_NOISE``).
 """
 from __future__ import annotations
 

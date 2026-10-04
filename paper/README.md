@@ -14,7 +14,7 @@ Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`).
 | `tables/*.tex` | **generated**: every data table |
 | `figures/*.pdf` | **generated**: every figure, drawn at its printed width (6.5 in text width, 8 pt text) |
 | `analysis/*.py` | the scripts that generate all of the above from the repository's data |
-| `refs.bib` | 87 verified references; each entry's `verification` field says how it was checked (BibTeX ignores it) |
+| `refs.bib` | 86 verified references; each entry's `verification` field says how it was checked (BibTeX ignores it) |
 | `check_tex.py` | static checks that need no TeX installation, including estimated table widths and figure scales (`-v` lists every table) |
 | `make_bundle.py` | a flat, self-contained source folder and zip for Overleaf or arXiv |
 

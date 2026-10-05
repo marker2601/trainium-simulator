@@ -17,11 +17,5 @@ setup and ours is absorbed there rather than in shared coefficients, and one acc
 records to a fit. A maintainer's approval opens a pull request with the record exactly as approved, and merging
 triggers a refit that is \emph{guarded}: it refuses to write anything if the in-sample or pair-validation error on our
 own data grows by more than \val{guard-max-worse}~bpb, or if the prediction for a published base recipe moves by more
-than \val{guard-max-shift}~bpb. \Cref{app:contrib} gives the mechanics and a stress test.
-
-The stress test is weak evidence and we present it as such. Its ``honest'' records are generated from the model's own
-predictions plus noise, so accepting them is close to automatic; its attack, a coordinated pair of sock-puppet records
-that pull a shared coefficient, was designed by us with the thresholds known, and there is no adaptive attacker. The
-guard refused that attack down to two records and accepted the honest ones. An attacker who knows the thresholds can
-stay under them, and per-hardware effects can absorb slow drifts. What the guard does is turn the cheapest damaging
-attack, pulling a shared coefficient, into a visible failure.
+than \val{guard-max-shift}~bpb. \Cref{app:contrib} gives the mechanics and a stress test, which is weak evidence:
+we designed its attack with the thresholds known, and an attacker who knows them can stay under them.

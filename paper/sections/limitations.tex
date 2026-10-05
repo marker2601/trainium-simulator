@@ -4,45 +4,42 @@
 
 \begin{enumerate}
   \item \textbf{Few seeds, at a selected seed.} Most late effects in \cref{tab:levers,tab:negative} are single
-    same-seed pairs at seed~73, which ranked \val{g7-s73-rank} of \val{g7-nseeds} in its sweep. Effects measured on
-    a lottery winner may not hold at other seeds. The row pool rests on one chip pair and one official pair from the
-    same trajectory; the prewarm on one official pair and single-run step counts; the EMA blend on one chip pair. The
-    rule we set (three seeds below 0.0003) was often not affordable.
-  \item \textbf{Selection and the evaluation text.} Seeds and salts were chosen by rehearsal score, and five of the
-    seven final-day uploads carry a lottery-selected salt. Four uploads (\upl{K65a}--\upl{K65d}) were official tests of
-    single changes. If the official shard overlaps the public validation text (\cref{sec:contest}), seed and salt
-    selection used part of the evaluation set.
+    same-seed pairs at seed~73, which ranked \val{g7-s73-rank} of \val{g7-nseeds} in its sweep, and may not hold at
+    other seeds. The row pool rests on one chip pair and one official pair from the same trajectory; the prewarm on
+    one official pair and single-run step counts; the EMA blend on one chip pair. Our rule of three seeds below 0.0003
+    was often not affordable.
+  \item \textbf{Selection and the evaluation text.} Seeds and salts were chosen by rehearsal score (five of the seven
+    final-day uploads carry a lottery-selected salt), and \upl{K65a}--\upl{K65d} were official tests of single
+    changes. If the official shard overlaps the public validation text (\cref{sec:contest}), that selection used part
+    of the evaluation set.
   \item \textbf{The offset may depend on the chip.} The frozen calibration's errors are positive on the faster
-    final-day chips (\cref{tab:offset-chips}), but every final-day upload with a lottery-selected salt was rehearsed
-    on those chips, so instance and selection are confounded. The oracle's headline statistics depend on one
-    model-normalised rehearsal (\cref{tab:oracle-sens}). The pseudo-prospective analyses are retrospective
-    simulations; only three written projections are archived.
-  \item \textbf{Determinism rests on one pair.} The evidence that a warm and a cold run of one file follow the same
-    trajectory is one pair with older code (\cref{sec:determinism}). The offset statistics cannot tell a
-    deterministic official run from one that re-draws the order noise: the within-chip offset SD
-    (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi}) contains the SD that re-drawing
-    would give (about \val{noise-chip-pair}). Step counts jitter by up to \val{jitter-range-hi} steps within a chip.
+    final-day chips (\cref{tab:offset-chips}), where every lottery-selected final-day upload was rehearsed, so
+    instance and selection are confounded. The oracle's headline statistics depend on one model-normalised rehearsal
+    (\cref{tab:oracle-sens}). The pseudo-prospective analyses are retrospective; only three written projections are
+    archived.
+  \item \textbf{Determinism rests on one pair.} It used older code (\cref{sec:determinism}). The within-chip offset SD
+    (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi}) contains the SD that re-drawing the
+    order noise would give (about \val{noise-chip-pair}), so the offset statistics cannot tell a deterministic official run from one that re-draws the order noise. Step counts jitter by up to
+    \val{jitter-range-hi} steps within a chip.
   \item \textbf{Hardware heterogeneity.} Instances differed by up to \val{chip-spread}\docnum{} in step time, and
-    chip~D ran an older Neuron runtime (2.33.10, against 2.34.10 on chip~C). We
-    normalised only same-recipe runs, never across a change that alters step time, and every comparison in the text
-    names its chip.
+    chip~D ran an older Neuron runtime (2.33.10, against 2.34.10 on chip~C). We normalised only same-recipe runs,
+    never across a change that alters step time, and every comparison names its chip.
   \item \textbf{Released data do not cover the final day.} \texttt{runs.jsonl} holds chips A--D up to 29~September.
     The chip E, G and H runs behind the row-pool pair, the salt lottery, the EMA-blend and output-projection pairs, the
-    pool-size ablation and the final-day test bench exist only as quotes from campaign documents, marked \docnum{} and
-    listed in \cref{app:docfacts}. They are reported, not recomputable.
-  \item \textbf{Simulator circularity.} The surrogate was fitted on our own search trajectory: the knobs are
-    non-random and confounded with code eras (\cref{tab:coefficients}), and some inputs come from a reconciled campaign
-    ledger that was partly extracted from free text (\texttt{research/sim-data/dataset-qa.md}). Its step prior is centred
-    on the price it is sometimes used to support. On genuinely new mechanisms it is at chance
-    (\val{postfit-sign}, \val{postfit-wilson}).
-  \item \textbf{The price of a step.} $\kappa$ rests on a per-step rate whose number of comparisons is not recorded and
-    on one long run; it varies with the step count. The gap figures extrapolate it, and other teams' recipes may sit on
+    pool-size ablation and the final-day test bench are quotes from campaign documents, marked \docnum{}
+    (\cref{app:docfacts}): reported, not recomputable.
+  \item \textbf{Simulator circularity.} The surrogate was fitted on our own search trajectory, whose knobs are
+    non-random and confounded with code eras (\cref{tab:coefficients}); some inputs come from a campaign ledger partly
+    extracted from free text (\texttt{research/sim-data/dataset-qa.md}); its step prior is centred on the price it is
+    sometimes used to support. On genuinely new mechanisms it is at chance (\val{postfit-sign}, \val{postfit-wilson}).
+  \item \textbf{The price of a step.} It rests on a per-step rate whose number of comparisons is not recorded and on one
+    long run, and it varies with the step count. The gap figures extrapolate it, and other teams' recipes may sit on
     a different curve.
-  \item \textbf{Leaderboard snapshot.} The leaderboard references are from the last public snapshot we recorded (about
-    \val{leaderboard-time}\docnum{}). The organisers' published final standings may differ.
-  \item \textbf{Forking paths.} The campaign was adaptive and the analyses are post hoc; the spike threshold, for
-    example, was chosen after seeing the data. The temporal and pseudo-prospective checks are the parts least exposed
-    to this. Follow-up experiments should be pre-registered in the repository before they are run.
+  \item \textbf{Leaderboard snapshot.} The references are from the last public snapshot we recorded (about
+    \val{leaderboard-time}\docnum{}); the organisers' published final standings may differ.
+  \item \textbf{Forking paths.} The campaign was adaptive and the analyses are post hoc (the spike threshold, for
+    example, was chosen after seeing the data); the temporal and pseudo-prospective checks are least exposed to this.
+    Follow-up experiments should be pre-registered in the repository.
   \item \textbf{Utilisation estimates.} ``About \val{mfu}\docnum{} MFU'' and ``\val{idle}\docnum{} idle'' are
-    approximate profiles. We use them only to motivate the kernel hypothesis of \cref{sec:gap}.
+    approximate profiles, used only to motivate the kernel hypothesis of \cref{sec:gap}.
 \end{enumerate}

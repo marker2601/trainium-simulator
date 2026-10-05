@@ -36,11 +36,42 @@ organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a
 
 \begin{table}[!htbp]
   \centering
+  \caption{\textbf{Offset $=$ official $-$ rehearsal, by period} ($10^{-3}$ bpb). The 95\% CI is the half-width for
+    the mean (Student $t$). Ranges are rounded half-up from the exact differences. Official scores are published to
+    four decimals, so every offset carries a rounding error of up to $\pm$\val{official-rounding}.}
+  \label{tab:offset-periods}
+  \input{tables/offset_periods}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
   \caption{\textbf{Coverage of the expanding-window prediction intervals}: uploads inside the interval, with the
     expected count in brackets, for two burn-in lengths (\cref{sec:oracle-holdout}).}
   \label{tab:coverage}
   \input{tables/oracle_coverage}
 \end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{Sensitivity of the oracle statistics to \upl{K70a}} ($10^{-3}$ bpb). ``Frozen'': the chip-C
+    calibration on the final-day uploads. ``In 95\% PI'' and ``Seq.\ MAE'': the expanding window with a burn-in of
+    three uploads.}
+  \label{tab:oracle-sens}
+  \input{tables/oracle_sensitivity}
+\end{table}
+
+\subsection{The written projections}
+\label{sec:projections}
+
+The repository records three projections written before upload (\texttt{results/official-scores.csv},
+\texttt{docs/EXACT-ORACLE.md}). \upl{K73s6} was projected at \val{k73s6-projected}\docnum{} and scored
+\val{official-k73s6}, the largest miss (\val{k73s6-miss}). \upl{K82s4} was projected at
+\val{k82s4-projected}\docnum{} and scored \val{best-official}; \upl{K82s7} was projected at about \val{k82s7-projected}\docnum{} and
+scored \val{salt7-official}. These two projections did \emph{not} use the frozen chip-C offset, which misses them by
+\val{ferr-k82s4} and \val{ferr-k82s7} (\cref{tab:offset-holdout}). They added an offset of \val{k82-proj-offset}\docnum{}
+read off the final-day uploads already scored, most of them on the faster chips G and H; the exact rule was not
+recorded. That is the text-plus-chip correction applied informally, which may be why those two landed close. It is
+also a reason to treat their closeness as anecdote rather than as a test.
 
 \section{Simulator internals}
 \label{app:sim}
@@ -57,6 +88,19 @@ organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a
   \input{tables/dataset}
 \end{table}
 
+\subsection{Step time and the step walk}
+\label{app:steptime}
+
+The step-time model regresses the median $k\!=\!1,2,4$ step times on code-lineage effects and knob features (depth,
+width, batch, fused paths). It is deliberately empirical, because the Neuron compiler is far from linear in
+operation count: removing one elementwise pass over the MLP activation saved \val{st-onepass}\docnum{}, fusing the
+QKV projection, which has fewer operations, was \val{st-qkv}\docnum{} \emph{slower}, and a 96-parameter gate cost
+\val{st-gate}\docnum{}. A mechanism that no fitted run carries is charged a \val{st-novel-prior}\docnum{} prior and
+flagged ``cost unknown''. Medians are scaled by the measured median-to-mean overhead (\val{overhead}) before the walk.
+Left one code lineage out, the model predicts the $k\!=\!4$ step time of runs whose mechanisms another lineage
+carried with an MAE of \val{st-lolo-reach} (\val{st-lolo-nreach} runs; \cref{tab:sim-other}), and the walk reproduces
+a rehearsal's phase switches to within \val{walk-phase-err}\docnum{} steps.
+
 \subsection{Features and code eras}
 
 The quality surrogate reads \val{q-nbase-features} base features (\cref{tab:features}) and \val{q-nbowl-features}
@@ -72,6 +116,23 @@ order, and ``M9+'' groups the flag-gated versions from M9 on, whose new mechanis
   \label{tab:features}
   \input{tables/features}
 \end{table}
+
+\subsection{Fitting the quality surrogate}
+\label{app:fit}
+
+The fit of \cref{eq:quality} is not one closed-form solve. For a given residual SD $\sigma_q$, the MAP estimate solves
+$(X^\top X + \sigma_q^2 D)\hat\beta = X^\top y + \sigma_q^2 D m$ with $D=\mathrm{diag}(1/s_j^2)$ for prior SDs $s_j$
+and prior means $m$. A bowl coefficient that comes out negative is pinned at zero and the system re-solved (an
+active-set solution of the non-negativity constraint). $\sigma_q$ is then re-estimated by empirical Bayes from the
+residuals and effective degrees of freedom, three times, and floored at \val{q-sigma-floor}. Seed effects are
+estimated jointly, as best linear unbiased predictors. The fit uses \val{q-nfit} runs, \val{q-ncols} columns and
+\val{q-neras} eras, with \val{q-edf} effective degrees of freedom.
+
+\paragraph{Paired Monte Carlo.} \texttt{simulate} and \texttt{search} propagate chip jitter, seed luck, coefficient
+uncertainty, residuals and the offset by Monte Carlo with common random numbers, so that wherever two recipes agree
+the noise cancels. $P(\text{candidate} < \text{base})$ is a paired probability; we have not checked its calibration
+beyond interval coverage (\val{lopo-rec-cover} of LOPO recipe pairs fall inside the predicted $\pm2$\,SD,
+\cref{sec:simval}). An identical recipe reproduces the base exactly.
 
 \subsection{What the surrogate learned}
 
@@ -145,21 +206,6 @@ configuration tried, are \texttt{research/sim-data/steptime-validation.md}, \tex
 an earlier snapshot of the dataset (\val{qv-records}\docnum{} records), and the script that generated it is not
 released, so its numbers are not recomputed here.
 
-\subsection{The GPU proxy}
-\label{app:gpu}
-
-The proxy is built from four parts. \emph{A generated fork}: a patcher applies \val{gpu-patches}\docnum{} checked
-textual patches to the recipe, a check verifies that the committed fork is byte-identical to a fresh build, and the
-patcher refuses any anchor it cannot find exactly. \emph{A virtual charged clock}: every clock-keyed switch
-(accumulation phases, the eight multi-token prediction stages, cooldown levels, the EMA save and the stop) fires at the
-step number at which it fired on chip, computed from a chip log's per-phase step times; real GPU time is ignored.
-\emph{Data-world emulation}: the trainer reproduces the organiser loader's eight-rank sharding on one device, so each
-step sees the same tokens. \emph{Calibration before use}: no GPU verdict may influence a chip run until the proxy has
-reproduced pairs the campaign already paid for; an earlier proxy was rejected under this rule when one of its verdicts
-flipped sign. A GPU pair is void when its step-10 loss sits on a different warm-up path from its control. The shipped
-\texttt{--deterministic} flag uses PyTorch's \texttt{warn\_only=True}; paired verdicts need \texttt{warn\_only=False}.
-The protocol, runbook and patch notes are in \texttt{ffsim/gpu/}.
-
 \section{Seed sweeps}
 
 \begin{table}[!htbp]
@@ -217,6 +263,14 @@ published base prediction by \val{guard-attack-two-shift}.
   \label{tab:guard}
   \input{tables/guard}
 \end{table}
+
+\paragraph{How much the stress test shows.} The stress test is weak evidence and we present it as such. Its
+``honest'' records are generated from the model's own predictions plus noise, so accepting them is close to
+automatic; its attack, a coordinated pair of sock-puppet records that pull a shared coefficient, was designed by us
+with the thresholds known, and there is no adaptive attacker. The guard refused that attack down to two records and
+accepted the honest ones. An attacker who knows the thresholds can stay under them, and per-hardware effects can
+absorb slow drifts. What the guard does is turn the cheapest damaging attack, pulling a shared coefficient, into a
+visible failure.
 
 \clearpage
 \section{The final recipe}

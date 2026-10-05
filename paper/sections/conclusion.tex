@@ -1,12 +1,14 @@
 % sections/conclusion.tex
 \section{Conclusion}
 
-In a wall-clock contest on a deterministic accelerator, the most useful tool we had was a rule: rehearse the exact
-file, cold, and add an offset (C1). It predicted the final uploads to within a few $10^{-4}$, but the offset is part
-text and part instance speed, its resolution for differences between uploads is about \val{diff-95}~bpb, and its
+In a wall-clock contest on an accelerator that behaved deterministically in our checks, the most useful tool we had
+was a rule: rehearse the exact file, cold, and add an offset (C1). It predicted the final uploads with an MAE of
+\val{holdout-mae} (largest error \val{holdout-maxerr}), but the offset is part text and partly instance- or
+selection-dependent, its resolution for differences between uploads is about \val{diff-95}~bpb, and its
 best-looking statistics lean on one normalised rehearsal. A simulator that separates the steps a recipe gets from what
-each step is worth (C2) beats trivial baselines when it has seen the knob values before and is at chance when it has
-not; it says what is noise, not what will work. One price per optimizer step (C3) made every trade explicit, exposed a
+each step is worth (C2) beats a steps-only baseline on recipe changes it can relate to its data, keeps
+\val{lokvo-rec-sign} sign agreement on knob values it has never seen, and is at chance on genuinely new mechanisms; it
+says what is noise, not what will work. One price per optimizer step (C3) made every trade explicit, exposed a
 compilation regression that only cold rehearsals reveal, and shows that seed, order and selection effects are as large
 as most late improvements. Read as a hypothesis, the same accounting puts the gap to the top ten at
 \val{gap-ten-range} more effective compute and points at kernels. The data that would test the simulator beyond our

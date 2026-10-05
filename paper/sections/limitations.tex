@@ -12,14 +12,18 @@
     seven final-day uploads carry a lottery-selected salt. Four uploads (\upl{K65a}--\upl{K65d}) were official tests of
     single changes. If the official shard overlaps the public validation text (\cref{sec:contest}), seed and salt
     selection used part of the evaluation set.
-  \item \textbf{The offset depends on the chip.} The frozen calibration's errors are positive on the faster
-    final-day chips (\cref{tab:offset-chips}), and the oracle's headline statistics depend on one model-normalised
-    rehearsal (\cref{tab:oracle-sens}). The pseudo-prospective analyses are retrospective simulations; only three
-    written projections are archived.
+  \item \textbf{The offset may depend on the chip.} The frozen calibration's errors are positive on the faster
+    final-day chips (\cref{tab:offset-chips}), but every final-day upload with a lottery-selected salt was rehearsed
+    on those chips, so instance and selection are confounded. The oracle's headline statistics depend on one
+    model-normalised rehearsal (\cref{tab:oracle-sens}). The pseudo-prospective analyses are retrospective
+    simulations; only three written projections are archived.
   \item \textbf{Determinism rests on one pair.} The evidence that a warm and a cold run of one file follow the same
-    trajectory is one pair with older code (\cref{sec:determinism}). Step counts jitter by up to
-    \val{jitter-range-hi} steps within a chip.
-  \item \textbf{Hardware heterogeneity.} Instances differed by up to \val{chip-spread}\docnum{} in step time. We
+    trajectory is one pair with older code (\cref{sec:determinism}). The offset statistics cannot tell a
+    deterministic official run from one that re-draws the order noise: the within-chip offset SD
+    (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi}) contains the SD that re-drawing
+    would give (about \val{noise-chip-pair}). Step counts jitter by up to \val{jitter-range-hi} steps within a chip.
+  \item \textbf{Hardware heterogeneity.} Instances differed by up to \val{chip-spread}\docnum{} in step time, and
+    chip~D ran an older Neuron runtime (2.33.10, against 2.34.10 on chip~C). We
     normalised only same-recipe runs, never across a change that alters step time, and every comparison in the text
     names its chip.
   \item \textbf{Released data do not cover the final day.} \texttt{runs.jsonl} holds chips A--D up to 29~September.

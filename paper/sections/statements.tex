@@ -10,17 +10,21 @@ The code, data and analysis scripts are in the public repository
 \fi
 \begin{itemize}
   \item \textbf{Data.} \texttt{results/official-scores.csv} (every scored upload with its rehearsal and offset),
-    \texttt{research/sim-data/runs.jsonl} (\val{ds-n} run records, chips A--D), \texttt{validation-pairs.json}
-    (\val{ds-pairs} pairs), \texttt{official-uploads.csv}, the dataset QA and validation reports, and three reference
-    chip-log directories used by the parsers and tests. Our code, data and documents are released under the MIT
-    licence; recipes derived from the organiser's baseline are Apache-2.0; contributed records are CC-BY-4.0.
+    \texttt{research/sim-data/runs.jsonl} (\val{ds-n} run records, chips A--D; \val{ds-nochip} records have no
+    recorded chip), \texttt{validation-pairs.json} (\val{ds-pairs} pairs), \texttt{official-uploads.csv}, the
+    dataset QA and validation reports, and three reference chip-log directories used by the parsers and tests. Our
+    code, data and documents are released under the MIT licence; recipes derived from the organiser's baseline are
+    Apache-2.0; contributed records are CC-BY-4.0.
   \item \textbf{Code.} The simulator (\texttt{ffsim/}, numpy only), the GPU proxy (\texttt{ffsim/gpu/}), the app
     (\texttt{space/}), the contribution pipeline (\texttt{ffsim/contrib.py}, \texttt{.github/workflows/}), and both
     recipes byte-identical to the uploaded files, with their SHA-256 hashes in \texttt{recipes/README.md}.
   \item \textbf{Software.} All chip runs used the organiser-provided AWS Neuron environment on \texttt{trn2.3xlarge}:
     PyTorch~2.11.0, \texttt{torch-neuronx}~2.11.3 and the Neuron compiler \texttt{neuronx-cc}~2.26 (build
-    2.26.6360.0), in eager mode with one process per NeuronCore (launch command in \texttt{recipes/README.md}).
-  \item \textbf{Commands.} \texttt{python -m pytest -q tests} runs the test suite;
+    2.26.6360.0), with the model compiled by \texttt{torch.compile} (backend \texttt{neuron},
+    \texttt{dynamic=False}, the recipes' default), one process per NeuronCore (launch command in
+    \texttt{recipes/README.md}). The Neuron runtime was 2.34.10 on chip~C and 2.33.10 on chip~D; the released files
+    do not record it for the other chips.
+  \item \textbf{Commands.} \texttt{pip install -r paper/requirements.txt} installs the pinned dependencies; \texttt{python -m pytest -q tests} runs the test suite;
     \texttt{python paper/analysis/make\_all.py} regenerates \texttt{paper/numbers.tex}, every table in
     \texttt{paper/tables/} and every figure in \texttt{paper/figures/}; \texttt{python paper/check\_tex.py} runs the
     static checks; \texttt{latexmk -pdf main.tex} in \texttt{paper/} builds this document. The analysis is
@@ -61,9 +65,9 @@ path to misuse beyond that of the general techniques it builds on.
 
 \paragraph{Use of AI assistants.} The campaign's engineering and experiment orchestration, the analysis scripts and
 the drafting of this manuscript were carried out with substantial help from an AI assistant (Anthropic's Claude),
-working under the author's direction. Every result reported here comes from logged runs and official scores in the
-released data. The author reviewed the manuscript and takes full responsibility for its content. No AI system is
-listed as an author.
+working under the author's direction. Every result reported here comes from logged runs and official scores;
+those whose records are not released are marked \docnum{} and listed in \cref{app:docfacts}. The author reviewed the
+manuscript and takes full responsibility for its content. No AI system is listed as an author.
 
 \ifanonymous\else
 \section*{Acknowledgements}

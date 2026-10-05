@@ -92,6 +92,7 @@ QUOTED = [
     ("finals", "6--12~December 2026", "contest rules: NeurIPS 2026 competition event"),
     ("official-rounding", "0.00005", "official scores are published to 4 decimals (results CSV)"),
     ("anchor-date", "24~September", f"{GAP}"),
+    ("qv-records", "1{,}188", "research/sim-data/quality-validation.md header: run records when the report was written"),
 ]
 
 
@@ -112,6 +113,8 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("leaky-official", d("K59", "K57"), src + ": K59 - K57")
     N.add("salt7-vs-salt4", d("K82s7", "K82s4", 5), src + ": K82s7 - K82s4")
     N.add("salt6-vs-salt4", d("K73s6", "K73s4"), src + ": K73s6 - K73s4")
+    N.add("salt6-reh-vs-salt4", num(s["K73s6"]["rehearsal"] - s["K73s4"]["rehearsal"], 5, sign=True),
+          src + ": K73s6 - K73s4 rehearsal")
     N.add("xshift-official", d("K65a", "K63"), src + ": K65a - K63")
     N.add("latek8-official", d("K65b", "K63"), src + ": K65b - K63")
     N.add("nesterov-official", d("K65c", "K63", 5), src + ": K65c - K63")

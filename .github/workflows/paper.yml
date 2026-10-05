@@ -2,6 +2,8 @@ name: Paper
 
 # Builds paper/main.tex into a PDF on every push or pull request that touches the paper, its figures, or the data
 # and code its numbers come from, and uploads the PDF as a workflow artifact (Actions -> this run -> Artifacts).
+# It also uploads the generated main.bbl and an arXiv source bundle (artifact arxiv-source) that includes it, after
+# compiling that bundle on its own without BibTeX, as arXiv will.
 on:
   push:
     branches: [main]
@@ -42,7 +44,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install
-        run: python -m pip install -r requirements.txt matplotlib
+        run: python -m pip install -r paper/requirements.txt
       - name: Regenerate numbers and tables from the data
         run: python paper/analysis/make_all.py
       - name: numbers.tex and tables/ are up to date with the data
@@ -77,5 +79,37 @@ jobs:
           path: |
             paper/main.pdf
             paper/main.log
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload main.bbl
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paper-bbl
+          path: paper/main.bbl
+          if-no-files-found: error
+          retention-days: 30
+      - name: Assemble the arXiv source bundle (with main.bbl)
+        run: python3 paper/make_bundle.py --out paper/build/arxiv-source --bbl paper/main.bbl
+      - name: Unpack the bundle into a clean folder
+        # The stand-alone compile below sees exactly the files in the zip that goes to arXiv.
+        run: python3 -m zipfile -e paper/build/arxiv-source.zip paper/build/arxiv-check
+      - name: Compile the bundle on its own, without BibTeX (arXiv uses main.bbl)
+        uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
+        with:
+          root_file: main.tex
+          working_directory: paper/build/arxiv-check
+          args: -pdf -bibtex- -file-line-error -halt-on-error -interaction=nonstopmode
+      - name: Every citation in the bundle resolves from main.bbl
+        run: |
+          if grep -nE "Citation .* undefined|There were undefined citations" paper/build/arxiv-check/main.log; then
+            echo "::error::the arXiv bundle has undefined citations: main.bbl is missing or out of date"
+            exit 1
+          fi
+          echo "none undefined"
+      - name: Upload the arXiv source bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: arxiv-source
+          path: paper/build/arxiv-source.zip
           if-no-files-found: error
           retention-days: 30

@@ -25,15 +25,15 @@ a change enters through $\bar t_k$ (and so $S$) and through $q$.
 \label{sec:simdata}
 
 \texttt{research/sim-data/runs.jsonl} holds \val{ds-n} run records from \val{ds-chips} Trainium instances (chips
-A--D): \val{ds-full} full runs and \val{ds-screens} short screens (\cref{tab:dataset}). They were merged from a run
-table, the campaign ledger and harvested chip logs. Each record carries the effective \texttt{FF\_*} environment,
-steps, charged and start-up seconds, median step time per accumulation phase, the early loss curve where logged
-(\val{ds-loss-curves} records), and the \valbpb{} on the first 2M public tokens. \texttt{validation-pairs.json}
-holds \val{ds-pairs} same-seed treatment/control pairs from \val{ds-pair-families} families: \val{ds-pairs-recipe}
-recipe changes and \val{ds-pairs-noise} seed or chip comparisons. The quality model is fitted only on the
-\val{q-nfit} full chip runs whose complete environment is known; the other records are screens, runs from the
-earliest chips without a recorded code version, rows whose base recipe is unknown, or runs without a final score.
-The final-day runs on chips E, G and H are not in the dataset.
+A--D; \val{ds-nochip} records have no recorded chip): \val{ds-full} full runs and \val{ds-screens} short screens
+(\cref{tab:dataset}). They were merged from a run table, the campaign ledger and harvested chip logs. Each record
+carries the effective \texttt{FF\_*} environment, steps, charged and start-up seconds, median step time per
+accumulation phase, the early loss curve where logged (\val{ds-loss-curves} records), and the \valbpb{} on the first
+2M public tokens. \texttt{validation-pairs.json} holds \val{ds-pairs} same-seed treatment/control pairs from
+\val{ds-pair-families} families: \val{ds-pairs-recipe} recipe changes and \val{ds-pairs-noise} seed or chip
+comparisons. The quality model is fitted only on the \val{q-nfit} full chip runs whose complete environment is known;
+the other records are screens, runs from the earliest chips without a recorded code version, rows whose base recipe is
+unknown, or runs without a final score. The final-day runs on chips E, G and H are not in the dataset.
 
 \subsection{Step time and the step walk}
 
@@ -87,8 +87,9 @@ a chip run.
 
 \paragraph{Paired Monte Carlo.} \texttt{simulate} and \texttt{search} propagate chip jitter, seed luck, coefficient
 uncertainty, residuals and the offset by Monte Carlo with common random numbers, so that wherever two recipes agree
-the noise cancels and a paired $P(\text{candidate} < \text{base})$ is a calibrated statement. An identical recipe
-reproduces the base exactly.
+the noise cancels. $P(\text{candidate} < \text{base})$ is a paired probability; we have not checked its calibration
+beyond interval coverage (\val{lopo-rec-cover} of LOPO recipe pairs fall inside the predicted $\pm2$\,SD,
+\cref{sec:simval}). An identical recipe reproduces the base exactly.
 
 \subsection{Validation, with baselines}
 \label{sec:simval}
@@ -139,13 +140,14 @@ which biases it towards supported pairs.
 
 \paragraph{Genuinely new mechanisms.} On the \val{postfit-n} pairs that finished after the release fit, which tested
 attention-source variants and new learning-rate settings (\cref{tab:postfit}), sign agreement was \val{postfit-sign}
-(\val{postfit-k} of \val{postfit-n}; Wilson 95\% interval \val{postfit-wilson}), indistinguishable from chance, and
-the MAE \val{postfit-mae} was worse than the zero predictor's \val{postfit-zero-mae}. The surrogate can say which knob
-moves are inside the noise; it cannot say whether a new mechanism will work. During the campaign we used it for
-negative screening: none of the \val{search-n}\docnum{} local candidates around \upl{K60} cleared the
-chip-confirmation bar, and we ran none of them. Because they were never run, this is not evidence that they were bad,
-only that the surrogate saw no reason to spend chip time on them. Every later win came from mechanisms the data had
-never seen (the row pool, the EMA blend and the prewarm).
+(\val{postfit-k} of \val{postfit-n}; Wilson 95\% interval \val{postfit-wilson}, too narrow because several pairs
+share a control), indistinguishable from chance, and the MAE \val{postfit-mae} was worse than the zero predictor's
+\val{postfit-zero-mae}. The surrogate can say which knob moves are inside the noise; it cannot say whether a new
+mechanism will work. During the campaign we used it for negative screening: none of the \val{search-n}\docnum{} local
+candidates around \upl{K60} cleared the chip-confirmation bar, and we ran none of them. Because they were never run,
+this is not evidence that they were bad, only that the surrogate saw no reason to spend chip time on them. Every later
+quality win came from mechanisms the data had never seen (the row pool and the EMA blend); the prewarm, which the data
+does contain, recovered steps rather than per-step quality.
 
 \subsection{The GPU proxy}
 \label{sec:gpu}

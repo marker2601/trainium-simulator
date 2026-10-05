@@ -10,7 +10,8 @@ Checks, starting from paper/main.tex and following every \\input / \\include:
   * every \\cite / \\citep / \\citet / ... key exists in refs.bib (uncited bib entries are listed as information);
   * refs.bib parses: unique keys, balanced braces, ASCII only;
   * every \\includegraphics file exists on the \\graphicspath (with .pdf / .png / .jpg if no extension is given);
-  * every \\val{key} is defined by \\ffdef in numbers.tex (unused values are information);
+  * every \\val{key} is defined by \\ffdef in numbers.tex (unused values are information), and no $+$ or $-$ is
+    typed before a \\val whose value carries its own sign (it would print twice; a warning for unsigned values);
   * no unescaped _ ^ # & outside math, tables and verbatim-like arguments (heuristic), and no stray "??";
   * no control characters in any source file, and \\knob never inside a caption or sectioning title;
   * layout estimates (revision 1): every tabular's width from Computer Modern metrics against the 469.75 pt text
@@ -367,6 +368,19 @@ def check_moving_args(texts: Dict[Path, str]) -> None:
                 warnings.append(f"{f.name}: \\{m.group(1)} title uses \\texttt without \\texorpdfstring")
 
 
+def check_typed_signs(texts: Dict[Path, str]) -> None:
+    """``$+$ \\val{k}`` prints the sign twice when k's value is signed (num(..., sign=True) writes \\ensuremath{+})."""
+    vals = _numbers()
+    for f, t in texts.items():
+        for m in re.finditer(r"\$([+-])\$\s*(?:\\,|~)?\s*\\val\{([^}]+)\}", t):
+            v = vals.get(m.group(2), "")
+            ln = t.count("\n", 0, m.start()) + 1
+            if v.startswith(("\\ensuremath{+}", "\\ensuremath{-}", "+", "-")):
+                errors.append(f"{f.name}:{ln}: ${m.group(1)}$ typed before \\val{{{m.group(2)}}}, whose value is signed")
+            else:
+                warnings.append(f"{f.name}:{ln}: ${m.group(1)}$ typed before \\val{{{m.group(2)}}}; prefer a signed value")
+
+
 def check_control_chars(files: List[Path]) -> None:
     for f in files:
         raw = f.read_text(encoding="utf-8")
@@ -424,6 +438,7 @@ def main() -> int:
             errors.append(f"{f.name}: figure not found on the graphicspath: {g}")
 
     check_moving_args(texts)
+    check_typed_signs(texts)
     check_control_chars(files)
     check_layout(texts)
 

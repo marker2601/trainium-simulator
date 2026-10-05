@@ -75,6 +75,8 @@
 \ffdef{chip-off-n-g}{3}  % results/official-scores.csv
 \ffdef{chip-ferr-g}{\ensuremath{+}0.00059}  % results/official-scores.csv: frozen chip-C error, mean by chip
 \ffdef{off-sd-within}{0.00034}  % results/official-scores.csv: pooled within-chip SD since K50
+\ffdef{off-sd-within-lo}{0.00024}  % results/official-scores.csv: chi-square 95% CI of the pooled within-chip SD, 10 df
+\ffdef{off-sd-within-hi}{0.00059}  % results/official-scores.csv
 \ffdef{loo-n}{13}  % results/official-scores.csv
 \ffdef{loo-pooled-mae}{0.00036}  % results/official-scores.csv: leave-one-out, pooled mean
 \ffdef{loo-chip-mae}{0.00028}  % results/official-scores.csv: leave-one-out, same-chip mean
@@ -95,6 +97,8 @@
 \ffdef{holdout-mae}{0.00035}  % results/official-scores.csv
 \ffdef{holdout-bias}{\ensuremath{+}0.00034}  % results/official-scores.csv
 \ffdef{holdout-maxerr}{0.00083}  % results/official-scores.csv
+\ffdef{holdout-mae-lo}{0.00017}  % results/official-scores.csv: percentile bootstrap over the final-day uploads, 4000 draws, rng 0
+\ffdef{holdout-mae-hi}{0.00055}  % results/official-scores.csv: percentile bootstrap
 \ffdef{holdout-npos}{6}  % results/official-scores.csv
 \ffdef{holdout-signp}{0.06}  % one-sided sign test, Binomial(n, 1/2)
 \ffdef{holdout-mae-direct}{0.00053}  % results/official-scores.csv
@@ -152,6 +156,7 @@
 \ffdef{ds-screens}{278}  % research/sim-data/runs.jsonl
 \ffdef{ds-loss-curves}{342}  % research/sim-data/runs.jsonl
 \ffdef{ds-chips}{4}  % research/sim-data/runs.jsonl
+\ffdef{ds-nochip}{28}  % research/sim-data/runs.jsonl: records without a chip
 \ffdef{ds-pairs}{99}  % research/sim-data/validation-pairs.json
 \ffdef{ds-pairs-recipe}{87}  % validation-pairs.json
 \ffdef{ds-pairs-noise}{12}  % validation-pairs.json
@@ -312,6 +317,8 @@
 \ffdef{postfit-wilson}{30\%--75\%}  % Wilson 95% interval
 \ffdef{postfit-mae}{0.00104}  % simulator.py
 \ffdef{postfit-zero-mae}{0.00075}  % zero predictor on the 15 pairs
+\ffdef{asr-s97-delta}{\ensuremath{+}0.00115}  % docs/simulator-report-20260929.md section 5: AS-a s97 (D), raw (doc)
+\ffdef{asr-s97-step-deficit}{41}  % docs/simulator-report-20260929.md section 5: 2109 vs 2150 steps (doc)
 \ffdef{postfit-ndec}{12}  % simulator.py
 \ffdef{postfit-signdec}{67\%}  % simulator.py
 \ffdef{st-lolo-reach}{0.545\%}  % StepTimeModel.loo_report('k4')
@@ -365,6 +372,8 @@
 \ffdef{jitter-sd-hi}{6.2}  % research/sim-data/runs.jsonl loss_curve (seeds.py)
 \ffdef{jitter-range-lo}{6}  % research/sim-data/runs.jsonl loss_curve (seeds.py): max - min steps within a seed sweep
 \ffdef{jitter-range-hi}{22}  % research/sim-data/runs.jsonl loss_curve (seeds.py)
+\ffdef{xshift-spike-ratio}{3}  % results/official-scores.csv K65a - K63 over the spike-path penalty (seeds.py)
+\ffdef{prewarm-g-drop-sds}{4--11}  % results/official-scores.csv: K73s6 - K77a steps over the within-sweep step SDs (seeds.py)
 \ffdef{l10-good}{13.11--13.23}  % research/sim-data/runs.jsonl loss_curve (seeds.py)
 \ffdef{l10-spike}{13.69--14.27}  % research/sim-data/runs.jsonl loss_curve (seeds.py)
 \ffdef{l10-mid}{13.39}  % research/sim-data/runs.jsonl loss_curve (seeds.py)
@@ -524,6 +533,7 @@
 \ffdef{finals}{6--12~December 2026}  % contest rules: NeurIPS 2026 competition event (doc)
 \ffdef{official-rounding}{0.00005}  % official scores are published to 4 decimals (results CSV) (doc)
 \ffdef{anchor-date}{24~September}  % docs/GAP-ANALYSIS.md (doc)
+\ffdef{qv-records}{1{,}188}  % research/sim-data/quality-validation.md header: run records when the report was written (doc)
 \ffdef{rowpool-official}{\ensuremath{-}0.0022}  % results/official-scores.csv: K70a - K63
 \ffdef{ema-blend-official}{\ensuremath{-}0.0003}  % results/official-scores.csv: K77a - K73s4
 \ffdef{prewarm-official}{\ensuremath{-}0.0003}  % results/official-scores.csv: K82s4 - K77a
@@ -532,6 +542,7 @@
 \ffdef{leaky-official}{\ensuremath{-}0.0015}  % results/official-scores.csv: K59 - K57
 \ffdef{salt7-vs-salt4}{\ensuremath{+}0.00003}  % results/official-scores.csv: K82s7 - K82s4
 \ffdef{salt6-vs-salt4}{\ensuremath{+}0.0005}  % results/official-scores.csv: K73s6 - K73s4
+\ffdef{salt6-reh-vs-salt4}{\ensuremath{-}0.00007}  % results/official-scores.csv: K73s6 - K73s4 rehearsal
 \ffdef{xshift-official}{\ensuremath{+}0.0034}  % results/official-scores.csv: K65a - K63
 \ffdef{latek8-official}{\ensuremath{+}0.0005}  % results/official-scores.csv: K65b - K63
 \ffdef{nesterov-official}{0.00000}  % results/official-scores.csv: K65c - K63
@@ -571,4 +582,4 @@
 \ffdef{k82-nknobs}{145}  % ffsim/examples/recipe-K82s4.json
 \ffdef{k82-bytes}{252{,}013}  % recipes/K82s4/train.py
 \ffdef{size-limit}{262{,}144}  % enforced by the submission portal; not stated in the published rules
-\ffdef{n-docfacts}{88}  % make_all.py
+\ffdef{n-docfacts}{91}  % make_all.py

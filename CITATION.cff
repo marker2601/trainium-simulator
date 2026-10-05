@@ -14,6 +14,7 @@ authors:
   - given-names: "Jagadeesh Kumar"
     family-names: "Gorla"
     affiliation: "Independent researcher (team FrontierForge)"
+    orcid: "https://orcid.org/0009-0002-2270-831X"
 repository-code: "https://github.com/marker2601/trainium-simulator"
 url: "https://github.com/marker2601/trainium-simulator"
 license: MIT
@@ -32,6 +33,7 @@ preferred-citation:
     - given-names: "Jagadeesh Kumar"
       family-names: "Gorla"
       affiliation: "Independent researcher (team FrontierForge)"
+      orcid: "https://orcid.org/0009-0002-2270-831X"
   year: 2026
   version: "1.0.0"
   repository-code: "https://github.com/marker2601/trainium-simulator"

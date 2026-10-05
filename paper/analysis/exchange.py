@@ -36,7 +36,7 @@ LEVERS = [
     ("Row pool, 256 micro-batches", -0.0023, None, "chip", "1", "chip E; official $-$2.2; $-$0.5\\% steps"),
     ("Batch warm-up 65k$\\to$131k$\\to$262k", -0.0019, None, "log", "", "changes steps itself$^{\\ddagger}$"),
     ("LeakyReLU(0.35)$^2$ MLP", -0.0017, None, "log", "", "chip C vs ReLU$^2$ $-$1.05; official $-$1.5"),
-    ("Attention-source reuse (6--8 reuse 5)", -0.0015, None, "chip", "4", "4 seeds; step cost $<$0.1\\%"),
+    ("Attention-source reuse (6--8 reuse 5)", -0.0015, None, "chip", "4", "3 seeds, 2 chips; 5th pair (s97) $+$1.15 raw; step cost $<$0.1\\%"),
     ("Rotary key offset", -0.0013, None, "log", "", ""),
     ("Cooldown 0.7 + small-batch LR", -0.0006, None, "norm", "3", "all 3 negative; seeds differ"),
     ("EMA blend 0.6 (no prewarm)", -0.0005, None, "chip", "1", "official $-$0.3 (K77a$-$K73s4)"),

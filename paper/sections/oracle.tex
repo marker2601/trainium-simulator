@@ -4,16 +4,17 @@
 
 \subsection{Protocol}
 
-The rule we followed for every upload from 26~September on is short:
+The rule we followed for every rehearsed upload from 26~September on (all except the four official tests
+\upl{K65a}--\upl{K65d}) is short:
 \begin{quote}
   Run the \emph{exact upload file}, at the upload seed, on your own Trainium instance, for the full charged budget,
   starting \emph{cold}. Score the trained weights on the first \val{eval-tokens} tokens of the public validation
   data. The official score will be that number plus an offset.
 \end{quote}
 Each shuffle salt is a code constant, so every salt is its own file with its own hash, and its rehearsal is a
-rehearsal of that file. One upload breaks the rule: the rehearsal of \upl{K70a} ran on chip~E, which is slow, and was
-normalised to chip-C speed before use (\cref{sec:k70a}). For upload $i$ with rehearsal score $r_i$ on chip $c(i)$ and
-official score $y_i$ we write
+rehearsal of that file. Among the rehearsed uploads, one breaks the rule: the rehearsal of \upl{K70a} ran on
+chip~E, which is slow, and was normalised to chip-C speed before use (\cref{sec:k70a}). For upload $i$ with rehearsal
+score $r_i$ on chip $c(i)$ and official score $y_i$ we write
 \begin{equation}
   \label{eq:offset}
   y_i = r_i + \mu + \gamma_{c(i)} + \varepsilon_i, \qquad \varepsilon_i \sim \mathcal{N}(0, \sigma_{\text{off}}^2),
@@ -21,9 +22,9 @@ official score $y_i$ we write
 where $\mu$ is the part of the offset that belongs to the evaluation text and $\gamma_c$ a per-chip part. During
 the campaign we used the special case $\gamma\equiv0$: estimate $\hat\mu$ and $s$ from $n$ earlier uploads and
 predict $y_{\text{new}}$ with the interval $r_{\text{new}} + \hat\mu \pm t_{n-1,0.975}\, s\sqrt{1 + 1/n}$
-(\cref{app:derivations}). A file was uploaded only after its cold rehearsal had exited cleanly, with no graph breaks,
-charged time inside the budget and the file under the size limit. The repository records written projections for
-three uploads (\cref{sec:projections}).
+(\cref{app:derivations}). Apart from \upl{K65a}--\upl{K65d}, a file was uploaded only after its cold rehearsal
+had exited cleanly, with no graph breaks, charged time inside the budget and the file under the size limit. The
+repository records written projections for three uploads (\cref{sec:projections}).
 
 \paragraph{Why it should work, and why not exactly.} If training is deterministic (\cref{sec:determinism}), the
 official run follows the rehearsal's trajectory for as many steps as it gets. The text then contributes a constant:
@@ -76,7 +77,7 @@ would remove it at the source.
   \centering
   \includegraphics{oracle_calibration.pdf}
   \caption{\textbf{Rehearsal and official score.} (a) Rehearsal against official for the \val{off-n-since} uploads
-    since \upl{K50}; the solid line is official $=$ rehearsal $+$ \val{off-mean-since-short} with a $\pm2$\,SD band,
+    since \upl{K50}; the solid line is official $=$ rehearsal \val{off-mean-since-short} with a $\pm2$\,SD band,
     the dashed line is identity. (b) The offset per upload in upload order; grey marks the early chip-A/B uploads.
     Marker shape is the rehearsal chip.}
   \label{fig:oracle}
@@ -164,7 +165,7 @@ The repository records three projections written before upload (\texttt{results/
 scored \val{salt7-official}. These two projections did \emph{not} use the frozen chip-C offset, which misses them by
 \val{ferr-k82s4} and \val{ferr-k82s7} (\cref{tab:offset-holdout}). They added an offset of \val{k82-proj-offset}\docnum{}
 read off the final-day uploads already scored, most of them on the faster chips G and H; the exact rule was not
-recorded. That is the text-plus-chip correction applied informally, and it is why those two landed close. It is
+recorded. That is the text-plus-chip correction applied informally, which may be why those two landed close. It is
 also a reason to treat their closeness as anecdote rather than as a test.
 
 \subsection{Resolution}

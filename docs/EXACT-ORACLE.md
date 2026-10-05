@@ -6,27 +6,28 @@ The most useful tool we had was not a model. It was a rule:
 > cold start. Score the trained weights on the first 2,097,152 tokens of the public validation shard. The official
 > score will be that number **plus about +0.0066 to +0.0070**, with an sd of about 0.0004.
 
-We used this rule to pick every upload from 26 Sep on. Over the 15 scored uploads since K50 the offset averaged
-+0.0067 with an sd of 0.0004 (range +0.0061 to +0.0074). The largest miss against a written projection was
-0.0006: K73s6, a salt-selected draw, was projected at 0.9619 and scored 0.9625. The two final uploads landed within
-0.0001 of their projections. Over all 30 uploads with a rehearsal, including the early chip-A/B era, the offset
-ranged from +0.0053 to +0.0077.
+We used this rule to pick every rehearsed upload from 26 Sep on (all except K65a-K65d, four official tests of
+single changes). Over the 15 rehearsed uploads since K50 the offset averaged +0.0067 with an sd of 0.0004 (range
++0.0061 to +0.0074). The largest miss against a written projection was 0.0006: K73s6, a salt-selected draw, was
+projected at 0.9619 and scored 0.9625. The two final uploads landed within 0.0001 of their projections. Over all 30
+uploads with a rehearsal, including the early chip-A/B era, the offset ranged from +0.0053 to +0.0077.
 
 ## Why it works
 
 1. **Training is deterministic for a given file and seed.** A cold rehearsal and a warm rerun of the same file
    agreed to about 5e-6 (1.041525 vs 1.041520 on 19 Sep). The official run executes the same code on the same
    kind of chip, so it follows the same optimizer trajectory.
-2. **The offset is a property of the text, not of the recipe.** The first 2M public tokens are easier than typical
-   text: the same model scores about +0.0070 worse on 20M public tokens. The private shard behaves like typical
-   text. The offset therefore barely moves between very different recipes. It moved 0.0011 across nine
-   submissions that changed the architecture, the optimizer and the data order.
+2. **The offset is mostly a property of the text, not of the recipe.** The first 2M public tokens are easier than
+   typical text: the same model scores about +0.0070 worse on 20M public tokens, about the size of the offset. The
+   offset therefore barely moves between very different recipes. It moved 0.0011 across nine submissions that
+   changed the architecture, the optimizer and the data order. It may also depend on the instance that ran the
+   rehearsal: on the final day it was larger for rehearsals on the faster chips G and H.
 
 ## The calibration data
 
 | period | uploads | offset mean | sd | range |
 |---|---|---|---|---|
-| chip-C rehearsals K51-K60 (the simulator's offset model) | 7 | +0.00654 | 0.00040 | +0.0061 .. +0.0072 |
+| chip-C rehearsals K51-K60 (the simulator's offset model) | 7 | +0.00653 | 0.00042 | +0.0061 .. +0.0072 |
 | final day, chips C/E/G/H (K63-K82s7) | 7 | +0.00687 | 0.00030 | +0.0065 .. +0.0074 |
 | everything since K50 | 15 | +0.00671 | 0.00038 | +0.0061 .. +0.0074 |
 | every scored upload with a rehearsal | 30 | +0.00648 | 0.00061 | +0.0053 .. +0.0077 |
@@ -47,9 +48,9 @@ official score was 0.9655, an offset of +0.0064.
 
 ## How we used it
 
-- **Gate every upload.** A file was uploaded only after its cold rehearsal finished cleanly: exit 0, no graph
-  breaks, charged time inside the budget, and the file under the 262,144-byte limit. Its projected score was
-  written down before the upload.
+- **Gate every upload.** Apart from K65a-K65d, a file was uploaded only after its cold rehearsal finished cleanly:
+  exit 0, no graph breaks, charged time inside the budget, and the file under the 262,144-byte limit. Its projected
+  score was written down before the upload.
 - **Test on chips instead of on the leaderboard.** Because a rehearsal predicts the official score, a structural
   change can be judged on our own chips without spending an upload. On the final day we ran four chips as an
   "official test bench": each change was built as a complete upload file and rehearsed at seed 73.

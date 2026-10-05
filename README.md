@@ -11,6 +11,7 @@ A simulator, a calibration method and a best recipe from Phase 1 of the AWS Trai
 [![Tests](https://img.shields.io/badge/tests-385%20passed%2C%207%20skipped-brightgreen.svg)](tests/)
 [![AWS Trainium](https://img.shields.io/badge/AWS-Trainium%20%28trn2%29-FF9900.svg)](https://github.com/aws-neuron/trainium-frontier)
 [![Gradio](https://img.shields.io/badge/UI-Gradio-F97316.svg)](space/)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0002--2270--831X-A6CE39?logo=orcid&logoColor=white)](https://orcid.org/0009-0002-2270-831X)
 
 [Quick start](#quick-start) &middot; [Results](#results) &middot; [Use it on your own runs](#use-it-on-your-own-runs) &middot; [Findings](#key-findings-tldr) &middot; [Limitations](#honest-limitations) &middot; [Cite](#cite-this-work)
 
@@ -300,9 +301,11 @@ tests/                 392 tests (385 pass, 7 skip: 5 need the private chip harv
 
 ## Cite this work
 
+Author: Jagadeesh Kumar Gorla ([ORCID 0009-0002-2270-831X](https://orcid.org/0009-0002-2270-831X)).
+
 If `ffsim`, the exact-oracle method or the findings help your work, please cite the software
 ([`CITATION.cff`](CITATION.cff); GitHub's "Cite this repository" button reads it). A paper describing the method is
-in preparation; its outline and claims ledger are in [`paper/OUTLINE.md`](paper/OUTLINE.md).
+in preparation; its LaTeX source is in [`paper/`](paper/), and an arXiv preprint will follow.
 
 ```bibtex
 @software{frontierforge_2026,

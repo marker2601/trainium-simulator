@@ -15,7 +15,8 @@ import math
 import re
 from typing import Dict, List
 
-from common import (FIGURES, RUNS, TABLES, Numbers, mean, milli, num, pct, sd, t_quantile, table, wilson)
+from common import (FIGURES, RUNS, TABLES, Numbers, load_scores, mean, milli, num, pct, sd, t_quantile, table,
+                    wilson)
 
 SPIKE_L10 = 13.5
 INTERMEDIATE = (13.3, SPIKE_L10)
@@ -102,6 +103,15 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("jitter-sd-hi", num(max(jit_sd), 1), SRC)
     N.add("jitter-range-lo", str(min(jit_rng)), SRC + ": max - min steps within a seed sweep")
     N.add("jitter-range-hi", str(max(jit_rng)), SRC)
+    # the chip-G step drop without the EMA prewarm (K73s6 - K77a), in single-run jitter SDs
+    sc = {r["name"]: r for r in load_scores()}
+    # the official K65a - K63 delta (an attention-input shift that may have re-rolled the warm-up path) in units of
+    # the controlled spike-path penalty
+    N.add("xshift-spike-ratio", num((sc["K65a"]["official"] - sc["K63"]["official"]) / dp, 0),
+          "results/official-scores.csv K65a - K63 over the spike-path penalty (seeds.py)")
+    drop = sc["K73s6"]["steps"] - sc["K77a"]["steps"]
+    N.add("prewarm-g-drop-sds", f"{num(drop / max(jit_sd), 0)}--{num(drop / min(jit_sd), 0)}",
+          "results/official-scores.csv: K73s6 - K77a steps over the within-sweep step SDs (seeds.py)")
     # step-10 loss ranges by path (the threshold sits in the empty gap; chosen after seeing the data)
     l10 = [x["L10"] for c, f, _ in GROUPS for x in groups[(c, f)] if x["L10"] is not None]
     good_l = [v for v in l10 if v < INTERMEDIATE[0]]

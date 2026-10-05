@@ -21,8 +21,8 @@ import math
 import re
 from typing import Dict, List, Optional
 
-from common import (FIGURES, TABLES, Numbers, binom_tail, intc, load_scores, mean, milli, num, offset_str,
-                    official_str, sd, t_quantile, table, tex_escape)
+from common import (FIGURES, TABLES, Numbers, binom_tail, chi2_quantile, intc, load_scores, mean, milli, num,
+                    offset_str, official_str, sd, t_quantile, table, tex_escape)
 
 CHIP_C = ["K51", "K53", "K54b_min", "K56", "K57", "K59", "K60"]          # the simulator's offset model (docs/EXACT-ORACLE.md)
 FINAL_DAY = ["K63", "K70a", "K73s4", "K73s6", "K77a", "K82s4", "K82s7"]  # rehearsed on chips C/E/G/H on 30 Sep - 1 Oct
@@ -191,6 +191,10 @@ def run(N: Numbers) -> Dict[str, object]:
     den = sum(len(rs) - 1 for rs in chips.values() if len(rs) > 1)
     s_within = math.sqrt(num_ss / den)
     N.add("off-sd-within", num(s_within, 5), src + ": pooled within-chip SD since K50")
+    # 95% chi-square interval for the pooled SD (den degrees of freedom)
+    N.add("off-sd-within-lo", num(s_within * math.sqrt(den / chi2_quantile(0.975, den)), 5),
+          src + f": chi-square 95% CI of the pooled within-chip SD, {den} df")
+    N.add("off-sd-within-hi", num(s_within * math.sqrt(den / chi2_quantile(0.025, den)), 5), src)
     # leave-one-out: pooled mean vs chip mean (text + chip), on the uploads that share a chip with another upload
     pooled_err, chip_err = [], []
     for r in since:
@@ -243,6 +247,14 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("holdout-mae", num(mae, 5), src)
     N.add("holdout-bias", num(bias, 5, sign=True), src)
     N.add("holdout-maxerr", num(max(abs(e) for e in errs), 5), src)
+    # percentile bootstrap of the frozen MAE over the final-day uploads (fixed RNG)
+    import numpy as np
+    rng = np.random.default_rng(0)
+    ae = np.abs(np.asarray(errs))
+    boot = ae[rng.integers(0, len(ae), (4000, len(ae)))].mean(axis=1)
+    N.add("holdout-mae-lo", num(float(np.percentile(boot, 2.5)), 5),
+          src + ": percentile bootstrap over the final-day uploads, 4000 draws, rng 0")
+    N.add("holdout-mae-hi", num(float(np.percentile(boot, 97.5)), 5), src + ": percentile bootstrap")
     npos = sum(1 for e in errs if e > 0)
     N.add("holdout-npos", str(npos), src)
     N.add("holdout-signp", num(binom_tail(npos, len(errs)), 2), "one-sided sign test, Binomial(n, 1/2)")
@@ -365,6 +377,7 @@ PLAIN = [
     ("OPT_FUSE 2", "fused optimizer update, level 2"),
     ("OPT_FUSE 3", "fused optimizer update, level 3"),
     ("XSHIFT", "attention-input shift (XSHIFT)"),
+    ("(re-rolled the warm-up path)", "(may have re-rolled the warm-up path)"),
 ]
 
 

@@ -232,6 +232,50 @@ def _betacf(a: float, b: float, x: float) -> float:
     return h
 
 
+def _gammainc(a: float, x: float) -> float:
+    """Regularised lower incomplete gamma P(a, x) (Numerical Recipes series / continued fraction)."""
+    if x <= 0.0:
+        return 0.0
+    lfront = a * math.log(x) - x - math.lgamma(a)
+    if x < a + 1.0:
+        term = total = 1.0 / a
+        ap = a
+        for _ in range(1000):
+            ap += 1.0
+            term *= x / ap
+            total += term
+            if abs(term) < abs(total) * 1e-14:
+                break
+        return total * math.exp(lfront)
+    b = x + 1.0 - a
+    c, d = 1e300, 1.0 / b
+    h = d
+    for i in range(1, 1000):
+        an = -i * (i - a)
+        b += 2.0
+        d = an * d + b
+        d = 1.0 / (d if abs(d) > 1e-300 else 1e-300)
+        c = b + an / c
+        c = c if abs(c) > 1e-300 else 1e-300
+        de = d * c
+        h *= de
+        if abs(de - 1.0) < 1e-14:
+            break
+    return 1.0 - math.exp(lfront) * h
+
+
+def chi2_quantile(p: float, df: int) -> float:
+    """Chi-square quantile by bisection on P(df/2, x/2) (scipy-free)."""
+    lo, hi = 0.0, max(10.0, 10.0 * df)
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if _gammainc(df / 2.0, mid / 2.0) < p:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
 def wilson(k: int, n: int, z: float = 1.959964) -> tuple:
     """Wilson score interval for a binomial proportion."""
     if n == 0:

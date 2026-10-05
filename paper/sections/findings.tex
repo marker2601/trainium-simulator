@@ -15,8 +15,9 @@ with what did not work (\cref{sec:negative}) and what the remaining gap would co
 order-redraw noise model of \cref{sec:seeds}: $\sqrt2$ times the shuffle-salt SD for a chip pair
 (\val{noise-chip-pair}), plus the offset noise of two uploads for an official pair (\val{noise-official-pair}),
 divided by $\sqrt n$ for $n$ pairs. It is the right scale for changes that act after the warm-up; a change that
-re-rolls the warm-up path faces the larger seed noise. The four largest effects come from the campaign log and have
-no run identifiers in the repository; the late levers are single pairs at seed~73. Only the row pool, the
+re-rolls the warm-up path faces the larger seed noise. Four of the six largest effects (multi-token prediction,
+batch warm-up, LeakyReLU$^2$, the key offset) come from the campaign log and have no run identifiers in the
+repository; the late levers are single pairs at seed~73. Only the row pool, the
 attention-source reuse and the earlier, larger levers clear about three noise SDs.
 
 \begin{table}[tbp]
@@ -54,14 +55,15 @@ RNG with a salt, which re-draws the order after micro-batch~\val{rowpool-from} w
 
 \paragraph{Evidence.} On chip E, the pool scored \val{rowpool-chip-treat}\docnum{} at \val{rowpool-steps-treat}\docnum{}
 steps against \val{rowpool-chip-ctrl}\docnum{} at \val{rowpool-steps-ctrl}\docnum{} for the same file without it:
-\val{rowpool-chip} raw, about \val{rowpool-stepnorm}\docnum{} after normalising for the \val{rowpool-step-cost}\docnum{}
-of steps the pool cost, and about \val{rowpool-z} noise SDs. Officially, \upl{K70a} scored \val{official-k70a} against
-\upl{K63}'s \val{official-k63}, a difference of \val{rowpool-official}. That agreement is what determinism predicts and
-is not independent evidence that the effect generalises: both numbers come from the same trajectory pair at seed~73.
-And because the pool changes the data order, its measured effect contains one draw of the order noise (SD about
-\val{salt-sd}\docnum{}). A pool of \val{pool-large}\docnum{} gave the same result as \val{rowpool-size}; a pool of
-\val{pool-small}\docnum{} helped less. Other order manipulations were null within $\pm\val{rowpool-null}$\docnum{}:
-larger pools, epoch reshuffles, pool-aware accumulation and document reordering.
+\val{rowpool-chip}\docnum{} raw, about \val{rowpool-stepnorm}\docnum{} after normalising for the
+\val{rowpool-step-cost}\docnum{} of steps the pool cost, and about \val{rowpool-z} noise SDs. Officially, \upl{K70a}
+scored \val{official-k70a} against \upl{K63}'s \val{official-k63}, a difference of \val{rowpool-official}. That
+agreement is what determinism predicts and is not independent evidence that the effect generalises: both numbers come
+from the same trajectory pair at seed~73. And because the pool changes the data order, its measured effect contains
+one draw of the order noise (SD about \val{salt-sd}\docnum{}). A pool of \val{pool-large}\docnum{} gave the same
+result as \val{rowpool-size}; a pool of \val{pool-small}\docnum{} helped less. Other order manipulations were null
+within $\pm\val{rowpool-null}$\docnum{}: larger pools, epoch reshuffles, pool-aware accumulation and document
+reordering.
 
 \paragraph{What we do not know.} The evidence is one chip pair at one seed and one salt. It is probably real at about
 \val{rowpool-z} order-noise SDs, but it is not replicated, and the pair is not in the released run data. Our working hypothesis is
@@ -74,10 +76,12 @@ are listed in \cref{sec:limits}.
 
 Blocks 6, 7 and 8 reuse the attention source computed by block~5 (\knob{FF_ATTN_SRC=5:6,7,8}), in the spirit of
 cross-layer attention sharing \citep{brandon2024cla,xiao2019sharing}. It is our best-replicated structural effect:
-four same-seed chip pairs at different seeds gave \val{asr-pairs}\docnum{} (mean \val{asr-mean}), at a step cost under
-\val{asr-step-cost}\docnum{}. Officially, \upl{K60} improved on \upl{K59} by \val{asr-official}. The surrogate, whose
-coefficient for this feature then rested on two runs, predicted the right sign on four of five post-fit
-attention-source pairs but overestimated the size by about \val{asr-overestimate}\docnum{} (\cref{tab:postfit}).
+four same-seed chip pairs (seeds 73, 67 and 58 on chip~C, seed~73 on chip~D) gave \val{asr-pairs}\docnum{} (mean
+\val{asr-mean}), at a step cost under \val{asr-step-cost}\docnum{}; a fifth pair, seed~97 on chip~D, was
+\val{asr-s97-delta}\docnum{} raw, mostly a \val{asr-s97-step-deficit}\docnum{}-step deficit (\cref{tab:postfit}).
+Officially, \upl{K60} improved on \upl{K59} by \val{asr-official}. The surrogate, whose coefficient for this feature
+then rested on two runs, predicted the right sign on four of five post-fit attention-source pairs but overestimated
+the size by about \val{asr-overestimate}\docnum{} (\cref{tab:postfit}).
 
 \subsection{The EMA blend and the prewarm accounting trap}
 \label{sec:prewarm}
@@ -97,9 +101,10 @@ without it. Only cold rehearsals exposed the regression, which is the general le
 ran \val{steps-k73s6} steps, with EMA but without prewarm \val{steps-k77a}, and with both \val{steps-k82s7}; on chip~H,
 without EMA \val{steps-k73s4} and with both \val{steps-k82s4}. These are single runs, and step counts jitter by
 \val{jitter-range-lo}--\val{jitter-range-hi} steps within a seed sweep (SD \val{jitter-sd-lo}--\val{jitter-sd-hi};
-\cref{sec:determinism}). The chip-G drop of \val{prewarm-g-drop} steps without prewarm is several times that jitter,
-while the difference between prewarm and no EMA (\val{prewarm-g-gain} steps on chip G, \val{prewarm-h-gain} on chip H) is
-inside it. The salts differ between some of these files, which changes the data order but not the step time.
+\cref{sec:determinism}). The chip-G drop of \val{prewarm-g-drop} steps without prewarm is about \val{prewarm-g-drop-sds}
+single-run jitter SDs but only just above the largest within-sweep range (\val{jitter-range-hi} steps), while the
+difference between prewarm and no EMA (\val{prewarm-g-gain} steps on chip G, \val{prewarm-h-gain} on chip H) is inside
+it. The salts differ between some of these files, which changes the data order but not the step time.
 Officially, \upl{K82s4} (prewarm) scored \val{prewarm-official} against \upl{K77a} (no prewarm): one pair, below the
 oracle's resolution (\cref{sec:resolution}), consistent with the step-based estimate. The EMA blend itself is a separate
 effect of about \val{ema-blend-chip}\docnum{} in one chip pair without prewarm; officially \upl{K77a} improved on
@@ -171,7 +176,9 @@ same-seed comparison is measured on that lottery winner. Effects measured on a s
 seeds \citep{cawley2010overfitting}. We followed two rules: a lever must act after step~19, so that it cannot re-roll
 the warm-up path, and an effect under 0.0003 needs three seeds; the second was often not affordable. Our one official
 test of a change to the first steps illustrates the first rule: an attention-input shift in blocks 6--8 (\upl{K65a})
-scored \val{xshift-official} against its base, a re-rolled seed rather than a measured effect.
+scored \val{xshift-official} against its base. It may have re-rolled the warm-up path, but we did not log its
+step-10 loss, and \val{xshift-official} is about \val{xshift-spike-ratio} times the controlled spike-path penalty
+(\val{spike-delta}), so a genuinely harmful change cannot be ruled out.
 
 \subsection{Salt lotteries and the winner's curse}
 \label{sec:salts}
@@ -180,9 +187,10 @@ Because rehearsals are deterministic, a lottery over shuffle salts can be run on
 Four salts of the \upl{K73} recipe spanned \val{salt-span}\docnum{} on chip, and salt~4 was uploaded as \upl{K73s4};
 the later uploads \upl{K77a} and \upl{K82s4} inherit it. A second lottery on the final recipe picked salt~7
 (\upl{K82s7}); its size is not recorded in the released files. Where a lottery's draws ran on different chips, salt
-and chip speed are confounded. Selection was only partly rewarded. Salt~4 kept its edge officially, but salt~6,
-selected later as a better rehearsal, scored \val{salt6-vs-salt4} against it (\upl{K73s6}). Salt~7 gave the best
-rehearsal of the campaign (\val{salt7-rehearsal}) and tied salt~4 officially (\val{salt7-vs-salt4}).
+and chip speed are confounded. Selection was only partly rewarded. Salt~4 kept its edge officially. Salt~6
+rehearsed \val{salt6-reh-vs-salt4} against it, but on chip~G against chip~H, so that edge is confounded with the chip;
+officially it scored \val{salt6-vs-salt4} against salt~4 (\upl{K73s6}). Salt~7 gave the best rehearsal of the campaign
+(\val{salt7-rehearsal}) and tied salt~4 officially (\val{salt7-vs-salt4}).
 
 A simple model explains the pattern. A salt's rehearsal advantage is its true effect (SD about \val{salt-sd-mid}) plus a
 part that does not transfer to the official run, with SD $s_\eta$. The expected share of a selected advantage that
@@ -209,7 +217,8 @@ momentum, soft cap, RoPE base, cooldown $\pm0.1$) won a confirmation. The four o
 \begin{table}[tbp]
   \centering
   \caption{\textbf{What lost.} $\Delta$ against the control (positive is worse); evidence as in \cref{tab:levers}.
-    Official deltas are against \upl{K63}. Source: \texttt{docs/FINDINGS.md} \S5\docnum{} and
+    Official deltas are against \upl{K63}. \textsuperscript{\S}\,May have re-rolled the warm-up path; its step-10 loss
+    was not logged (\cref{sec:seeds}). Source: \texttt{docs/FINDINGS.md} \S5\docnum{} and
     \texttt{results/official-scores.csv}.}
   \label{tab:negative}
   \input{tables/negative}

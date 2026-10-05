@@ -1,0 +1,5 @@
+# The paper's analysis (paper/analysis/make_all.py) and paper/check_tex.py, on top of requirements.txt. Python 3.11.
+# matplotlib is pinned to the release that drew the committed figures (paper/figures/*.pdf); check_tex.py also
+# reads its bundled font metrics to estimate table widths.
+-r ../requirements.txt
+matplotlib==3.11.2

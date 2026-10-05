@@ -16,9 +16,10 @@ This paper reports how one team measured that relation in Phase~1 of the AWS Tra
 \texttt{trn2.3xlarge} instance and scored by validation bits per byte (\valbpb{}) on a pinned validation shard
 computed by the organisers. Over 17~days and \val{n-scored} scored uploads, our official score fell from
 \val{first-official} to \val{best-official} (\cref{fig:history}). Our best upload finished outside the top ten, so
-this is not a paper about a winning recipe. It is a measurement study: every upload was preceded by a full-length
-rehearsal on our own hardware, failures were logged as carefully as successes, and the repository recomputes the
-numbers in this paper from the released data.
+this is not a paper about a winning recipe. It is a measurement study: \val{n-rehearsed} of the \val{n-scored}
+uploads were preceded by a full-length rehearsal on our own hardware (the other \val{n-official-tests}, \upl{K65a}--\upl{K65d}, were
+official tests of single changes), failures were logged as carefully as successes, and the repository recomputes
+every number not marked \docnum{} from the released data.
 
 \paragraph{What is and is not new.} Replaying a candidate on deterministic hardware and correcting it with a
 hold-out offset is standard validation practice, and a ridge regression with era, chip and seed effects is a
@@ -43,22 +44,25 @@ benchmark, and they are rarely reported.
   \item \textbf{C1: How well deterministic rehearsal predicts a leaderboard} (\cref{sec:oracle}). A cold,
     full-budget rehearsal of the exact upload file, scored on the first \val{eval-tokens} public validation tokens,
     predicted the official score up to an offset of \val{off-mean-since} (SD \val{off-sd-since}, $n=\val{off-n-since}$).
-    The offset is mostly text (the official shard is harder than the first 2M public tokens) but carries a
-    per-instance component of a few $10^{-4}$. A calibration frozen on the chip-C calibration uploads predicted the
-    seven final uploads with MAE \val{holdout-mae} and a positive bias on faster instances; we report how much of
-    this depends on one normalised rehearsal, on salt selection and on the burn-in of the interval.
+    The offset is mostly text (the official shard is harder than the first 2M public tokens) but appears to carry
+    a per-instance component of a few $10^{-4}$, confounded with salt selection. A calibration frozen on the chip-C
+    calibration uploads predicted the seven final uploads with MAE \val{holdout-mae} and a positive bias on faster
+    instances; we report how much of this depends on one normalised rehearsal, on salt selection and on the burn-in of
+    the interval.
   \item \textbf{C2: A run simulator, with baselines} (\cref{sec:sim}). \ffsim{} decomposes a score into steps,
     computed by replaying the training script's charged-time schedule, and quality per step, from a ridge surrogate
-    fitted on \val{q-nfit} fully specified chip runs out of \val{ds-n} harvested records. Held out pair by pair it
-    beats a steps-only baseline and a majority-sign baseline on recipe changes; forward in time its knob features add
-    little; on new mechanisms it is no better than chance. A GPU proxy that replays the chip's schedule is a
-    feasibility demonstration.
+    fitted on \val{q-nfit} fully specified chip runs out of \val{ds-n} harvested records. Leaving one pair out
+    (replicate prediction), it beats a steps-only baseline on recipe changes (paired difference in sign agreement
+    \val{base-diff-sign-ci}) and scores above a majority sign (\val{base-major-rec-sign}); forward in time its knob
+    features add little; on new mechanisms it is no better than chance. A GPU proxy that replays the chip's schedule
+    is a feasibility demonstration.
   \item \textbf{C3: An accounting of what moved the score} (\cref{sec:price,sec:findings}). One price,
     $\kappa=\val{kappa}$ bpb per unit $\ln(\text{steps})$, converts every change into optimizer steps. With it we
-    report the levers with their noise, a row-level shuffle pool (\val{rowpool-chip} on chip,
-    \val{rowpool-official} officially, one pair each), a compilation-accounting trap that only cold rehearsals
-    reveal, the size of seed and order noise, negative results, and a pricing of the gap to the top ten
-    (\val{gap-ten-range} more effective compute) that we offer as a hypothesis about kernels, not a finding.
+    report the levers with their noise, a row-level shuffle pool (\val{rowpool-chip}\docnum{} in one chip pair at
+    one seed; the official \val{rowpool-official} replays the same trajectory, so it confirms the oracle, not the
+    effect), a compilation-accounting trap that only cold rehearsals reveal, the size of seed and order noise,
+    negative results, and a pricing of the gap to the top ten (\val{gap-ten-range} more effective compute) that we
+    offer as a hypothesis about kernels, not a finding.
   \item \textbf{C4: Released artifacts} (\cref{sec:contrib}). The simulator, the run dataset, both recipes, a
     local app and a reviewed, guarded pipeline through which others can add runs to the simulator. No external
     contributions exist yet.

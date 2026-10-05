@@ -22,9 +22,10 @@ organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a
 \begin{figure}[!htbp]
   \centering
   \includegraphics{step_counts.pdf}
-  \caption{\textbf{Optimizer steps in the 30-minute budget}, from the cold rehearsal of each upload; the letter is
-    the chip. Shading marks the batch regime: a 131k-token batch before \upl{K24}, a constant 262k batch from
-    \upl{K24}, and from \upl{K50} a batch warm-up through 65k and 131k phases, which adds steps early in the run.
+  \caption{\textbf{Optimizer steps in the 30-minute budget}, from the rehearsal of each upload (cold, but warm for
+    \upl{K15} and \upl{K38}); the letter is the chip. Shading marks the batch regime: a 131k-token batch before
+    \upl{K24}, a constant 262k batch from \upl{K24}, and from \upl{K50} a batch warm-up through 65k and 131k phases,
+    which adds steps early in the run.
     Step counts are comparable only within a regime and within a chip; hatched bars are chip~E, which ran slow.}
   \label{fig:steps}
 \end{figure}
@@ -49,8 +50,9 @@ organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a
 \begin{table}[!htbp]
   \centering
   \caption{\textbf{Run records by instance} (\texttt{research/sim-data/runs.jsonl}). Chips A and B are the early
-    instances whose records come from a run table without a code version; chip D ran an older runtime. The final-day
-    chips E, G and H are not in the dataset.}
+    instances whose records come from a run table without a code version; chip D ran an older Neuron runtime
+    (2.33.10, against 2.34.10 on chip C). ``Unknown'': records without a recorded chip. The final-day chips E, G and
+    H are not in the dataset.}
   \label{tab:dataset}
   \input{tables/dataset}
 \end{table}
@@ -123,7 +125,8 @@ over-predicted (\cref{tab:postfit}).
   \caption{\textbf{The \val{postfit-n} pairs that finished after the release fit} ($10^{-3}$ bpb). Observed and
     predicted values per pair are from \texttt{docs/simulator-report-20260929.md} \S5\docnum{} (the model was the
     release fit, in the candidate convention); sign agreement, the Wilson interval and the MAE are computed by
-    \texttt{paper/analysis/simulator.py}. AS: attention-source variants; ALR: AdamW learning-rate change.}
+    \texttt{paper/analysis/simulator.py}; the Wilson interval treats the pairs as independent, but several share a
+    control, so it is too narrow. AS: attention-source variants; ALR: AdamW learning-rate change.}
   \label{tab:postfit}
   \input{tables/postfit}
 \end{table}
@@ -137,8 +140,10 @@ over-predicted (\cref{tab:postfit}).
 \end{table}
 
 The full validation reports, including support grading for every knob value, the leakage guard and every
-configuration tried, are \texttt{research/sim-data/steptime-validation.md}, \texttt{simulate-validation.md},
-\texttt{quality-validation.md} and \texttt{dataset-qa.md}.
+configuration tried, are \texttt{research/sim-data/steptime-validation.md}, \texttt{simulate-validation.md} and
+\texttt{dataset-qa.md}. \texttt{research/sim-data/quality-validation.md} is a historical report: it was written on
+an earlier snapshot of the dataset (\val{qv-records}\docnum{} records), and the script that generated it is not
+released, so its numbers are not recomputed here.
 
 \subsection{The GPU proxy}
 \label{app:gpu}

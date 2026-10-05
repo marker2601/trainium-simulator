@@ -1,8 +1,8 @@
-% main.tex -- FrontierForge Phase 1 paper (revision 1, 1 October 2026).
+% main.tex -- Rehearse, Don't Guess (October 2026).
 %
 % Venue-agnostic article layout. To move it into an arXiv, TMLR or workshop template, keep the body
 % (\input{sections/...}), numbers.tex and the \ffdef / \val definitions below, and swap the preamble.
-% Build:   latexmk -pdf main.tex      (from paper/; see README.md)
+% Build:   latexmk -pdf main.tex      (from paper/)
 % Numbers: every data-derived number is \val{key}, defined in numbers.tex, which
 %          paper/analysis/make_all.py regenerates from the repository's data. Do not type numbers by hand.
 % Figures: every figure is generated at its printed width by paper/analysis (figures/*.pdf); place it at that width.
@@ -29,6 +29,7 @@
 \graphicspath{{figures/}}
 \setlist{nosep,leftmargin=*}
 \setlength{\parskip}{0.25em}
+\setlength{\emergencystretch}{2em}   % a looser last pass before a line is left running into the margin
 
 % Float placement: let pages fill with floats rather than defer them.
 \renewcommand{\topfraction}{0.9}
@@ -40,7 +41,7 @@
 \setcounter{totalnumber}{5}
 
 % ---------------------------------------------------------------- double-blind switch
-% \anonymoustrue for MLSys / TMLR / other double-blind venues: hides the author block, the acknowledgements and
+% \anonymoustrue for double-blind review: hides the author block, the acknowledgements and
 % the repository URL (the reproducibility statement then points to "an anonymised repository").
 % \anonymousfalse (default) for arXiv and the camera-ready version.
 \newif\ifanonymous
@@ -65,12 +66,14 @@
 
 \title{Rehearse, Don't Guess:\\[2pt]
   \large Deterministic Rehearsal, a Run Simulator and the Price of a Step on AWS Trainium}
+% PDF metadata: the title in every build, the author only when \anonymousfalse (below).
+\hypersetup{pdftitle={Rehearse, Don't Guess: Deterministic Rehearsal, a Run Simulator and the Price of a Step on AWS Trainium}}
 
 \ifanonymous
   \author{Anonymous authors}
 \else
-  % Add an e-mail inside \thanks{} if the venue asks for one.
-  \author{Jagadeesh Kumar Gorla\thanks{Independent researcher (team FrontierForge, AWS Trainium Frontier challenge).}}
+  \author{Jagadeesh Kumar Gorla\thanks{Independent researcher (team FrontierForge, AWS Trainium Frontier challenge). ORCID: \href{https://orcid.org/0009-0002-2270-831X}{0009-0002-2270-831X}.}}
+  \hypersetup{pdfauthor={Jagadeesh Kumar Gorla}}
 \fi
 \date{October 2026}
 

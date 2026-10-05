@@ -26,10 +26,10 @@ these.
     which is independent of the tokenizer; lower is better. \Cref{eq:bpb} is also what our rehearsals compute. The kit also ships public validation
     data, which teams may score locally. Uploads are scored only by the organisers.
   \item \textbf{Deadline and standings.} Round~1 closed at \val{rules-deadline}. The rules limit each team to one
-    entry; the portal scored repeated uploads from an entry, and the leaderboard showed a team's scores. Our last
-    upload, \upl{K82s7}, was made at \val{k82s7-upload}, inside the deadline. We report our best scored upload,
-    \upl{K82s4} (\val{best-official-long}); the published rules do not say whether standings use a team's best or
-    last upload, and the two differ by \val{salt7-vs-salt4}. The top ten teams advanced to Round~2.
+    entry \citep{trainiumfrontier2026rules}; \cref{tab:uploads} lists the official score of each of our uploads. Our
+    last upload, \upl{K82s7}, was made at \val{k82s7-upload}, inside the deadline. We report our best scored upload,
+    \upl{K82s4} (\val{best-official-long}); our last upload, a shuffle-salt draw of the same recipe, differs from it
+    by \val{salt7-vs-salt4}. The top ten teams advanced to Round~2.
 \end{itemize}
 
 \paragraph{The evaluation text.} The rules do not say whether the pinned shard is disjoint from the public
@@ -46,8 +46,9 @@ the public validation data. An \emph{upload} is an officially scored submission,
 (\upl{K82s4} is recipe K82 with shuffle salt~4). A \emph{chip} is one of our separate \texttt{trn2.3xlarge}
 instances. Chips A--D produced the run records the simulator is fitted on; chips E, G and H were added on the final
 day and produced only rehearsals, which are not in the released run dataset (\cref{sec:limits}). Chips differ in step
-time by up to \val{chip-spread}\docnum{}, and one older runtime was \val{chip-old-runtime}\docnum{} slower, so we compare
-step counts only within a chip. Symbols are collected in \cref{tab:notation} (\cref{app:notation}).
+time by up to \val{chip-spread}\docnum{}, and chip~D's older Neuron runtime (2.33.10, against 2.34.10 on chip~C) was
+\val{chip-old-runtime}\docnum{} slower, so we compare step counts only within a chip. Symbols are collected in
+\cref{tab:notation} (\cref{app:notation}).
 
 \subsection{Determinism}
 \label{sec:determinism}
@@ -58,8 +59,11 @@ matter, and we have different evidence for each.
   \item \textbf{Same trajectory, given the same steps.} Given the same file, seed and data order, the optimizer
     trajectory should be identical. Our direct evidence is one pair: a cold rehearsal and a warm rerun of one file on
     19~September scored \val{det-cold}\docnum{} and \val{det-warm}\docnum{}, a difference of \val{det-diff}. That is
-    repeatable to $10^{-5}$, not bit-for-bit, and it rests on $n=1$ with older code. Indirect evidence is that
-    official scores track rehearsals with a slope of \val{reg-slope} (\cref{sec:oracle}).
+    repeatable to $10^{-5}$, not bit-for-bit, and it rests on $n=1$ with older code. The offset statistics do not
+    settle the question: a slope of \val{reg-slope} (\cref{sec:oracle}) shows the offset does not depend on the
+    recipe, and the within-chip offset SD (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi})
+    cannot rule out an official run that re-draws the order noise (expected SD about \val{noise-chip-pair},
+    \cref{sec:levers}).
   \item \textbf{Same number of steps.} Training stops at a wall-clock target, so the step count depends on the
     host's speed and on run-to-run jitter. Within a seed sweep (one recipe on one chip; the seed changes neither the
     program nor the step time) the step count has an SD of \val{jitter-sd-lo}--\val{jitter-sd-hi} steps and a range
@@ -116,7 +120,7 @@ cost on the chip is known. \Cref{fig:exchange} shows the law with both calibrati
   \caption{\textbf{The price of a step} (\cref{eq:exchange}). Solid line: $\kappa=\val{kappa}$, the price used
     throughout; dashed line: $\kappa=\val{xr-k-anchor}$ from the single long run (square). Black bars: the compute
     needed to close the gap from our best score to \#10 and \#1 on the final leaderboard snapshot, across the two
-    values of $\kappa$. Triangle: a typical final-day recipe change of \val{late-change}~bpb, worth
+    values of $\kappa$. Triangle: a typical final-day recipe change of \val{late-change}\docnum{}~bpb, worth
     \val{late-change-pct} more steps. Grey band: the kernel-throughput gain discussed in \cref{sec:gap}.}
   \label{fig:exchange}
 \end{figure}
@@ -177,8 +181,8 @@ every upload's step count.
 
 \begin{table}[tbp]
   \centering
-  \caption{\textbf{Step-count changes between uploads rehearsed on the same chip} (cold rehearsals,
-    \texttt{results/official-scores.csv}). Each row bundles every change between the two uploads.}
+  \caption{\textbf{Step-count changes between uploads rehearsed on the same chip} (rehearsals, cold except
+    \upl{K38}'s, \texttt{results/official-scores.csv}). Each row bundles every change between the two uploads.}
   \label{tab:steps}
   \input{tables/steps_decomp}
 \end{table}

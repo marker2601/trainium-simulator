@@ -16,14 +16,15 @@ Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`).
 | `analysis/*.py` | the scripts that generate all of the above from the repository's data |
 | `refs.bib` | 86 verified references; each entry's `verification` field says how it was checked (BibTeX ignores it) |
 | `check_tex.py` | static checks that need no TeX installation, including estimated table widths and figure scales (`-v` lists every table) |
-| `make_bundle.py` | a flat, self-contained source folder and zip for Overleaf or arXiv |
+| `make_bundle.py` | a flat, self-contained source folder and zip for Overleaf or arXiv (`--bbl` adds the compiled `main.bbl`, `--out` chooses the folder) |
+| `requirements.txt` | the analysis dependencies: the repository's `requirements.txt` plus matplotlib, pinned to the release that drew the committed figures |
 
 The prose never types a data-derived number. It writes `\val{key}`, and `numbers.tex` defines the key. An undefined
 key prints as a bold `??key??` and raises a LaTeX warning. `check_tex.py` catches it before that.
 
 ## Regenerate numbers, tables and figures
 
-From the repository root, with `pip install -r requirements.txt matplotlib`:
+From the repository root, with `pip install -r paper/requirements.txt`:
 
 ```bash
 python paper/analysis/make_all.py             # paper/numbers.tex, paper/tables/*.tex, paper/figures/*.pdf
@@ -63,13 +64,21 @@ are not used by the paper.
 **Overleaf.** Run `python paper/make_bundle.py`, then upload `paper/build/paper-source.zip` with *New project ->
 Upload project*. The bundle is flat: all figures are in one `figures/` folder.
 
-**arXiv.** Build the bundle, compile it once, copy the generated `main.bbl` into `paper/build/paper-source/` and zip
-the folder. arXiv expects the `.bbl` to sit next to `main.tex`. Use the CC BY 4.0 licence, which matches TMLR's.
+**arXiv.** The bundle also needs the compiled bibliography, `main.bbl`, next to `main.tex`: arXiv uses it when it is
+present instead of running BibTeX. Compile once in `paper/`, then run `python paper/make_bundle.py --bbl`, which
+copies `paper/main.bbl` into the bundle (`--bbl FILE` takes another file, `--out DIR` writes `DIR/` and `DIR.zip`
+instead). Or take the `arxiv-source` artifact from CI, which is built this way and already compiled on its own. Use
+the CC BY 4.0 licence, which matches TMLR's.
+
+`make_bundle.py` deletes and rebuilds its output folder on every run. It refuses the paper folder and its parents,
+a folder inside `paper/` but outside `paper/build/`, and any other non-empty folder that an earlier run did not write.
 
 **CI.** [`.github/workflows/paper.yml`](../.github/workflows/paper.yml) runs on every push or pull request that
 touches `paper/`, `docs/figures/`, the data or `ffsim/`. It regenerates the numbers and tables and fails if they
 differ from the committed ones. It then runs `check_tex.py`, compiles the PDF with `xu-cheng/latex-action` (pinned
-to the 4.1.0 release commit) and uploads it as the `paper-pdf` artifact.
+to the 4.1.0 release commit) and uploads it as the `paper-pdf` artifact and `main.bbl` as `paper-bbl`. Last, it
+builds the arXiv bundle with that `main.bbl`, compiles the unpacked zip on its own without BibTeX, fails if any
+citation is undefined, and uploads the zip as the `arxiv-source` artifact.
 
 ## Moving it into a venue template
 

@@ -8,7 +8,7 @@ A simulator, a calibration method and a best recipe from Phase 1 of the AWS Trai
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](requirements.txt)
-[![Tests](https://img.shields.io/badge/tests-384%20passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-385%20passed%2C%207%20skipped-brightgreen.svg)](tests/)
 [![AWS Trainium](https://img.shields.io/badge/AWS-Trainium%20%28trn2%29-FF9900.svg)](https://github.com/aws-neuron/trainium-frontier)
 [![Gradio](https://img.shields.io/badge/UI-Gradio-F97316.svg)](space/)
 
@@ -27,9 +27,10 @@ A simulator, a calibration method and a best recipe from Phase 1 of the AWS Trai
 
 - **Chip time is the bottleneck.** `ffsim` predicts a recipe's steps, step time and val_bpb in seconds on a laptop
   (numpy only), and tells you when a knob change is inside the noise so you can skip the run.
-- **Official scores you can call in advance.** A cold rehearsal of the exact upload file plus a near-constant offset
-  has called every upload since K50: none missed its written projection by more than
-  0.0006, and both final uploads landed within 0.0001. You can test on your own chip instead of on the leaderboard.
+- **Official scores you can call in advance.** A cold rehearsal of the exact upload file plus an offset that was
+  stable within the checks we ran (+0.0067, sd 0.0004, over the 15 rehearsed uploads since K50) predicts the official
+  score: an offset frozen before the last day predicted the final seven uploads with a mean absolute error of 0.00035,
+  almost all of it a positive bias. You can test on your own chip instead of on the leaderboard.
 - **Speed has an exchange rate.** `delta_bpb ~= 0.063 * ln(compute ratio)` turns any throughput gain into score,
   so you can price a kernel before you write it.
 
@@ -56,8 +57,8 @@ Speed and quality are modelled separately because the challenge scores a fixed w
 |---|---|---|
 | **What** | step-time model per code lineage, a replay of `train.py`'s charged-clock schedule, a ridge-regression quality model and a rehearsal-to-official offset model, run as a Monte Carlo with common random numbers | a generated CUDA fork of the real `train.py` driven by a *virtual charged clock*, so every batch-phase, MTP-stage and cooldown switch fires at the same step as on the chip |
 | **Needs** | Python 3.11 + numpy | an NVIDIA GPU, CUDA PyTorch, the organiser's `prepare.py` and tokenizer |
-| **Fitted / checked on** | 1,206 run records (928 full runs, 278 screens); quality model on 131 full runs; 99 held-out same-seed pairs | Trainium pairs the campaign had already paid for |
-| **How close** | K60 predicted 2,365 &plusmn; 9 steps and 0.9654 official, measured 2,361 and 0.9655; 85% sign agreement on the 99 pairs | one K60 run matched the chip to 4e-6 at equal steps (partly luck: default CUDA runs differ by 0.00056 between boxes); four paired effects within about 0.0002 |
+| **Fitted / checked on** | 1,206 run records (928 full runs, 278 screens); quality model on 131 full runs; 99 same-seed pairs, each left out in turn | Trainium pairs the campaign had already paid for |
+| **How close** | K60 predicted 2,365 &plusmn; 9 steps and 0.9654 official, measured 2,361 and 0.9655; 82.8% sign agreement on the 87 recipe-change pairs (a development-set estimate: the surrogate's configuration was chosen with these results in view) | one K60 run matched the chip to 4e-6 at equal steps (partly luck: default CUDA runs differ by 0.00056 between boxes); four paired effects within about 0.0002 |
 
 Full details, calibration tables and caveats: [`docs/SIMULATOR.md`](docs/SIMULATOR.md). The rehearsal method:
 [`docs/EXACT-ORACLE.md`](docs/EXACT-ORACLE.md).
@@ -91,7 +92,7 @@ CDT on 1 Oct) rank #10 was 0.9554 and rank #1 was 0.9328, so we finished outside
     <td width="50%"><img src="docs/figures/exchange_rate.svg" alt="Score change against compute ratio: delta_bpb = 0.063 ln(ratio)"></td>
   </tr>
   <tr>
-    <td><b>Exact oracle.</b> Over the 15 uploads since K50 the offset averaged +0.0067 (sd 0.0004, range +0.0061 to +0.0074). The largest miss against a written projection was 0.0006 (K73s6, a salt-selected draw); both final uploads landed within 0.0001.</td>
+    <td><b>Exact oracle.</b> Over the 15 rehearsed uploads since K50 the offset averaged +0.0067 (sd 0.0004, range +0.0061 to +0.0074). The largest miss against a written projection was 0.0006 (K73s6, a salt-selected draw); both final uploads landed within 0.0001.</td>
     <td><b>Exchange rate.</b> <code>delta_bpb ~= 0.063 * ln(compute ratio)</code>, fitted on one run given +28% compute, which bought -0.0155. The per-step rate measured directly on two chips is about 0.00057 bpb per 1% more steps.</td>
   </tr>
 </table>
@@ -102,7 +103,7 @@ CDT on 1 Oct) rank #10 was 0.9554 and rank #1 was 0.9328, so we finished outside
 git clone https://github.com/marker2601/trainium-simulator.git
 cd trainium-simulator
 pip install -r requirements.txt
-python -m pytest -q tests/        # 322 pass, 5 skip (they need the full private chip harvest)
+python -m pytest -q tests/        # 385 pass, 7 skip (5 need the full private chip harvest, 2 need gradio)
 ```
 
 **Command line.** Fit the three models from the shipped dataset (about 2 s), check them, then predict:
@@ -277,7 +278,7 @@ results/               official-scores.csv: every scored upload with rehearsal a
 research/sim-data/     runs.jsonl, validation-pairs.json, official-uploads.csv, validation reports, searches,
                        contrib/runs-contrib.jsonl (merged community runs)
 research/              experiments.csv (chips A/B table) and the K60 cold rehearsal log
-tests/                 327 tests (322 pass; 5 need the private chip harvest) and fixture logs
+tests/                 392 tests (385 pass, 7 skip: 5 need the private chip harvest, 2 need gradio) and fixture logs
 ```
 
 ## Honest limitations
@@ -292,7 +293,8 @@ tests/                 327 tests (322 pass; 5 need the private chip harvest) and
   and the pair MAE (0.00039) sits at the noise floor above its 0.0003 target, so `ffsim validate` prints
   `passes: False`.
 - **It is calibrated to one setting:** single-chip trn2 runs of one nanoGPT-style recipe family and this challenge's
-  evaluation shards. The offset is a property of that text, not a universal constant.
+  evaluation shards. The offset is mostly a property of the evaluation text and may also depend on the instance that
+  ran the rehearsal; it is not a universal constant.
 - **Selected draws partly regress.** K82s7 had the best rehearsal of the campaign (0.954379) but scored 0.96140,
   just behind K82s4 (0.96136); K73s6 gave back its whole local edge. Pick by rehearsal, but expect less.
 

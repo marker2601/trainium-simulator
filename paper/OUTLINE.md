@@ -24,7 +24,7 @@
 | **Campaign** | 15 Sep to 1 Oct 2026 (CDT), 30 scored uploads with a chip rehearsal, about 1,200 harvested chip-run records. |
 | **Result** | Official val_bpb **1.1463 → 0.96136** (K82s4, best scored). From 24 Sep alone: 0.9888 (K44) → 0.9614. Both final uploads (K82s4 0.96136, K82s7 0.96140) landed within 0.0001 of their projections. |
 | **The one-line lesson** | In a fixed wall-clock contest, **steps are the currency**: Δbpb ≈ 0.063 · ln(compute ratio), and the per-step rate we measured is about 0.00057 bpb per 1% more steps. Every other change has to be priced in that currency. |
-| **Artifacts** | `ffsim` (simulator), a local Gradio app with 4 API endpoints, two recipes (K60, K82s4), the run dataset, the scores ledger and 384 passing tests (5 skipped). |
+| **Artifacts** | `ffsim` (simulator), a local Gradio app with 4 API endpoints, two recipes (K60, K82s4), the run dataset, the scores ledger and 385 passing tests (7 skipped). |
 
 <p align="center">
   <img src="../docs/figures/score_history.svg" width="88%" alt="Fig. 1: official val_bpb per upload falls from 1.146 to 0.961, with what each new best changed">
@@ -290,7 +290,7 @@ See section 6 below.
 
 - Release contents: code (MIT), recipes (Apache-2.0 derivative of the organiser baseline, see `NOTICE`), data,
   the app and the tests.
-- Reproduce with `python -m pytest -q tests/` (384 pass, 5 skip).
+- Reproduce with `python -m pytest -q tests/` (385 pass, 7 skip).
 
 ### Appendix
 
@@ -357,7 +357,8 @@ g6e.xlarge, and slower in strict deterministic mode).
    normalise only same-recipe runs, and never across a change that alters step time. Fig. 2's step counts cross
    chips; label every comparison with its chip.
 5. **Offset generality.** The offset is calibrated on one recipe family, one tokenizer and one evaluation
-   shard. It is a property of the text, so it should transfer within this contest, not to other contests.
+   shard. It is mostly a property of the text and may also depend on the instance, so it should transfer within
+   this contest, not to other contests.
 6. **Simulator circularity.** The surrogate was trained on our own search trajectory (non-random, era-confounded
    knobs). Some inputs come from a reconciled monitor table that was partly LLM-extracted and rounded
    ([`dataset-qa.md`](../research/sim-data/dataset-qa.md)). Its post-fit accuracy on new mechanisms is low
@@ -419,4 +420,4 @@ Do not cite anything that has not been found and read. Each line is a search to 
 | Surrogate post-fit | 53% sign, MAE 0.00104, 15 pairs | `docs/simulator-report-20260929.md` §5 | verified |
 | GPU proxy parity | one K60 run, 0.959952 vs 0.959948 (partly luck); four effects within about 0.0002 | `docs/SIMULATOR.md` | verified, n = 4 (E6) |
 | Dataset | 1,206 records (928 full runs, 278 screens) | `docs/SIMULATOR.md`, `runs.jsonl` line count | verified |
-| Tests | 384 pass, 5 skip | `README.md` | re-run before submission |
+| Tests | 385 pass, 7 skip | `README.md` | re-run before submission |

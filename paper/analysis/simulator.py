@@ -204,6 +204,7 @@ def run(N: Numbers) -> Dict[str, Any]:
     N.add("ds-screens", intc(n_screen), ds)
     N.add("ds-loss-curves", intc(sum(1 for r in records if r.loss_curve)), ds)
     N.add("ds-chips", str(len([c for c in chips if c and c != "?"])), ds)
+    N.add("ds-nochip", intc(sum(1 for r in records if not r.chip or r.chip == "?")), ds + ": records without a chip")
     N.add("ds-pairs", str(len(pairs)), "research/sim-data/validation-pairs.json")
     N.add("ds-pairs-recipe", str(sum(1 for p in pairs if p.get("family") not in NOISE_FAMILIES)), "validation-pairs.json")
     N.add("ds-pairs-noise", str(sum(1 for p in pairs if p.get("family") in NOISE_FAMILIES)), "validation-pairs.json")
@@ -371,6 +372,10 @@ def run(N: Numbers) -> Dict[str, Any]:
     N.add("postfit-wilson", f"{pct(wl, 0)}--{pct(wh, 0)}", "Wilson 95% interval")
     N.add("postfit-mae", num(mean(r["abs_error"] for r in pf), 5), "simulator.py")
     N.add("postfit-zero-mae", num(mean(abs(r["observed"]) for r in pf), 5), "zero predictor on the 15 pairs")
+    # the fifth attention-source pair (seed 97, chip D), left out of the four-pair mean of docs/FINDINGS.md s3
+    s97 = next(o for lab, o, _ in POSTFIT if lab == "AS-a s97 (D)")
+    N.add("asr-s97-delta", num(s97, 5, sign=True), f"{REPORT} section 5: AS-a s97 (D), raw (doc)")
+    N.add("asr-s97-step-deficit", str(2150 - 2109), f"{REPORT} section 5: 2109 vs 2150 steps (doc)")
     dec = [r for r in pf if abs(r["observed"]) >= NOISE]
     N.add("postfit-ndec", str(len(dec)), "simulator.py")
     N.add("postfit-signdec", pct(sum(r["sign_ok"] for r in dec) / len(dec), 0), "simulator.py")

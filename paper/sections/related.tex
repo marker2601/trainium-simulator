@@ -21,34 +21,11 @@ did: four uploads were official tests of single changes (\cref{sec:limits}), see
 by their rehearsal score (a winner's curse, \cref{sec:salts}), and the rehearsal scores the public text that may
 overlap the official shard (\cref{sec:contest}).
 
-\paragraph{Optimizers, schedules and instability.} Our recipe uses Muon, momentum orthogonalised by a Newton--Schulz
-iteration \citep{jordan2024muon,bjorck1971orthogonal}, for matrices and AdamW
-\citep{kingma2015adam,loshchilov2019adamw} for the rest. Muon is analysed as steepest descent under a spectral norm
-by \citet{bernstein2024anthology,bernstein2024modular}; scaling studies and variants include
-\citet{liu2025muonscalable} and NorMuon \citep{li2025normuon}. Warm-up and decay follow the warmup-stable-decay and
-cooldown literature \citep{loshchilov2017sgdr,hu2024minicpm,hagele2024scaling,defazio2024schedulefree}. Why warm-up
-stabilises early training is analysed by \citet{liu2020radam} and \citet{xiong2020layernorm}; loss spikes and
-instabilities in early or large-scale training are studied by \citet{wortsman2024proxies}, \citet{chowdhery2023palm},
-\citet{molybog2023adam} and \citet{takase2025spike}. Our warm-up ``spike path'' (\cref{sec:seeds}) is a small-scale
-instance. The batch warm-up follows the critical-batch-size view \citep{mccandlish2018largebatch} and
-linear-scaling practice \citep{goyal2017imagenet}.
-
 \paragraph{Scaling laws and the price of compute.} Power laws in compute \citep{kaplan2020scaling} and
 compute-optimal allocation \citep{hoffmann2022chinchilla} describe loss as a function of model size and tokens;
 \citet{hagele2024scaling} extend them to runs whose length is set by a cooldown. Our price of a step
 (\cref{sec:price}) is the same object seen locally, the slope of score in log steps at one operating point, used to
 price engineering changes.
-
-\paragraph{Weight averaging, data order and architecture.} Our final weights blend live weights with an
-exponential moving average \citep{polyak1992averaging,izmailov2018swa,kaddour2022lawa,sanyal2023earlyavg,moralesbrotons2024ema,busbridge2023ema}.
-Random reshuffling beats with-replacement sampling \citep{gurbuzbalaban2019reshuffling,mishchenko2020reshuffling},
-partial shuffles trade I/O for statistical quality \citep{xu2022corgipile}, and packing and document boundaries
-affect language-model quality \citep{krell2021packing,zhao2024sequence,ding2024truncations}; our row pool is a
-row-level shuffle buffer on a streaming loader. The architecture uses attention \citep{vaswani2017attention} with
-rotary embeddings \citep{su2021roformer}, grouped-query attention with one key/value head
-\citep{shazeer2019mqa,ainslie2023gqa}, a squared-ReLU-family MLP \citep{so2021primer}, value embeddings related to
-value-residual learning \citep{zhou2024valueresidual} and multi-token prediction \citep{gloeckle2024multitoken};
-attention-source reuse is closest to cross-layer attention sharing \citep{brandon2024cla,xiao2019sharing}.
 
 \paragraph{Performance models and learning-curve surrogates.} Step time has been predicted analytically and from
 learned models: the roofline model \citep{williams2009roofline}, Paleo \citep{qi2017paleo}, cost predictors
@@ -70,3 +47,7 @@ accelerator being deterministic for a fixed file and seed (\cref{sec:determinism
 \citep{aws_trainium,aws_trainium2_arch,aws_trn2_arch,aws_neuroncore_v3}; programs are compiled by the Neuron
 compiler \citep{aws_neuron_docs} and custom kernels are written in NKI \citep{aws_nki_docs}. A search on
 1~October 2026 found no peer-reviewed study of small-model training efficiency on this hardware.
+
+\paragraph{The recipe and the campaign findings.} Work related to our recipe and to the findings of
+\cref{app:findings} (optimizers, schedules, warm-up instability, weight averaging, data order and the
+architecture) is reviewed in \cref{app:related-recipe}.

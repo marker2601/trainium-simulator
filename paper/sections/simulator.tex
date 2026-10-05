@@ -19,7 +19,10 @@ where $y$ is the official score, $q$ the rehearsal \valbpb{} after $S$ steps, $\
 measured stop reserve, and $\bar t_k$ the step time of the phase that accumulates $k$ micro-batches. The walk
 replays the training script's clock logic: warm-up at the full batch until step~20, each accumulation phase until
 its fraction of $T$, the cooldown and the stop rule. \Cref{eq:decomp} makes the trade of \cref{sec:price} explicit:
-a change enters through $\bar t_k$ (and so $S$) and through $q$.
+a change enters through $\bar t_k$ (and so $S$) and through $q$. The step times $\bar t_k$ come from an empirical
+step-time model on code-lineage and knob features; left one code lineage out, it predicts the $k\!=\!4$ step time
+of runs whose mechanisms another lineage carried with an MAE of \val{st-lolo-reach} (\cref{app:steptime} describes
+the model and the walk).
 
 \subsection{Data}
 \label{sec:simdata}
@@ -34,18 +37,6 @@ accumulation phase, the early loss curve where logged (\val{ds-loss-curves} reco
 comparisons. The quality model is fitted only on the \val{q-nfit} full chip runs whose complete environment is known;
 the other records are screens, runs from the earliest chips without a recorded code version, rows whose base recipe is
 unknown, or runs without a final score. The final-day runs on chips E, G and H are not in the dataset.
-
-\subsection{Step time and the step walk}
-
-The step-time model regresses the median $k\!=\!1,2,4$ step times on code-lineage effects and knob features (depth,
-width, batch, fused paths). It is deliberately empirical, because the Neuron compiler is far from linear in
-operation count: removing one elementwise pass over the MLP activation saved \val{st-onepass}\docnum{}, fusing the
-QKV projection, which has fewer operations, was \val{st-qkv}\docnum{} \emph{slower}, and a 96-parameter gate cost
-\val{st-gate}\docnum{}. A mechanism that no fitted run carries is charged a \val{st-novel-prior}\docnum{} prior and
-flagged ``cost unknown''. Medians are scaled by the measured median-to-mean overhead (\val{overhead}) before the walk.
-Left one code lineage out, the model predicts the $k\!=\!4$ step time of runs whose mechanisms another lineage
-carried with an MAE of \val{st-lolo-reach} (\val{st-lolo-nreach} runs; \cref{tab:sim-other}), and the walk reproduces
-a rehearsal's phase switches to within \val{walk-phase-err}\docnum{} steps.
 
 \subsection{The quality surrogate}
 \label{sec:quality}
@@ -73,23 +64,12 @@ Every coefficient has a Gaussian prior. The components are:
     scalars a non-negative curvature.
   \item \textbf{Seed effects} $u$ (prior SD \val{q-prior-seed}).
 \end{itemize}
-The fit is not one closed-form solve. For a given residual SD $\sigma_q$, the MAP estimate solves
-$(X^\top X + \sigma_q^2 D)\hat\beta = X^\top y + \sigma_q^2 D m$ with $D=\mathrm{diag}(1/s_j^2)$ for prior SDs $s_j$
-and prior means $m$. A bowl coefficient that comes out negative is pinned at zero and the system re-solved (an
-active-set solution of the non-negativity constraint). $\sigma_q$ is then re-estimated by empirical Bayes from the
-residuals and effective degrees of freedom, three times, and floored at \val{q-sigma-floor}. Seed effects are
-estimated jointly, as best linear unbiased predictors. The fit uses \val{q-nfit} runs, \val{q-ncols} columns and
-\val{q-neras} eras, with \val{q-edf} effective degrees of freedom. The final $\hat\sigma_q=\val{q-sigma}$ sits on the
-floor; without the floor the estimate is \val{q-sigma-nofloor}. For every candidate the model also reports
+The fit is a MAP solve with non-negative bowl terms and an empirical-Bayes residual SD, floored at
+\val{q-sigma-floor} (\cref{app:fit}). The final $\hat\sigma_q=\val{q-sigma}$ sits on the floor; without the floor the
+estimate is \val{q-sigma-nofloor}. For every candidate the model also reports
 \emph{support}: whether each changed value was seen in the data, interpolated, extrapolated or never varied. In the
 decision rule we used, only a supported candidate whose paired difference from the base is $-0.0003$ or better earns
-a chip run.
-
-\paragraph{Paired Monte Carlo.} \texttt{simulate} and \texttt{search} propagate chip jitter, seed luck, coefficient
-uncertainty, residuals and the offset by Monte Carlo with common random numbers, so that wherever two recipes agree
-the noise cancels. $P(\text{candidate} < \text{base})$ is a paired probability; we have not checked its calibration
-beyond interval coverage (\val{lopo-rec-cover} of LOPO recipe pairs fall inside the predicted $\pm2$\,SD,
-\cref{sec:simval}). An identical recipe reproduces the base exactly.
+a chip run. \texttt{simulate} and \texttt{search} propagate the noise by paired Monte Carlo (\cref{app:fit}).
 
 \subsection{Validation, with baselines}
 \label{sec:simval}
@@ -149,34 +129,8 @@ this is not evidence that they were bad, only that the surrogate saw no reason t
 quality win came from mechanisms the data had never seen (the row pool and the EMA blend); the prewarm, which the data
 does contain, recovered steps rather than per-step quality.
 
-\subsection{The GPU proxy}
-\label{sec:gpu}
-
-The second route runs the actual competition \texttt{train.py} on a CUDA GPU, driven so that it follows the chip's
-optimizer trajectory step for step: a generated fork of the recipe (\val{gpu-patches}\docnum{} checked textual
-patches), a virtual charged clock that fires every clock-keyed switch at the step at which it fired on chip,
-emulation of the organiser loader's eight-rank sharding on one device, and a rule that no GPU verdict may influence a
-chip run until the proxy has reproduced pairs the campaign already paid for (details in \cref{app:gpu}). It measures
-per-step quality only; step time must come from the chip.
-
-\Cref{tab:gpu} compares it with Trainium on an L40S GPU. Two of the four comparisons are informative equal-step
-chip pairs (attention-source reuse and LeakyReLU$^2$), and the GPU matched them to within \val{gpu-maxdiff-inf}\docnum{}.
-The cooldown-0.7 reference is the mean of two chip pairs of opposite sign, and the split-AdamW reference is an
-official upload delta at a different step count, so neither is a test. The noise is larger than the agreement: in
-default CUDA mode two runs of one configuration on two GPU boxes differed by \val{gpu-box-diff}\docnum{}, because the
-flash-attention backward pass is nondeterministic, and the campaign documents do not record which of the four
-comparisons ran in deterministic mode. Forcing deterministic algorithms made runs identical at every logged step, at
-\val{gpu-tps-det}\docnum{} instead of \val{gpu-tps-default}\docnum{} tokens/s. Hardware can also flip the warm-up
-path: seed~58 takes the good path on chip and a spike path on the GPU. With $n=\val{gpu-n-inf}$ informative pairs and
-noise above the agreement, the proxy is a feasibility demonstration, consistent with the chip in sign and magnitude,
-not a validated instrument. A run of the full schedule cost about \val{gpu-hours}\docnum{}~GPU-hours (about
-\$\val{gpu-cost-run}\docnum{}).
-
-\begin{table}[tbp]
-  \centering
-  \caption{\textbf{GPU proxy vs Trainium} at equal steps, seed 73 ($10^{-3}$ bpb except the last row; values from
-    \texttt{docs/SIMULATOR.md}\docnum{}). \textsuperscript{*}\,Not an informative comparison: the Trainium value is
-    the mean of two chip pairs of opposite sign (\val{gpu-cd-pairs}), or an official delta at a different step count.}
-  \label{tab:gpu}
-  \input{tables/gpu_parity}
-\end{table}
+\paragraph{A GPU proxy.} A second route runs the competition \texttt{train.py} on a CUDA GPU, driven to follow
+the chip's optimizer trajectory step for step, to measure per-step quality off the chip. It matched the two
+informative equal-step chip pairs to within \val{gpu-maxdiff-inf}\docnum{}, but with $n=\val{gpu-n-inf}$ and
+run-to-run noise above that agreement it is a feasibility demonstration, not a validated instrument
+(\cref{sec:gpu}).

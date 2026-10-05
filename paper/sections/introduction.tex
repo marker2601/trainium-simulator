@@ -55,8 +55,9 @@ benchmark, and they are rarely reported.
     (replicate prediction), it beats a steps-only baseline on recipe changes (paired difference in sign agreement
     \val{base-diff-sign-ci}) and scores above a majority sign (\val{base-major-rec-sign}); forward in time its knob
     features add little; on new mechanisms it is no better than chance. A GPU proxy that replays the chip's schedule
-    is a feasibility demonstration.
-  \item \textbf{C3: An accounting of what moved the score} (\cref{sec:price,sec:findings}). One price,
+    is a feasibility demonstration (\cref{sec:gpu}).
+  \item \textbf{C3: An accounting of what moved the score} (\cref{sec:price,sec:findings}; evidence in
+    \cref{app:findings}). One price,
     $\kappa=\val{kappa}$ bpb per unit $\ln(\text{steps})$, converts every change into optimizer steps. With it we
     report the levers with their noise, a row-level shuffle pool (\val{rowpool-chip}\docnum{} in one chip pair at
     one seed; the official \val{rowpool-official} replays the same trajectory, so it confirms the oracle, not the
@@ -76,6 +77,7 @@ snapshot.
 
 \paragraph{Roadmap.} \Cref{sec:related} places the work in context. \Cref{sec:setting} describes the contest, the
 determinism the method relies on, the price of a step and our final recipe (\cref{sec:recipe}). \Cref{sec:oracle,sec:sim} present C1
-and C2, \cref{sec:findings} C3, \cref{sec:contrib} C4 and \cref{sec:limits} the limitations. The appendices hold the
-upload ledger (\cref{app:ledger}), oracle details (\cref{app:oracle}), the simulator internals, the
-contribution pipeline, the final hyperparameters, derivations and a notation table.
+and C2, \cref{sec:findings} summarises C3, \cref{sec:contrib} presents C4 and \cref{sec:limits} the limitations.
+The appendices hold the campaign findings behind C3, with the GPU proxy (\cref{app:findings}), the upload ledger
+(\cref{app:ledger}), oracle details (\cref{app:oracle}), the simulator internals (\cref{app:sim}), the
+contribution pipeline (\cref{app:contrib}), the final hyperparameters, derivations and a notation table.

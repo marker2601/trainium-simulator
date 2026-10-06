@@ -1,4 +1,4 @@
-"""Warm-up path statistics (paper Section 6.6, experiment E8 of paper/OUTLINE.md) from runs.jsonl loss curves.
+"""Warm-up path statistics (the paper's warm-up analysis) from runs.jsonl loss curves.
 
 The seed sweeps are the full chip runs of one fixed recipe that differ only in FF_SEED: run names
 ``HHMM_R_g7_s<seed>`` (K57 recipe, code M9, chip C) and ``HHMM_R_g7lk35_s<seed>`` (LeakyReLU(0.35)^2, code M12,
@@ -94,10 +94,11 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("seed-sd-good-hi", num(max(sds_good), 5), SRC)
     # step-count jitter: the seed changes neither the program nor the step time, so within a sweep (one recipe, one
     # chip) the spread of the step count is run-to-run jitter of the charged clock.
-    jit_sd, jit_rng = [], []
+    jit_sd, jit_rng, jit_rel = [], [], []
     for chip, fam, _ in GROUPS:
         st = [x["steps"] for x in groups[(chip, fam)] if x["steps"]]
         jit_sd.append(sd(st))
+        jit_rel.append(sd(st) / mean(st))
         jit_rng.append(max(st) - min(st))
     N.add("jitter-sd-lo", num(min(jit_sd), 1), SRC + ": SD of steps within a seed sweep")
     N.add("jitter-sd-hi", num(max(jit_sd), 1), SRC)
@@ -146,7 +147,7 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("g7-s73-gap", num(mean([x["bpb"] for x in g7 if x["L10"] is not None and x["L10"] < INTERMEDIATE[0]]) - s73["bpb"], 4),
           SRC + ": good-path mean minus seed 73")
     _figure(groups)
-    return {"groups": groups}
+    return {"groups": groups, "jitter_rel": jit_rel}
 
 
 def _figure(groups) -> None:

@@ -2,3 +2,5 @@
 # with the built-in union driver (local merges and rebases; GitHub's merge button may still ask for a rebase).
 research/sim-data/contrib/runs-contrib.jsonl merge=union
 space/research/sim-data/contrib/runs-contrib.jsonl merge=union
+# Shell scripts run on Linux instances: always check them out with LF line endings.
+*.sh text eol=lf

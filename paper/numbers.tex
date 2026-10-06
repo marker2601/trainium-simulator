@@ -83,12 +83,25 @@
 \ffdef{diff-sd}{0.00053}  % sqrt(2) x since-K50 offset SD
 \ffdef{diff-95}{0.0010}  % 1.96 sqrt(2) x since-K50 offset SD
 \ffdef{diff-sd-within}{0.00048}  % sqrt(2) x within-chip offset SD
+\ffdef{diff-95-within}{0.0009}  % 1.96 sqrt(2) x within-chip offset SD
 \ffdef{pi-half}{0.0008}  % 95% prediction half-width at n=15
-\ffdef{salt-sd-mid}{0.00035}  % docs/FINDINGS.md s3: salt SD 0.0003-0.0004, midpoint
-\ffdef{salt-shrink}{0.58}  % reliability ratio (oracle.py)
-\ffdef{salt-shrink-within}{0.52}  % reliability ratio at the within-chip offset SD
-\ffdef{salt-shrink-lo}{0.46}  % range over s_eta choices
-\ffdef{salt-shrink-hi}{0.75}  % range over s_eta choices incl. 0.0002
+\ffdef{gap-n}{18}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m
+\ffdef{gap-chips}{C}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m: chips of those runs
+\ffdef{gap-mean}{\ensuremath{+}0.00712}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m
+\ffdef{gap-sd}{0.00012}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m
+\ffdef{gap-min}{\ensuremath{+}0.00696}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m
+\ffdef{gap-max}{\ensuremath{+}0.00739}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m
+\ffdef{gap-order-k}{146}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m: run pairs ordered the same on both texts
+\ffdef{gap-order-pairs}{153}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m
+\ffdef{gap-order-agree}{95\%}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m: share of run pairs ordered the same
+\ffdef{gap-r}{0.995}  % research/sim-data/runs.jsonl: bpb_20m - bpb_2m: Pearson r between the two scores
+\ffdef{offdec-round}{0.00003}  % SD of rounding to 4 decimals, 0.0001/sqrt(12)
+\ffdef{offdec-text}{0.00012}  % research/sim-data/runs.jsonl: SD of bpb_20m - bpb_2m (= gap-sd)
+\ffdef{offdec-rest}{0.00031}  % sqrt(within-chip SD^2 - text-gap SD^2 - rounding SD^2)
+\ffdef{offdec-rest-lo}{0.00020}  % remainder at the lower chi-square limit of the within-chip SD
+\ffdef{offdec-rest-hi}{0.00058}  % remainder at the upper chi-square limit of the within-chip SD
+\ffdef{offdec-text-share}{13\%}  % text-gap variance as a share of the within-chip offset variance
+\ffdef{offdec-rest-share}{87\%}  % remainder variance as a share of the within-chip offset variance
 \ffdef{frozen-offset}{\ensuremath{+}0.00653}  % results/official-scores.csv
 \ffdef{ferr-k82s4}{\ensuremath{+}0.00036}  % results/official-scores.csv: frozen chip-C error
 \ffdef{ferr-k82s7}{\ensuremath{+}0.00049}  % results/official-scores.csv: frozen chip-C error
@@ -114,7 +127,40 @@
 \ffdef{seq-maxerr}{0.00083}  % results/official-scores.csv
 \ffdef{seq-first}{K54b}  % results/official-scores.csv
 \ffdef{seq-expected}{11.4}  % 0.95 x n
-\ffdef{nooffset-mae}{0.0067}  % results/official-scores.csv
+\ffdef{nooffset-mae}{0.0069}  % results/official-scores.csv: final-day uploads, offset 0
+\ffdef{nooffset-mae-since}{0.0067}  % results/official-scores.csv: uploads since K50, offset 0
+\ffdef{priormean-mae}{0.00050}  % results/official-scores.csv: final day, predicted by the mean of every earlier rehearsed upload
+\ffdef{priormean-n}{23}  % results/official-scores.csv
+\ffdef{priormean-offset}{\ensuremath{+}0.00637}  % results/official-scores.csv
+\ffdef{priorsince-mae}{0.00033}  % results/official-scores.csv: final day, predicted by the mean of the earlier uploads since K50
+\ffdef{priorsince-n}{8}  % results/official-scores.csv
+\ffdef{earlymean-mae}{0.00061}  % results/official-scores.csv: final day, predicted by the mean of the early uploads (chips A/B, F2-K46)
+\ffdef{earlymean-n}{15}  % results/official-scores.csv
+\ffdef{earlymean-offset}{\ensuremath{+}0.00626}  % results/official-scores.csv
+\ffdef{conc-n}{105}  % results/official-scores.csv: pairs of uploads since K50
+\ffdef{conc-agree}{102}  % results/official-scores.csv: pairs ordered the same by rehearsal and official score
+\ffdef{conc-ties}{1}  % results/official-scores.csv: pairs with equal official scores
+\ffdef{conc-disagree}{2}  % results/official-scores.csv
+\ffdef{conc-close-thr}{0.0005}  % rehearsal difference below which a pair counts as close
+\ffdef{conc-close-n}{6}  % results/official-scores.csv: pairs whose rehearsals differ by less than 0.0005
+\ffdef{conc-close-agree}{4}  % results/official-scores.csv
+\ffdef{cq-n}{15}  % results/official-scores.csv, uploads since K50
+\ffdef{cq-gh-n}{5}  % results/official-scores.csv, uploads since K50: uploads rehearsed on instances G and H
+\ffdef{cq-slope}{\ensuremath{-}0.029}  % results/official-scores.csv, uploads since K50: d offset / d rehearsal bpb, no instance term
+\ffdef{cq-slope-lo}{\ensuremath{-}0.070}  % results/official-scores.csv, uploads since K50: 95% t interval
+\ffdef{cq-slope-hi}{\ensuremath{+}0.013}  % results/official-scores.csv, uploads since K50
+\ffdef{cq-slope-p}{0.16}  % results/official-scores.csv, uploads since K50: two-sided t test of the slope
+\ffdef{cq-slope-span}{0.00042}  % results/official-scores.csv, uploads since K50: |slope| x the since-K50 rehearsal span
+\ffdef{cq-slope-adj}{\ensuremath{+}0.008}  % results/official-scores.csv, uploads since K50: slope with a G/H indicator
+\ffdef{cq-slope-adj-lo}{\ensuremath{-}0.050}  % results/official-scores.csv, uploads since K50
+\ffdef{cq-slope-adj-hi}{\ensuremath{+}0.066}  % results/official-scores.csv, uploads since K50
+\ffdef{cq-gh-coef}{\ensuremath{+}0.00051}  % results/official-scores.csv, uploads since K50: G/H indicator, given the rehearsal score
+\ffdef{cq-gh-lo}{\ensuremath{-}0.00008}  % results/official-scores.csv, uploads since K50: 95% t interval
+\ffdef{cq-gh-hi}{\ensuremath{+}0.00110}  % results/official-scores.csv, uploads since K50
+\ffdef{cq-gh-diff}{\ensuremath{+}0.00045}  % results/official-scores.csv, uploads since K50: mean offset, G/H minus the rest
+\ffdef{cq-perm-n}{3{,}003}  % results/official-scores.csv, uploads since K50: label assignments enumerated
+\ffdef{cq-perm-p}{0.026}  % results/official-scores.csv, uploads since K50: exact two-sided permutation p, G/H mean difference
+\ffdef{cq-perm-p-adj}{0.087}  % results/official-scores.csv, uploads since K50: exact two-sided permutation p, G/H coefficient given the rehearsal score
 \ffdef{k70a-raw}{0.957259}  % results/official-scores.csv (note column)
 \ffdef{k70a-norm}{0.955946}  % results/official-scores.csv
 \ffdef{k70a-adj}{0.00131}  % results/official-scores.csv: raw - normalised
@@ -161,11 +207,13 @@
 \ffdef{ds-pairs-recipe}{87}  % validation-pairs.json
 \ffdef{ds-pairs-noise}{12}  % validation-pairs.json
 \ffdef{ds-pair-families}{24}  % validation-pairs.json
+\ffdef{ds-pairs-diffseed}{11}  % validation-pairs.json: noise pairs whose arms differ in seed (same chip)
+\ffdef{ds-pairs-crosschip}{1}  % validation-pairs.json: noise pairs whose arms ran on different chips (same seed)
 \ffdef{trn-hours-full}{550}  % research/sim-data/runs.jsonl: charged + start-up, medians imputed
 \ffdef{trn-hours-screens}{30}  % research/sim-data/runs.jsonl
 \ffdef{trn-hours-total}{580}  % research/sim-data/runs.jsonl
 \ffdef{trn-charged-median}{1{,}754}  % research/sim-data/runs.jsonl
-\ffdef{trn-startup-median}{380}  % research/sim-data/runs.jsonl
+\ffdef{trn-startup-median}{391}  % research/sim-data/runs.jsonl: median start-up of the full runs
 \ffdef{q-nfit}{131}  % ffsim.quality fit on runs.jsonl
 \ffdef{q-sigma}{0.0003}  % ffsim.quality fit
 \ffdef{q-sigma-nofloor}{0.00025}  % ffsim.quality fit with sigma_floor ~0
@@ -178,6 +226,12 @@
 \ffdef{q-nseeds}{26}  % ffsim.quality fit
 \ffdef{q-slope}{\ensuremath{-}0.0508}  % ffsim.quality fit, d bpb / d ln steps at 2300
 \ffdef{q-slope-pct}{0.00051}  % ffsim.quality fit, per 1% steps
+\ffdef{q-slope-sd}{0.0040}  % ffsim.quality fit: posterior SD of d bpb / d ln steps at 2300
+\ffdef{kappa-vague-prior-sd}{0.05}  % vague slope prior SD
+\ffdef{kappa-vague}{0.041}  % ffsim.quality refit with slope prior -0.057 +- 0.05 (curvature prior unchanged): -slope at 2300 steps
+\ffdef{kappa-vague-sd}{0.006}  % ffsim.quality refit with slope prior -0.057 +- 0.05 (curvature prior unchanged): -slope at 2300 steps, posterior SD
+\ffdef{kappa-vague-lo}{0.028}  % ffsim.quality refit with slope prior -0.057 +- 0.05 (curvature prior unchanged): -slope at 2300 steps, 95% posterior interval
+\ffdef{kappa-vague-hi}{0.053}  % ffsim.quality refit with slope prior -0.057 +- 0.05 (curvature prior unchanged): -slope at 2300 steps, 95% posterior interval
 \ffdef{q-dropped-noknobs}{55}  % ffsim.quality fit
 \ffdef{q-dropped-nocode}{464}  % ffsim.quality fit
 \ffdef{lopo-all-n}{99}  % pair_validation
@@ -283,8 +337,42 @@
 \ffdef{base-zero-rec-sign}{82.8\%}  % baseline, LOPO pairs
 \ffdef{base-zero-rec-mae}{0.00063}  % baseline, LOPO pairs
 \ffdef{base-zero-rec-signci}{73\%--89\%}  % cluster bootstrap
+\ffdef{base-fam-all-sign}{57.6\%}  % baseline, LOPO pairs
+\ffdef{base-fam-all-mae}{0.00063}  % baseline, LOPO pairs
+\ffdef{base-fam-all-signci}{45\%--75\%}  % cluster bootstrap
+\ffdef{base-fam-rec-sign}{54.0\%}  % baseline, LOPO pairs
+\ffdef{base-fam-rec-mae}{0.00055}  % baseline, LOPO pairs
+\ffdef{base-fam-rec-signci}{43\%--73\%}  % cluster bootstrap
 \ffdef{base-diff-sign-ci}{\ensuremath{+}6 to \ensuremath{+}29 points}  % paired cluster bootstrap, recipe pairs, full - steps-only
 \ffdef{base-diff-mae-ci}{\ensuremath{-}0.63 to \ensuremath{-}0.17}  % paired cluster bootstrap, recipe pairs, full - steps-only, 1e-3 bpb
+\ffdef{base-fam-nfallback}{14}  % recipe pairs with no other same-family pair that shares no run: predicted by the recipe-pair mean
+\ffdef{base-diff-fam-sign-ci}{\ensuremath{+}7 to \ensuremath{+}42 points}  % paired cluster bootstrap, recipe pairs, full - family mean
+\ffdef{base-diff-fam-mae-ci}{\ensuremath{-}0.38 to \ensuremath{+}0.03}  % paired cluster bootstrap, recipe pairs, full - family mean, 1e-3 bpb
+\ffdef{base-full-pdec-n}{55}  % recipe pairs, pdec subset of the full surrogate
+\ffdef{base-full-pdec-sign}{92.7\%}  % same subset for both models
+\ffdef{base-full-pdec-signci}{86\%--100\%}  % cluster bootstrap over control runs
+\ffdef{base-full-pdec-mae}{0.00043}  % same subset for both models
+\ffdef{base-steps-pdec-n}{55}  % recipe pairs, pdec subset of the full surrogate
+\ffdef{base-steps-pdec-sign}{80.0\%}  % same subset for both models
+\ffdef{base-steps-pdec-signci}{69\%--89\%}  % cluster bootstrap over control runs
+\ffdef{base-steps-pdec-mae}{0.00074}  % same subset for both models
+\ffdef{base-full-dec-n}{52}  % recipe pairs, dec subset of the full surrogate
+\ffdef{base-full-dec-sign}{96.2\%}  % same subset for both models
+\ffdef{base-full-dec-signci}{92\%--100\%}  % cluster bootstrap over control runs
+\ffdef{base-full-dec-mae}{0.00044}  % same subset for both models
+\ffdef{base-steps-dec-n}{52}  % recipe pairs, dec subset of the full surrogate
+\ffdef{base-steps-dec-sign}{84.6\%}  % same subset for both models
+\ffdef{base-steps-dec-signci}{69\%--95\%}  % cluster bootstrap over control runs
+\ffdef{base-steps-dec-mae}{0.00075}  % same subset for both models
+\ffdef{ins-all-signci}{78\%--94\%}  % cluster bootstrap over control runs, 4000 draws, rng 0
+\ffdef{lokvo-rec-signci}{72\%--88\%}  % cluster bootstrap over control runs, 4000 draws, rng 0
+\ffdef{temp-a-signci}{80\%--91\%}  % cluster bootstrap over control runs
+\ffdef{temp-a-steps-sign}{71\%}  % temporal hold-out, knob effects off
+\ffdef{temp-a-steps-signci}{50\%--82\%}  % cluster bootstrap over control runs
+\ffdef{temp-a-steps-mae}{0.00078}  % temporal hold-out, knob effects off
+\ffdef{temp-a-zero-mae}{0.00094}  % temporal hold-out, zero predictor
+\ffdef{temp-a-diff-sign-ci}{\ensuremath{+}5 to \ensuremath{+}34 points}  % paired cluster bootstrap, temporal pairs, full - steps-only
+\ffdef{temp-a-diff-mae-ci}{\ensuremath{-}0.08 to \ensuremath{+}0.29}  % paired cluster bootstrap, temporal pairs, full - steps-only, 1e-3 bpb
 \ffdef{temp-a-cutoff}{28 Sep}  % temporal hold-out
 \ffdef{temp-a-nfit}{59}  % temporal hold-out
 \ffdef{temp-a-n}{72}  % temporal hold-out
@@ -298,6 +386,13 @@
 \ffdef{temp-a-sup-n}{36}  % temporal hold-out
 \ffdef{temp-a-uns-sign}{83\%}  % temporal hold-out
 \ffdef{temp-a-uns-n}{36}  % temporal hold-out
+\ffdef{temp-b-signci}{83\%--98\%}  % cluster bootstrap over control runs
+\ffdef{temp-b-steps-sign}{67\%}  % temporal hold-out, knob effects off
+\ffdef{temp-b-steps-signci}{43\%--83\%}  % cluster bootstrap over control runs
+\ffdef{temp-b-steps-mae}{0.00089}  % temporal hold-out, knob effects off
+\ffdef{temp-b-zero-mae}{0.00108}  % temporal hold-out, zero predictor
+\ffdef{temp-b-diff-sign-ci}{\ensuremath{+}10 to \ensuremath{+}45 points}  % paired cluster bootstrap, temporal pairs, full - steps-only
+\ffdef{temp-b-diff-mae-ci}{\ensuremath{-}0.58 to \ensuremath{-}0.27}  % paired cluster bootstrap, temporal pairs, full - steps-only, 1e-3 bpb
 \ffdef{temp-b-cutoff}{29 Sep}  % temporal hold-out
 \ffdef{temp-b-nfit}{98}  % temporal hold-out
 \ffdef{temp-b-n}{46}  % temporal hold-out
@@ -338,14 +433,25 @@
 \ffdef{om-sd-hi}{0.00092}  % ffsim.offset
 \ffdef{search-n}{282}  % docs/SIMULATOR.md (doc)
 \ffdef{walk-phase-err}{6--10}  % docs/SIMULATOR.md (doc)
-\ffdef{walk-total-err}{0.3\%}  % docs/SIMULATOR.md (doc)
 \ffdef{reserve-s}{5.5}  % research/sim-data/simulate-validation.md section 2 (doc)
 \ffdef{reserve-n}{136}  % research/sim-data/simulate-validation.md section 2 (doc)
 \ffdef{overhead}{0.57\%}  % ffsim/steptime.py MEDIAN_TO_MEAN_OVERHEAD
 \ffdef{coef-ntop}{16}  % simulator.py
+\ffdef{sc-spec-n}{73}  % validation-pairs.json: pairs named in the simulator's specification (in_task_list)
+\ffdef{sc-n}{12}  % research/sim-data/quality-validation.md s11: configurations compared (doc)
+\ffdef{sc-default-name}{A3}  % research/sim-data/quality-validation.md s11: the default configuration
+\ffdef{sc-rec-lo-name}{A7}  % research/sim-data/quality-validation.md s11: lowest recipe-pair LOPO sign agreement
+\ffdef{sc-rec-hi-name}{A6}  % research/sim-data/quality-validation.md s11: highest recipe-pair LOPO sign agreement
+\ffdef{sc-rec-sign-lo}{69\%}  % research/sim-data/quality-validation.md s11: recipe-pair LOPO sign agreement, lowest (doc)
+\ffdef{sc-rec-sign-hi}{89\%}  % research/sim-data/quality-validation.md s11: recipe-pair LOPO sign agreement, highest (doc)
+\ffdef{sc-default-rec-sign}{82\%}  % research/sim-data/quality-validation.md s11: recipe-pair LOPO sign agreement, A3 (doc)
+\ffdef{sc-spec-sign-before}{74\%}  % research/sim-data/quality-validation.md s11: LOPO sign agreement on the 73 listed pairs, A7 (old missing-knob rule) (doc)
+\ffdef{sc-spec-sign-after}{85\%}  % research/sim-data/quality-validation.md s11: LOPO sign agreement on the 73 listed pairs, A3 (doc)
+\ffdef{sc-spec-sign-range}{74\%--90\%}  % research/sim-data/quality-validation.md s11: LOPO sign agreement on the 73 listed pairs, range over configurations (doc)
+\ffdef{sc-lokvo-sign-range}{63\%--85\%}  % research/sim-data/quality-validation.md s11: LOKVO sign agreement on the 73 listed pairs, range over configurations (doc)
 \ffdef{gpu-mae}{0.00008}  % docs/SIMULATOR.md route 2, computed
 \ffdef{gpu-maxdiff}{0.00015}  % docs/SIMULATOR.md route 2, computed
-\ffdef{gpu-maxdiff-inf}{0.00009}  % docs/SIMULATOR.md route 2, the two equal-step chip pairs
+\ffdef{gpu-maxdiff-inf}{0.00009}  % docs/SIMULATOR.md route 2, the two equal-step chip pairs (doc)
 \ffdef{gpu-n}{4}  % docs/SIMULATOR.md
 \ffdef{gpu-n-inf}{2}  % docs/SIMULATOR.md
 \ffdef{gpu-patches}{32}  % docs/SIMULATOR.md (doc)
@@ -388,13 +494,13 @@
 \ffdef{g7-s73-gap}{0.0009}  % research/sim-data/runs.jsonl loss_curve (seeds.py): good-path mean minus seed 73
 \ffdef{xr-k}{0.0629}  % docs/GAP-ANALYSIS.md: 0.0155 / ln(2288/1788)
 \ffdef{xr-k-anchor}{0.063}  % docs/GAP-ANALYSIS.md
-\ffdef{kappa}{0.057}  % docs/GAP-ANALYSIS.md: per-step rate x 100
+\ffdef{kappa}{0.057}  % docs/GAP-ANALYSIS.md: per-step rate x 100 (doc)
 \ffdef{xr-anchor-pct}{28\%}  % docs/GAP-ANALYSIS.md
-\ffdef{xr-anchor-gain}{0.0155}  % docs/GAP-ANALYSIS.md
-\ffdef{xr-anchor-long}{2{,}288}  % docs/GAP-ANALYSIS.md
-\ffdef{xr-anchor-short}{1{,}788}  % docs/GAP-ANALYSIS.md
+\ffdef{xr-anchor-gain}{0.0155}  % docs/GAP-ANALYSIS.md: gain of the long run (doc)
+\ffdef{xr-anchor-long}{2{,}288}  % docs/GAP-ANALYSIS.md: long run, seconds (doc)
+\ffdef{xr-anchor-short}{1{,}788}  % docs/GAP-ANALYSIS.md: short run, seconds (doc)
 \ffdef{xr-slope-pct}{0.00063}  % docs/GAP-ANALYSIS.md: k ln(1.01)
-\ffdef{xr-step-rate}{0.00057}  % docs/GAP-ANALYSIS.md
+\ffdef{xr-step-rate}{0.00057}  % docs/GAP-ANALYSIS.md: per-step rate, bpb per 1% more steps (doc)
 \ffdef{q-prior-b}{\ensuremath{-}0.057}  % ffsim/quality.py slope prior mean
 \ffdef{q-prior-b-sd}{0.005}  % ffsim/quality.py slope prior SD
 \ffdef{q-prior-c}{0.026}  % ffsim/quality.py curvature prior mean
@@ -406,14 +512,14 @@
 \ffdef{slope-900}{0.095--0.115}  % ffsim/quality.py docstring: slope magnitude at about 900 steps (doc)
 \ffdef{k44-steps}{1{,}615}  % results/official-scores.csv
 \ffdef{kappa-at-anchor}{0.069}  % kappa(S) = 0.057 - 2 x 0.026 ln(S/2300) at the anchor's geometric mid-point
-\ffdef{rank10}{0.9554}  % docs/GAP-ANALYSIS.md (final snapshot, by rank)
-\ffdef{rank1}{0.9328}  % docs/GAP-ANALYSIS.md (final snapshot, by rank)
+\ffdef{rank10}{0.9554}  % docs/GAP-ANALYSIS.md: #10 on the final snapshot (doc)
+\ffdef{rank1}{0.9328}  % docs/GAP-ANALYSIS.md: #1 on the final snapshot (doc)
 \ffdef{gap-ten}{0.0060}  % docs/GAP-ANALYSIS.md
 \ffdef{gap-ten-pct}{11\%}  % docs/GAP-ANALYSIS.md at kappa 0.057
 \ffdef{gap-ten-range}{10--11\%}  % docs/GAP-ANALYSIS.md kappa in [0.057, 0.063]
 \ffdef{gap-one}{0.0286}  % docs/GAP-ANALYSIS.md
 \ffdef{gap-one-pct}{65\%}  % docs/GAP-ANALYSIS.md at kappa 0.057
-\ffdef{gap-one-range}{58--65\%}  % docs/GAP-ANALYSIS.md kappa in [0.057, 0.063]
+\ffdef{gap-one-range}{57--65\%}  % docs/GAP-ANALYSIS.md kappa in [0.057, 0.063]
 \ffdef{tput-range}{0.008--0.013}  % docs/GAP-ANALYSIS.md: 15-23% tokens/s at kappa 0.057-0.063
 \ffdef{tput-lo-pct}{15}  % docs/GAP-ANALYSIS.md
 \ffdef{tput-hi-pct}{23}  % docs/GAP-ANALYSIS.md
@@ -427,6 +533,21 @@
 \ffdef{late-lever-range}{0.0003--0.0006}  % docs/FINDINGS.md: late levers in tab:levers
 \ffdef{n-levers}{10}  % docs/FINDINGS.md
 \ffdef{n-negative}{13}  % docs/FINDINGS.md
+\ffdef{gap-ten-vague-range}{12--24\%}  % docs/GAP-ANALYSIS.md: gap to #10 priced at the vague-prior kappa interval (simulator.py kappa-vague-lo/hi)
+\ffdef{late-change-vague-range}{0.9--1.8\%}  % 0.0005 bpb priced at the vague-prior kappa interval
+\ffdef{wc-jit-lo}{0.00005}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): kappa x within-sweep SD of steps / mean steps, smallest sweep SD
+\ffdef{wc-jit-hi}{0.00015}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): largest sweep SD
+\ffdef{wc-eta-lo}{0.00013}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): sqrt(gap-sd^2 + jitter^2)
+\ffdef{wc-eta-hi}{0.00019}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py)
+\ffdef{wc-between}{0.00020}  % results/official-scores.csv: between-chip offset SD since K50 (method of moments)
+\ffdef{wc-shrink-lo}{0.11}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): share of the edge lost, one chip, minimum over s_a and jitter
+\ffdef{wc-shrink-hi}{0.42}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): share lost, one chip, maximum
+\ffdef{wc-lam-lo}{0.58}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): lambda, one chip, minimum
+\ffdef{wc-lam-hi}{0.89}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): lambda, one chip, maximum
+\ffdef{wc-shrink-cross-lo}{0.29}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): share lost, draws on different chips, minimum
+\ffdef{wc-shrink-cross-hi}{0.60}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): share lost, draws on different chips, maximum
+\ffdef{wc-lam-cross-lo}{0.40}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): lambda across chips, minimum
+\ffdef{wc-lam-cross-hi}{0.71}  % winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py): lambda across chips, maximum
 \ffdef{guard-honest-a-shift}{0.0000}  % contrib_guard.py
 \ffdef{guard-honest-a-dpairs}{\ensuremath{-}0.000025}  % contrib_guard.py
 \ffdef{guard-honest-a-ok}{accepted}  % contrib_guard.py
@@ -479,18 +600,13 @@
 \ffdef{ema-warm-bias}{0.0002--0.0006}  % docs/EXACT-ORACLE.md traps (doc)
 \ffdef{cooldown-stepnorm}{\ensuremath{-}0.0006}  % docs/FINDINGS.md s3, three chip pairs (doc)
 \ffdef{cproj-stepnorm}{\ensuremath{-}0.0004}  % docs/FINDINGS.md s3 (doc)
-\ffdef{optfuse-steps}{0.8\%}  % docs/FINDINGS.md s3 (doc)
 \ffdef{salt-sd}{0.0003--0.0004}  % docs/FINDINGS.md s3 (doc)
 \ffdef{salt-span}{0.0008}  % docs/FINDINGS.md s3: four salts spanned 0.0008 on chip (doc)
-\ffdef{seed-sd-doc}{0.0010--0.0012}  % docs/FINDINGS.md s4 (doc)
 \ffdef{spike-penalty-doc}{\ensuremath{+}0.003 to \ensuremath{+}0.0045}  % docs/FINDINGS.md s4 (doc)
-\ffdef{spike-frac-doc}{40\%}  % docs/FINDINGS.md s4 (doc)
 \ffdef{harvested-runs-doc}{430}  % docs/FINDINGS.md s4 (doc)
-\ffdef{lottery-new-seeds}{6}  % docs/FINDINGS.md s4: 1 of about 6 new seeds landed on the good path (doc)
 \ffdef{det-cold}{1.041525}  % docs/EXACT-ORACLE.md why it works (19 Sep) (doc)
 \ffdef{det-warm}{1.041520}  % docs/EXACT-ORACLE.md why it works (doc)
 \ffdef{det-diff}{5\ensuremath{\times}10\textsuperscript{\ensuremath{-}6}}  % docs/EXACT-ORACLE.md (doc)
-\ffdef{text-gap}{\ensuremath{+}0.0070}  % docs/EXACT-ORACLE.md: 20M vs first 2M public tokens (doc)
 \ffdef{chip-spread}{3.5\%}  % docs/EXACT-ORACLE.md traps (doc)
 \ffdef{chip-old-runtime}{7--12\%}  % docs/EXACT-ORACLE.md traps (doc)
 \ffdef{headroom}{6--8}  % docs/EXACT-ORACLE.md traps: seconds of headroom under the 1,800 s cap (doc)
@@ -502,7 +618,6 @@
 \ffdef{k82s7-projected}{0.9614}  % docs/FINDINGS.md s1: K82s7 projected about 0.9614 (doc)
 \ffdef{asr-overestimate}{0.0005}  % docs/simulator-report-20260929.md s5: attention-source pairs over-predicted by about 0.0005 (doc)
 \ffdef{gpu-cd-pairs}{\ensuremath{+}0.09 and \ensuremath{-}0.37$\times10^{-3}$}  % docs/SIMULATOR.md route 2: cooldown 0.7 chip pairs (doc)
-\ffdef{k82s4-projected-range}{0.9611--0.9619}  % docs/EXACT-ORACLE.md reproducing it (doc)
 \ffdef{tokens-per-s}{285k}  % docs/GAP-ANALYSIS.md where the compute goes (doc)
 \ffdef{mfu}{30\%}  % docs/GAP-ANALYSIS.md: roughly 30% MFU (doc)
 \ffdef{idle}{19\%}  % docs/GAP-ANALYSIS.md: idle on host dispatch (doc)
@@ -512,7 +627,6 @@
 \ffdef{win-muonshard}{2.6\%}  % docs/FINDINGS.md s6 (doc)
 \ffdef{win-optfuse}{0.7\%}  % docs/FINDINGS.md s6 (doc)
 \ffdef{late-change}{0.0005}  % docs/GAP-ANALYSIS.md: recipe changes on the final day (doc)
-\ffdef{lever-min}{0.0013}  % docs/FINDINGS.md s1: each structural change worth 0.0013 or more (doc)
 \ffdef{pool-large}{1{,}024}  % docs/FINDINGS.md s3: a pool of 1,024 gave the same result as 256 (doc)
 \ffdef{pool-small}{64}  % docs/FINDINGS.md s3: a pool of 64 helped less (doc)
 \ffdef{scalar-keys}{61}  % docs/FINDINGS.md s5 (doc)
@@ -522,18 +636,19 @@
 \ffdef{st-gate}{7.6\%}  % docs/SIMULATOR.md route 1: a 96-parameter gate (doc)
 \ffdef{st-onepass}{1.8\%}  % docs/SIMULATOR.md route 1: one fewer elementwise pass (doc)
 \ffdef{st-novel-prior}{3\%}  % docs/SIMULATOR.md route 1: unknown-mechanism prior (doc)
-\ffdef{search-k60-cands}{282}  % docs/SIMULATOR.md: local candidates around K60 (doc)
 \ffdef{leaderboard-time}{7:40~AM CDT on 1~October}  % docs/GAP-ANALYSIS.md: final snapshot (doc)
 \ffdef{eval-tokens}{2{,}097{,}152}  % docs/EXACT-ORACLE.md: first public tokens used by the rehearsal (doc)
-\ffdef{budget-s}{1{,}800}  % contest rules (trainiumfrontier2026rules): 30 minutes excluding start-up/compilation (doc)
+\ffdef{budget-s}{1{,}800}  % published contest rules: 30 minutes excluding start-up/compilation (doc)
 \ffdef{rules-shard-tokens}{about 20M}  % contest rules: pinned validation shard, ~20M tokens (doc)
 \ffdef{rules-deadline}{11:59~PM PT on 30~September 2026}  % contest rules: Round 1 deadline (doc)
 \ffdef{k82s7-upload}{1:41~AM CDT on 1~October, i.e.\ 11:41~PM PT on 30~September}  % docs/FINDINGS.md s1 (doc)
-\ffdef{round-two}{7~October to 4~November 2026}  % contest rules (doc)
-\ffdef{finals}{6--12~December 2026}  % contest rules: NeurIPS 2026 competition event (doc)
 \ffdef{official-rounding}{0.00005}  % official scores are published to 4 decimals (results CSV) (doc)
 \ffdef{anchor-date}{24~September}  % docs/GAP-ANALYSIS.md (doc)
 \ffdef{qv-records}{1{,}188}  % research/sim-data/quality-validation.md header: run records when the report was written (doc)
+\ffdef{runtime-chip-a}{2.34.10}  % campaign log: Neuron runtime version recorded on chip A (doc)
+\ffdef{image-chips}{B, E, G and H}  % campaign log: instances launched from a machine image taken from chip A (19 Sep) (doc)
+\ffdef{pairs-listed}{27--29~September}  % campaign log, 27-29 Sep: validation pairs listed by hand, each treatment against the control named at the time, 60-step screens left out (doc)
+\ffdef{k54b-ast}{same Python syntax tree}  % campaign log: the uploaded K54b_min and the rehearsed K54b parse to the same Python syntax tree (doc)
 \ffdef{rowpool-official}{\ensuremath{-}0.0022}  % results/official-scores.csv: K70a - K63
 \ffdef{ema-blend-official}{\ensuremath{-}0.0003}  % results/official-scores.csv: K77a - K73s4
 \ffdef{prewarm-official}{\ensuremath{-}0.0003}  % results/official-scores.csv: K82s4 - K77a
@@ -582,4 +697,4 @@
 \ffdef{k82-nknobs}{145}  % ffsim/examples/recipe-K82s4.json
 \ffdef{k82-bytes}{252{,}013}  % recipes/K82s4/train.py
 \ffdef{size-limit}{262{,}144}  % enforced by the submission portal; not stated in the published rules
-\ffdef{n-docfacts}{91}  % make_all.py
+\ffdef{n-docfacts}{100}  % make_all.py

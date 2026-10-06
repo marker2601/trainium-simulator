@@ -134,4 +134,4 @@ each. More details: [`GAP-ANALYSIS.md`](GAP-ANALYSIS.md).
 3. **Keep the data-efficiency stack.** Row pool, EMA blend + prewarm, attention-source reuse and salt selection
    all add on top of throughput.
 4. **Price every kernel before building it.** A chip S60 screen gives the step time. The exchange rate turns it
-   into bpb, and a deterministic rehearsal checks the result (see [`EXACT-ORACLE.md`](EXACT-ORACLE.md)).
+   into bpb, and a full-length rehearsal checks the result (see [`EXACT-ORACLE.md`](EXACT-ORACLE.md)).

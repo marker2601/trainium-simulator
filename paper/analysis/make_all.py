@@ -109,10 +109,12 @@ def docfacts_table(N: Numbers) -> None:
 
 def main() -> int:
     N = Numbers()
-    oracle.run(N)
-    simulator.run(N)
-    seeds.run(N)
+    o = oracle.run(N)
+    sim = simulator.run(N)
+    sd_ = seeds.run(N)
     exchange.run(N)
+    exchange.vague_prices(N, *sim["kappa_vague"])
+    oracle.winners_curse(N, o, sd_["jitter_rel"], exchange.KAPPA)
     contrib_guard.run(N)
     docfacts.run(N)
     figs.run(N)

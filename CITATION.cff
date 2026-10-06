@@ -7,8 +7,8 @@ abstract: >-
   language-model training recipe on AWS Trainium without spending chip time.
   It combines a numpy surrogate fitted on 1,206 Trainium run records with a
   GPU proxy that replays the Trainium schedule step for step. The release also
-  documents the exact-oracle method (a deterministic cold chip rehearsal plus a
-  near-constant offset predicts the official score), the best Phase 1 recipe
+  documents the exact-oracle method (a cold, full-length chip rehearsal plus a
+  calibrated offset predicts the official score), the best Phase 1 recipe
   from the AWS Trainium Frontier challenge, and the findings behind it.
 authors:
   - given-names: "Jagadeesh Kumar"

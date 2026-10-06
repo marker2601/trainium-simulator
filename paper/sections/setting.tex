@@ -33,11 +33,14 @@ these.
 \end{itemize}
 
 \paragraph{The evaluation text.} The rules do not say whether the pinned shard is disjoint from the public
-validation data. The size of our offset (\cref{sec:oracle}) is consistent with the official score being computed on
-text like the first \val{rules-shard-tokens} public validation tokens: the same model scores \val{text-gap}\docnum{}
-worse on 20M public tokens than on the first 2M. If the shards overlap, our rehearsals scored part of the official
-text, and choosing seeds and shuffle salts by their rehearsal score (\cref{sec:salts}) was selection on part of the
-evaluation set. We treat that possibility as a threat to validity throughout rather than rule it out.
+validation data. Our rehearsals score the first 2M public tokens, which are easier than a longer stretch: the
+\val{gap-n} runs in the released dataset that were scored on both (all on chip~\val{gap-chips}) score \val{gap-mean}
+worse on the first 20M public tokens than on the first 2M (SD \val{gap-sd}, range \val{gap-min} to \val{gap-max}),
+about the size of our offset (\cref{sec:oracle}), and the two texts order \val{gap-order-agree} of the run pairs the
+same way ($r=\val{gap-r}$). We do not infer from this which text the official shard is. If the shards overlap, our
+rehearsals scored part of the official text, and choosing seeds and shuffle salts by their rehearsal score
+(\cref{sec:salts}) was selection on part of the evaluation set. We treat that possibility as a threat to validity
+throughout rather than rule it out.
 
 \paragraph{Terms.} A \emph{micro-batch} is 65{,}536 tokens across the eight ranks, and $k$ is the number of
 micro-batches accumulated per optimizer step. A \emph{step} is one optimizer update. A \emph{rehearsal} is a
@@ -57,13 +60,13 @@ The Neuron compiler turns the training step into static graphs \citep{aws_neuron
 matter, and we have different evidence for each.
 \begin{enumerate}
   \item \textbf{Same trajectory, given the same steps.} Given the same file, seed and data order, the optimizer
-    trajectory should be identical. Our direct evidence is one pair: a cold rehearsal and a warm rerun of one file on
-    19~September scored \val{det-cold}\docnum{} and \val{det-warm}\docnum{}, a difference of \val{det-diff}. That is
-    repeatable to $10^{-5}$, not bit-for-bit, and it rests on $n=1$ with older code. The offset statistics do not
-    settle the question: a slope of \val{reg-slope} (\cref{sec:oracle}) shows the offset does not depend on the
-    recipe, and the within-chip offset SD (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi})
-    cannot rule out an official run that re-draws the order noise (expected SD about \val{noise-chip-pair},
-    \cref{sec:levers}).
+    trajectory should be identical. Our direct evidence is thin. A cold rehearsal and a warm rerun of one file on
+    19~September scored \val{det-cold}\docnum{} and \val{det-warm}\docnum{}, a difference of \val{det-diff}: repeatable
+    to $10^{-5}$, not bit-for-bit, with older code. In the released run data, two further pairs of chip-C runs of
+    the same code, knobs and seed logged the same training loss, to the four printed decimals, at every logged step
+    until their first clock-triggered schedule switch, which fired at slightly different steps; from there
+    step-time jitter re-rolled each run. That is the same trajectory up to the first clock event, not a bit-identical
+    run. The offset statistics do not settle the question (\cref{sec:limits}).
   \item \textbf{Same number of steps.} Training stops at a wall-clock target, so the step count depends on the
     host's speed and on run-to-run jitter. Within a seed sweep (one recipe on one chip; the seed changes neither the
     program nor the step time) the step count has an SD of \val{jitter-sd-lo}--\val{jitter-sd-hi} steps and a range
@@ -88,62 +91,35 @@ with one constant.
   \Delta\text{bpb} \;\approx\; -\kappa\,\ln\frac{S'}{S}, \qquad \kappa=\val{kappa}\ \text{bpb},
 \end{equation}
 where $S$ is the number of optimizer steps the budget allows. Equivalently, one percent more steps is worth
-$\rho=\kappa/100=\val{xr-step-rate}$~bpb. \emph{Effective compute} means optimizer steps at a fixed recipe and
+$\rho=\kappa/100=\val{xr-step-rate}$\docnum{}~bpb. \emph{Effective compute} means optimizer steps at a fixed recipe and
 batch schedule; tokens and FLOPs are then proportional to steps. Every ``step equivalent'', compute ratio and gap
-in this paper uses $\kappa=\val{kappa}$, with $[\val{kappa}, \val{xr-k-anchor}]$ as the sensitivity range.
+in this paper uses $\kappa=\val{kappa}$\docnum{}, with $[\val{kappa}, \val{xr-k-anchor}]$ as the sensitivity range.
+$\kappa$ is quoted from a campaign document and has no confidence interval; every step equivalent inherits that
+uncertainty.
 \end{minipage}}
 \end{center}
 
 \paragraph{Where $\kappa$ comes from.} $\kappa=\val{kappa}$ is the per-step rate we measured by normalising
 same-recipe runs between two chips of different speed\docnum{} (the number of comparisons behind it is not recorded
-in the repository, so we give it no confidence interval). A second, independent calibration comes from one
-\val{anchor-date} run trained for \val{xr-anchor-long}~s instead of \val{xr-anchor-short}~s
+in the repository). A second, independent calibration comes from one
+\val{anchor-date} run trained for \val{xr-anchor-long}\docnum{}~s instead of \val{xr-anchor-short}\docnum{}~s
 (\val{xr-anchor-pct} more steps at a constant 262k-token batch, before the batch warm-up existed), which improved
 \valbpb{} by \val{xr-anchor-gain}\docnum{}. One point and one free parameter is a calibration, not a fit: it gives
-$\kappa=\val{xr-k-anchor}$. The law is not constant across the campaign; \cref{app:kappa} gives its curvature and
-why the surrogate's slope is not independent evidence for it.
+$\kappa=\val{xr-k-anchor}$. The law is not constant across the campaign, and the run data do not pin $\kappa$ down:
+a surrogate refit with a vague slope prior puts it at \val{kappa-vague-lo}--\val{kappa-vague-hi}, which excludes the
+value we use (\cref{app:kappa} gives the curvature, the refit and what it would change).
 
-\paragraph{Uses and limits.} \Cref{eq:exchange} prices changes of a few percent, which is how we use it in
-\cref{sec:findings}; the simulator builds it into its decomposition (\cref{sec:decomp}). Extrapolations to large gaps (\cref{sec:gap}) are indicative only. One consequence is worth
-stating early: a change that costs 1\% of step time must improve per-step quality by at least \val{xr-step-rate}~bpb to
-break even, so a per-step gain measured at equal steps, on a GPU proxy for instance, is not a win until its step
-cost on the chip is known. \Cref{fig:exchange} (\cref{sec:gap}) shows the law with both calibrations.
+\paragraph{Uses and limits.} \Cref{eq:exchange} prices changes of a few percent (\cref{sec:findings}) and is built
+into the simulator (\cref{sec:decomp}); extrapolations to large gaps (\cref{sec:gap}, \cref{fig:exchange}) are
+indicative only. A change that costs 1\% of step time must improve per-step quality by at least
+\val{xr-step-rate}~bpb to break even.
 
 \subsection{The final recipe}
 \label{sec:recipe}
 
-\Cref{tab:recipe} summarises \upl{K82s4}, our best scored file. It descends from the organiser's GPT baseline, and
-every setting is a default in the file (\cref{app:recipe} lists the knobs). Its lineage over the last two days was
+\Cref{tab:recipe} (\cref{app:recipe}) summarises \upl{K82s4}, our best scored file. It descends from the organiser's GPT baseline, and
+every setting is a default in the file (\cref{tab:hyper} lists the knobs). Its lineage over the last two days was
 \upl{K60} (attention-source reuse) $\to$ \upl{K63} (EMA off, cooldown 0.7, lower learning rate in the small-batch
 phases) $\to$ \upl{K70a} (row pool) $\to$ \upl{K73s4} (fused optimizer, a deeper execution queue, a lower MLP
 output-projection learning rate, salt~4) $\to$ \upl{K77a} (EMA blend 0.6) $\to$ \upl{K82s4} (EMA prewarm). \Cref{sec:steps} breaks down where
 the campaign's extra optimizer steps came from.
-
-\begin{table}[tbp]
-  \centering
-  \caption{\textbf{The final recipe, \upl{K82s4}.} About \val{params}\docnum{} parameters; every value is a default
-    of \texttt{recipes/K82s4/train.py} (full knob list in \cref{tab:hyper}).}
-  \label{tab:recipe}
-  \small
-  \begin{tabular}{@{}p{2.2cm}p{13.6cm}@{}}
-    \toprule
-    Component & Setting \\
-    \midrule
-    Model & 9 blocks, width 1{,}024; four 256-wide query heads sharing one key/value head (GQA); value embeddings
-      fed to blocks 0 and 8; LeakyReLU(0.35)$^2$ MLP ($4\times$); rotary embeddings with a key offset (radius 0.3);
-      blocks 6--8 reuse block~5's attention source (\knob{FF_ATTN_SRC=5:6,7,8}); logit soft cap 15. \\
-    Objective & Next-token loss plus a 3-token multi-token-prediction loss with weights 1/0.5/0.25, faded to plain
-      next-token prediction in eight stages by 45\% of the run. \\
-    Optimizers & Muon (5 Newton--Schulz iterations, fused update) for matrices; AdamW for embeddings, scalars and
-      the head; MLP output projection at learning rate $\times0.8$. \\
-    Schedule & Charged-time target 1{,}795~s; batch warm-up 65k $\to$ 131k $\to$ 262k tokens per step
-      (\knob{FF_ACCUM_SCHED=1:0.06,2:0.2,4}) with learning rate $\times0.35$ and $\times0.6$ in the small-batch phases;
-      20 warm-up steps; linear cooldown over the last 70\% of the run. \\
-    Data & Stream-row loader; from micro-batch \val{rowpool-from} on, rows are drawn without replacement from a pool
-      of \val{rowpool-size} micro-batches (shuffle salt 4). \\
-    Final weights & 0.6 blend of live weights and an EMA updated every 32 steps; the EMA update is compiled
-      during the excluded start-up (\knob{FF_EMA_PREWARM}). \\
-    Seed & 73. \\
-    \bottomrule
-  \end{tabular}
-\end{table}

@@ -9,8 +9,10 @@ Academic work on fixed-budget training includes cramming a BERT in one GPU-day \
 an academic budget \citep{izsak2021academic} and budget-aware schedules \citep{li2020budgeted}. MLPerf Training
 \citep{mattson2020mlperf} and AlgoPerf \citep{dahl2023algoperf} formalise time-to-result benchmarking and discuss
 the run-to-run variance and the workload-specific tuning it invites; AlgoPerf is the closest analogue to a
-wall-clock contest. Our setting adds a graph compiler inside the charged clock and an organiser-scored shard, and
-we contribute measurements of the evaluation loop rather than a recipe.
+wall-clock contest. DAWNBench \citep{coleman2017dawnbench,coleman2019dawnbench} and the first AlgoPerf competition
+\citep{kasimbeg2025algoperf} were analysed by their organisers (\cref{app:related-recipe}). Ours is a
+participant-side account: our setting adds a graph compiler inside the charged clock and an organiser-scored shard,
+and we contribute measurements of the evaluation loop one team had, rather than a recipe.
 
 \paragraph{Leaderboards, adaptive reuse and selection.} Reusing a hold-out set for many adaptive decisions
 overfits it; the reusable hold-out \citep{dwork2015reusable} and the Ladder mechanism \citep{blum2015ladder} limit
@@ -18,8 +20,15 @@ what a leaderboard reveals for this reason. A meta-analysis of Kaggle competitio
 found such overfitting smaller in practice than worst-case theory suggests, and model-selection bias inflates the
 score of whatever is chosen as best \citep{cawley2010overfitting}. These are the right frame for three things we
 did: four uploads were official tests of single changes (\cref{sec:limits}), seeds and shuffle salts were chosen
-by their rehearsal score (a winner's curse, \cref{sec:salts}), and the rehearsal scores the public text that may
-overlap the official shard (\cref{sec:contest}).
+by their rehearsal score (a winner's curse, \cref{sec:salts}), and the rehearsal scores public text whose relation to
+the official shard the published rules do not state (\cref{sec:contest}).
+
+\paragraph{Proxy evaluations.} How well a score on one evaluation set predicts another has been studied for new
+test sets \citep{recht2019imagenet,miller2021accuracy}, for benchmark noise in language-model development
+\citep{madaan2024variance,heineman2025signal} and for small-scale pretraining decisions
+\citep{magnusson2025datadecide} (\cref{app:related-recipe}). We ask the corresponding question for one contest: how
+well a full-length rehearsal predicts the official score, and how small a difference it can resolve
+(\cref{sec:resolution}).
 
 \paragraph{Scaling laws and the price of compute.} Power laws in compute \citep{kaplan2020scaling} and
 compute-optimal allocation \citep{hoffmann2022chinchilla} describe loss as a function of model size and tokens;
@@ -33,15 +42,18 @@ learned models: the roofline model \citep{williams2009roofline}, Paleo \citep{qi
 Throughput and utilisation work \citep{narayanan2021megatron,korthikanti2023recompute,dao2022flashattention,dao2023flashattention2,chowdhery2023palm}
 motivates separating step time from per-step quality. Learning-curve extrapolation
 \citep{domhan2015extrapolating,swersky2014freezethaw,klein2017lcbnn,adriaensen2023lcpfn} and multi-fidelity search
-\citep{li2018hyperband,falkner2018bohb} predict final loss from partial runs. \ffsim{} is simpler: a linear model on
-recipe features with an explicit step term, fitted on full runs only, because in our data short screens predict
-early loss but not the final ranking.
+\citep{li2018hyperband,falkner2018bohb} predict final loss from partial runs. Surrogate benchmarks
+\citep{eggensperger2015surrogates,zela2022surrogate} are judged by whether they reproduce the real benchmark's
+conclusions, the standard we apply to \ffsim{} (\cref{sec:simval}). \ffsim{} is simpler: a linear model on recipe
+features with an explicit step term, fitted on full runs only; we did not validate short screens as predictors.
 
 \paragraph{Variance, determinism and reproducibility.} Seed and data-order variance can rival the effects being
 studied \citep{picard2021seed,dodge2020finetuning,bouthillier2021variance}, and implementation-level nondeterminism
 adds more \citep{pham2020variance,nagarajan2018deterministic,zhuang2021randomness,summers2021nondeterminism}; PyTorch
-documents which operations can be made deterministic \citep{pytorch_reproducibility}. Our protocol depends on the
-accelerator being deterministic for a fixed file and seed (\cref{sec:determinism}).
+documents which operations can be made deterministic \citep{pytorch_reproducibility}, and record-and-replay can make
+training reproducible \citep{chen2022reproducible}. We try to apply the reporting standard of
+\citet{hoefler2015scientific} to scores as well as to times. Our protocol depends on the accelerator behaving
+deterministically for a fixed file and seed, and \cref{sec:determinism} states how limited our direct evidence is.
 
 \paragraph{Trainium.} Trainium2 and its NeuronCore-v3 are documented by AWS
 \citep{aws_trainium,aws_trainium2_arch,aws_trn2_arch,aws_neuroncore_v3}; programs are compiled by the Neuron
@@ -49,5 +61,4 @@ compiler \citep{aws_neuron_docs} and custom kernels are written in NKI \citep{aw
 1~October 2026 found no peer-reviewed study of small-model training efficiency on this hardware.
 
 \paragraph{The recipe and the campaign findings.} Work related to our recipe and to the findings of
-\cref{app:findings} (optimizers, schedules, warm-up instability, weight averaging, data order and the
-architecture) is reviewed in \cref{app:related-recipe}.
+\cref{app:findings}, and more detail on the benchmark and proxy studies above, is in \cref{app:related-recipe}.

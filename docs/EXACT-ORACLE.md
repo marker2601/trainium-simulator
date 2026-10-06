@@ -42,10 +42,11 @@ the errors (official - rehearsal - 0.00653) are K63 -0.00004, K70a +0.00002, K73
 the final-day chips ran a little hotter than chip C. K70a's rehearsal was normalised to chip-C speed.
 
 Per-upload values are in [`results/official-scores.csv`](../results/official-scores.csv), and the table the
-simulator fits on is `research/sim-data/official-uploads.csv`. Two organiser-side anomalies are excluded:
+simulator fits on is `research/sim-data/official-uploads.csv`. Two scores from runs that the organisers rescored
+are excluded, so that each upload counts once:
 
-- a rerun of K44 on a slower host, which did 2.3% fewer steps and scored +0.0014 worse;
-- a duplicate F6 run that was cut before its LR decay.
+- a second score for K44;
+- a second score for F6, from a run that was cut before its LR decay.
 
 The K60 rehearsal log is in `research/rehearsal-logs/C41_cold_K60/`. It shows 2,361 steps and val_bpb 0.95910; the
 official score was 0.9655, an offset of +0.0064.
@@ -53,7 +54,7 @@ official score was 0.9655, an offset of +0.0064.
 ## How we used it
 
 - **Gate every upload.** Apart from K65a-K65d, a file was uploaded only after its cold rehearsal finished cleanly:
-  exit 0, no graph breaks, charged time inside the budget, and the file under the 262,144-byte limit. Its projected
+  exit 0, no graph breaks, charged time inside the budget, and the file under the portal's file-size limit. Its projected
   score was written down before the upload.
 - **Test on chips instead of on the leaderboard.** Because a rehearsal predicts the official score, a structural
   change can be judged on our own chips without spending an upload. On the final day we ran four chips as an

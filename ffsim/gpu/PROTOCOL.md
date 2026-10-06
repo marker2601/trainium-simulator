@@ -48,7 +48,7 @@ one. The proxy's scope is therefore whatever families it has reproduced, and not
 
 | | |
 |---|---|
-| file | `recipes/K60/train.py` (sha `ae396432`, 237,050 B, < 262,144 B limit) |
+| file | `recipes/K60/train.py` (sha `ae396432`, 237,050 B, under the portal's file-size limit) |
 | lineage | K59 (the K57T recipe baked on M12 + `FF_LEAKY_RELU2=0.35 FF_LEAKY_FORM=fnm`) baked on M14 + `FF_ATTN_SRC=5:6,7,8` (layers 6, 7, 8 reuse layer 5's attention source, "AS-a") |
 | official | **0.9655** (29 Sep 19:50 UTC, best; #10 cut 0.9651) |
 | rehearsal | C41_cold_K60 on chip C: **0.95910 @ 2,361 steps**, startup 497.3 s, charged 1,790.5 s, `FF_TIME_TARGET=1793`; offset to official +0.0064 |
@@ -424,26 +424,24 @@ then need a 3-seed chip confirmation (~2 h of chip C), a cold rehearsal (~38 min
 The last chip-C hours are already committed to the K62 rehearsals, and no GPU verdict is trusted before
 the gate. Nothing in this directory may take a chip slot before the close.
 
-**Phase 2** (as announced to participants): winners notified by
-8 Oct 06:59 UTC; opens 7 Oct; closes **5 Nov 07:59 UTC**; trn2.48xlarge in us-east-2 (16 chips), a 4-hour
-budget, 3 submissions per week, scored 50% val_bpb + 50% CORE (60-minute CORE timeout), an
-`inference.py` wrapper required; Phase-2 credits are separate.
+**Phase 2** (as announced to participants): trn2.48xlarge (16 chips), a 4-hour budget, 3 submissions
+per week, scored 50% val_bpb + 50% CORE (60-minute CORE timeout), an `inference.py` wrapper required.
 
-The plan, in order:
+The plan as written on 29 Sep (not carried out), in order:
 
-1. **1-6 Oct, before any Phase-2 chip exists: run the pre-screen and the gate at K60.** The 99
+1. **Before any Phase-2 chip exists: run the pre-screen and the gate at K60.** The 99
    Trainium pairs exist now and will not be re-run; K60 is the last recipe with three-seed pairs in
    four families. This is the only window in which the proxy can be validated against paid-for data.
    Outcome: a scoped acceptance (or a rejection) of the CUDA path of the current file, plus the measured
    GPU noise terms.
-2. **7-10 Oct: re-anchor.** Phase 2 is 16 chips x 4 h = 256x the chip-seconds of Phase 1; the base
+2. **Then re-anchor.** Phase 2 is 16 chips x 4 h = 256x the chip-seconds of Phase 1; the base
    recipe, the step count and the slope `d bpb / d ln steps` all change, so the K60 calibration carries
    only the *families* it validated, not the numbers. The first 3-5 Phase-2 Trainium pairs (a seed pair,
    an activation pair, an attention pair) re-run gates 2-6 at the new scale before the proxy screens
    anything there.
 3. **Scale is the constraint in Phase 2, not price per hour.** A full-scale Phase-2 run of this model
    would be ~256 x 0.49B = ~126B tokens = ~9.5e19 FLOPs = 364 h on one L40S at 40% MFU (45 h on eight;
-   ~$1,370 on a g6e.48xlarge, which today's quota cannot launch). The GPU proxy in Phase 2 is therefore
+   ~$1,370 on a g6e.48xlarge). The GPU proxy in Phase 2 is therefore
    a **reduced-schedule** instrument (a virtual clock over a shortened target, e.g. the first 15-20% of
    the Phase-2 schedule, or a narrower model), and a reduced schedule is a new proxy that needs its own
    gate: the campaign's 120-step and value-embedding sign inversions show that a short run can rank

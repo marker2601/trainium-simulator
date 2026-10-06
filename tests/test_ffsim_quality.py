@@ -954,7 +954,7 @@ def test_offset_fit_from_uploads_table():
 def test_offsets_skip_non_calibration_rows_and_prefer_measured_offsets():
     rows = [{"submission": "K59", "official_bpb": "0.9671", "rehearsal_bpb": "0.96092", "offset": "+0.0062", "recipe_note": "best"},
             {"submission": "K44_rerun", "official_bpb": "0.99021", "rehearsal_bpb": "0.98235", "offset": "+0.00786",
-             "recipe_note": "organiser rerun; NOT a calibration point for OffsetModel"},
+             "recipe_note": "rescored by the organisers; NOT a calibration point for OffsetModel"},
             {"submission": "K54b", "official_bpb": "", "rehearsal_bpb": "0.96326", "offset": "", "recipe_note": "NOT SCORED"},
             {"submission": "X", "official_bpb": 0.97, "rehearsal_bpb": 0.96, "offset": 0.0001, "calibration": False},
             {"submission": "Y", "official": 0.9700, "rehearsal": 0.9640, "offset": 0.0099}]

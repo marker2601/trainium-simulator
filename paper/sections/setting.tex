@@ -6,7 +6,7 @@
 \label{sec:contest}
 
 Phase~1 (Round~1) of the AWS Trainium Frontier challenge \citep{trainiumfrontier2026rules} asked teams to train a
-language model from scratch with the organiser's kit\footnote{Provided by the organisers to participants. We
+language model from scratch with the organisers' kit\footnote{Provided by the organisers to participants. We
 do not redistribute the kit, its data loader or its tokenizer, and our recipes import them.} on a
 \texttt{trn2.3xlarge} instance \citep{aws_trn2_arch,aws_trainium2_arch}. The rules that shape everything below are
 these.
@@ -14,9 +14,8 @@ these.
   \item \textbf{A charged-time budget.} Training may use \val{budget-s}~s (30~minutes) of wall-clock time,
     excluding start-up and compilation \citep{trainiumfrontier2026rules}. The kit runs eight data-parallel ranks
     under \texttt{torchrun}.
-  \item \textbf{One file.} A submission is a single \texttt{train.py}, run inside the organiser's harness. The
-    submission portal rejected files of \val{size-limit} bytes or more; this limit is not stated in the published
-    rules. Our final file is \val{k82-bytes} bytes.
+  \item \textbf{One file.} A submission is a single \texttt{train.py}, run inside the organisers' harness.
+    Uploads had to stay under the portal's file-size limit. Our final file is \val{k82-bytes} bytes.
   \item \textbf{The metric.} The score is validation bits per byte ``on the pinned validation shard, computed over
     \textasciitilde20M tokens'' \citep{trainiumfrontier2026rules},
     \begin{equation}
@@ -44,9 +43,9 @@ throughout rather than rule it out.
 
 \paragraph{Terms.} A \emph{micro-batch} is 65{,}536 tokens across the eight ranks, and $k$ is the number of
 micro-batches accumulated per optimizer step. A \emph{step} is one optimizer update. A \emph{rehearsal} is a
-full-length run of an exact upload file on our own Trainium instance, scored on the first \val{eval-tokens} tokens of
+full-length run of an exact upload file on one of our own Trainium instances, scored on the first \val{eval-tokens} tokens of
 the public validation data. An \emph{upload} is an officially scored submission, named by our recipe identifier
-(\upl{K82s4} is recipe K82 with shuffle salt~4). A \emph{chip} is one of our separate \texttt{trn2.3xlarge}
+(\upl{K82s4} is recipe \upl{K82} with shuffle salt~4). A \emph{chip} is one of our separate \texttt{trn2.3xlarge}
 instances. Chips A--D produced the run records the simulator is fitted on; chips E, G and H were added on the final
 day and produced only rehearsals, which are not in the released run dataset (\cref{sec:limits}). Chips differ in step
 time by up to \val{chip-spread}\docnum{}, and chip~D's older Neuron runtime (2.33.10, against 2.34.10 on chip~C) was
@@ -90,7 +89,7 @@ with one constant.
   \label{eq:exchange}
   \Delta\text{bpb} \;\approx\; -\kappa\,\ln\frac{S'}{S}, \qquad \kappa=\val{kappa}\ \text{bpb},
 \end{equation}
-where $S$ is the number of optimizer steps the budget allows. Equivalently, one percent more steps is worth
+where $S$ is the number of optimizer steps the budget allows and $S'$ the number after the change. Equivalently, one percent more steps is worth
 $\rho=\kappa/100=\val{xr-step-rate}$\docnum{}~bpb. \emph{Effective compute} means optimizer steps at a fixed recipe and
 batch schedule; tokens and FLOPs are then proportional to steps. Every ``step equivalent'', compute ratio and gap
 in this paper uses $\kappa=\val{kappa}$\docnum{}, with $[\val{kappa}, \val{xr-k-anchor}]$ as the sensitivity range.
@@ -99,7 +98,7 @@ uncertainty.
 \end{minipage}}
 \end{center}
 
-\paragraph{Where $\kappa$ comes from.} $\kappa=\val{kappa}$ is the per-step rate we measured by normalising
+\paragraph{Where $\kappa$ comes from.} $\kappa=\val{kappa}$ follows from the per-step rate $\rho$ we measured by normalising
 same-recipe runs between two chips of different speed\docnum{} (the number of comparisons behind it is not recorded
 in the repository). A second, independent calibration comes from one
 \val{anchor-date} run trained for \val{xr-anchor-long}\docnum{}~s instead of \val{xr-anchor-short}\docnum{}~s
@@ -117,7 +116,7 @@ indicative only. A change that costs 1\% of step time must improve per-step qual
 \subsection{The final recipe}
 \label{sec:recipe}
 
-\Cref{tab:recipe} (\cref{app:recipe}) summarises \upl{K82s4}, our best scored file. It descends from the organiser's GPT baseline, and
+\Cref{tab:recipe} (\cref{app:recipe}) summarises \upl{K82s4}, our best scored file. It descends from the organisers' GPT baseline, and
 every setting is a default in the file (\cref{tab:hyper} lists the knobs). Its lineage over the last two days was
 \upl{K60} (attention-source reuse) $\to$ \upl{K63} (EMA off, cooldown 0.7, lower learning rate in the small-batch
 phases) $\to$ \upl{K70a} (row pool) $\to$ \upl{K73s4} (fused optimizer, a deeper execution queue, a lower MLP

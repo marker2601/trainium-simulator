@@ -48,8 +48,6 @@ QUOTED = [
     ("chip-spread", "3.5\\%", f"{ORACLE} traps"),
     ("chip-old-runtime", "7--12\\%", f"{ORACLE} traps"),
     ("headroom", "6--8", f"{ORACLE} traps: seconds of headroom under the 1,800 s cap"),
-    ("rerun-steps", "2.3\\%", f"{ORACLE}: organiser-side K44 rerun"),
-    ("rerun-delta", "\\ensuremath{+}0.0014", f"{ORACLE}: organiser-side K44 rerun"),
     ("k73s6-projected", "0.9619", f"{ORACLE}: largest miss against a written projection"),
     ("k82s4-projected", "0.9614--0.9615", f"{ORACLE} reproducing it"),
     ("k82-proj-offset", "\\ensuremath{+}0.0069 to \\ensuremath{+}0.0070", f"{ORACLE} reproducing it: final-day offset"),

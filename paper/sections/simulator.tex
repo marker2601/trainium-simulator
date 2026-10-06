@@ -20,8 +20,8 @@ measured stop reserve, and $\bar t_k$ the step time of the phase that accumulate
 replays the training script's clock logic: warm-up at the full batch until step~20, each accumulation phase until
 its fraction of $T$, the cooldown and the stop rule. \Cref{eq:decomp} makes the trade of \cref{sec:price} explicit:
 a change enters through $\bar t_k$ (and so $S$) and through $q$. The step times $\bar t_k$ come from an empirical
-step-time model on code-lineage and knob features; left one code lineage out, it predicts the $k\!=\!4$ step time
-of runs whose mechanisms another lineage carried with an MAE of \val{st-lolo-reach} (\cref{app:steptime} describes
+step-time model on code-lineage and knob features; with one code lineage left out, it predicts the $k\!=\!4$ step time
+of runs whose mechanisms another lineage carried, with an MAE of \val{st-lolo-reach} (\cref{app:steptime} describes
 the model and the walk).
 
 \subsection{Data}
@@ -76,7 +76,7 @@ a chip run. \texttt{simulate} and \texttt{search} propagate the noise by paired 
 \Cref{tab:sim-calibration} collects the checks. Every row predicts the difference $\Delta$ between the two arms of a
 pair, and sign agreement counts a predicted sign that matches the measured one. Four baselines use the same pairs and
 the same leave-one-pair-out protocol: a leave-one-out majority sign, the zero predictor, the mean $\Delta$ of the
-other pairs in the same family that share no run with it (the mean of all recipe pairs for the
+other pairs in the same family that share no run with the held-out pair (the mean of all recipe pairs for the
 \val{base-fam-nfallback} pairs without one), and the same model with every knob effect switched off (era, chip, steps
 and seed only). Intervals are cluster bootstraps over the \val{lopo-boot-clusters} control runs, many of which anchor
 several pairs.
@@ -104,7 +104,7 @@ mean the surrogate gains \val{base-diff-fam-sign-ci} of sign agreement but no cl
 sign scores \val{base-major-rec-sign} and the zero predictor has MAE
 \val{base-zero-rec-mae} (\cref{fig:pairs} plots every pair). Within the replicate setting of LOPO, then, the knob
 features carry real information about signs. On the pairs where the \emph{prediction} is decisive, which is what
-the decision rule uses, it scores \val{lopo-rec-signpdec} on \val{lopo-rec-npdec} pairs against
+the decision rule uses, the surrogate scores \val{lopo-rec-signpdec} on \val{lopo-rec-npdec} pairs against
 \val{base-steps-pdec-sign} for the steps-only model (\cref{app:pairval}). The MAE is above the noise floor of two
 single runs, \val{pair-noise-floor} (\cref{app:derivations}).
 

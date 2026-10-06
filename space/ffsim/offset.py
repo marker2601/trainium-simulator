@@ -31,8 +31,8 @@ Both moments rest on six points, so:
 Scope (read before trusting an official prediction)
 ----------------------------------------------------
 The offset is calibrated on K5x-shaped recipes (M4 -> M12 code, TT ~1790, 2036 -> 2360 steps) rehearsed on chip C.
-It conflates shard difficulty with whatever the official host does to the STEP COUNT: the organiser's K44 rerun on
-a slower host cost +0.0014 for ~2.3% fewer steps, and that host effect is inside every calibration point. Host
+It conflates shard difficulty with whatever the official host does to the STEP COUNT, and that host effect is inside
+every calibration point. Host
 sensitivity is mechanism-dependent (chip D, runtime 2.33.10, is ~7-12% slower at k4 in full runs but only ~1% in
 60-step screens), so the offset is recipe-independent only for mechanisms whose step time reacts to the organiser
 runtime the way K5x does. A mechanism with a different runtime sensitivity needs its own upload before its
@@ -43,7 +43,7 @@ the data's and the sd stays the contract's (a 2-point sd is not a measurement).
 
 The uploads table (``research/sim-data/official-uploads.csv``, ``load_official_uploads``) carries every upload
 since F2. Rows are CALIBRATION points only when they were scored and are not flagged "NOT a calibration point"
-(K54b: rejected for size; K44_rerun and F6_dup: organiser-side reruns). The contract's offset is the chip-C era
+(K54b: rejected for size; K44_rerun and F6_dup: rescored by the organisers). The contract's offset is the chip-C era
 (K51 -> K59 plus K60, ``CONTRACT_SUBMISSIONS``); the loader returns that subset by default and the whole calibration set
 with ``submissions=None`` (older uploads were rehearsed on chips A/B with earlier code).
 """

@@ -4,12 +4,13 @@
 Training speed-runs fix a budget and ask how low a validation loss can go. Community records such as the
 modded-nanoGPT speed-run \citep{jordan2024moddednanogpt}, built on nanoGPT \citep{karpathy2022nanogpt}, academic
 ``cramming'' studies \citep{geiping2023cramming,izsak2021academic}, budgeted-training analyses \citep{li2020budgeted}
-and time-to-result benchmarks such as MLPerf Training \citep{mattson2020mlperf} and AlgoPerf
+and time-to-result benchmarks such as DAWNBench \citep{coleman2017dawnbench}, MLPerf Training
+\citep{mattson2020mlperf} and AlgoPerf
 \citep{dahl2023algoperf} share one property: the quantity being optimised is the quality that a \emph{wall-clock}
 budget buys, not the quality per step or per FLOP. In such a setting two things are scarce. A full trial costs the
 whole budget on the target hardware, and the official score comes from the organisers with limited feedback. Most
 practical decisions therefore rest on proxies, such as short screens, scores on public data and runs on other
-hardware, whose relation to the official score is rarely measured.
+hardware, whose relation to the official score is often left unmeasured.
 
 This paper reports how one team measured that relation in Phase~1 of the AWS Trainium Frontier challenge
 \citep{trainiumfrontier2026rules}. A language model is trained from scratch for 30~minutes of charged time on one
@@ -21,12 +22,14 @@ uploads were preceded by a full-length rehearsal on our own hardware (the other 
 official tests of single changes), failures were logged as carefully as successes, and the repository recomputes
 every number not marked \docnum{} from the released data.
 
-\paragraph{What is and is not new.} Replaying a candidate on deterministic hardware and correcting it with a
-hold-out offset is standard validation practice, and a ridge regression with era, chip and seed effects is a
-standard surrogate. Our contribution is the \emph{measurement}: how well that practice predicted a real
-leaderboard, how large its errors and biases were, what limited it, and what a single price per optimizer step says
-about the changes we tried. We think these quantities are useful to anyone running a time-budgeted contest or
-benchmark, and they are rarely reported.
+\paragraph{What is and is not new.} Replaying a candidate on hardware that behaves deterministically and correcting it
+with a hold-out offset is standard validation practice, and a ridge regression with era, chip and seed effects is a
+standard surrogate. How well proxy evaluations transfer to a target has been studied for test sets, benchmarks and
+small-scale pretraining experiments, and benchmark organisers have analysed time-to-result competitions
+(\cref{sec:related}). Our contribution is a participant-side \emph{measurement} in one wall-clock contest: how well
+that practice predicted a real leaderboard, how large its errors and biases were, what limited it, and what a single
+price per optimizer step says about the changes we tried. We have not found these quantities reported for a
+time-budgeted training contest, and we think they are useful to anyone running or entering one.
 
 \begin{figure}[tbp]
   \centering
@@ -39,9 +42,11 @@ benchmark, and they are rarely reported.
   \label{fig:history}
 \end{figure}
 
-\paragraph{Contributions.} The same four contributions, in this order, structure the paper.
+\paragraph{Contributions.} In one sentence: in a wall-clock contest, a cold, full-length rehearsal of the exact
+upload predicted the official score up to a measurable offset, while a cheaper simulator could tell which changes
+were inside the noise but not which would win. The same four contributions, in this order, structure the paper.
 \begin{itemize}
-  \item \textbf{C1: How well deterministic rehearsal predicts a leaderboard} (\cref{sec:oracle}). A cold,
+  \item \textbf{C1: How well full-length rehearsal predicts a leaderboard} (\cref{sec:oracle}). A cold,
     full-budget rehearsal of the exact upload file, scored on the first \val{eval-tokens} public validation tokens,
     predicted the official score up to an offset of \val{off-mean-since} (SD \val{off-sd-since}, $n=\val{off-n-since}$).
     The offset is mostly text (the official shard is harder than the first 2M public tokens) but appears to carry
@@ -75,9 +80,8 @@ numbers that exist only in campaign documents with a dagger (\docnum{}, listed i
 threats to validity in \cref{sec:limits}. Other teams appear only as rank-indexed scores from the public leaderboard
 snapshot.
 
-\paragraph{Roadmap.} \Cref{sec:related} places the work in context. \Cref{sec:setting} describes the contest, the
-determinism the method relies on, the price of a step and our final recipe (\cref{sec:recipe}). \Cref{sec:oracle,sec:sim} present C1
-and C2, \cref{sec:findings} summarises C3, \cref{sec:contrib} presents C4 and \cref{sec:limits} the limitations.
-The appendices hold the campaign findings behind C3, with the GPU proxy (\cref{app:findings}), the upload ledger
-(\cref{app:ledger}), oracle details (\cref{app:oracle}), the simulator internals (\cref{app:sim}), the
-contribution pipeline (\cref{app:contrib}), the final hyperparameters, derivations and a notation table.
+\paragraph{Roadmap.} After related work (\cref{sec:related}), \cref{sec:setting} describes the contest, the
+determinism the method relies on, the price of a step and our final recipe (\cref{sec:recipe}); \cref{sec:oracle,sec:sim,sec:findings,sec:contrib}
+present C1--C4 and \cref{sec:transfer,sec:limits} what transfers and the limitations. The appendices hold the
+evidence behind C3 (\cref{app:findings}), the upload ledger (\cref{app:ledger}), oracle and simulator details
+(\cref{app:oracle,app:sim}), the contribution pipeline (\cref{app:contrib}), derivations and notation.

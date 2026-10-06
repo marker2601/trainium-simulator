@@ -10,16 +10,20 @@ We used this rule to pick every rehearsed upload from 26 Sep on (all except K65a
 single changes). Over the 15 rehearsed uploads since K50 the offset averaged +0.0067 with an sd of 0.0004 (range
 +0.0061 to +0.0074). The largest miss against a written projection was 0.0006: K73s6, a salt-selected draw, was
 projected at 0.9619 and scored 0.9625. The two final uploads landed within 0.0001 of their projections. Over all 30
-uploads with a rehearsal, including the early chip-A/B era, the offset ranged from +0.0053 to +0.0077.
+uploads with a rehearsal, including the early chip-A/B era, the offset ranged from +0.0053 to +0.0078 (K15's exact
+difference is +0.00775, rounded half-up as in the paper).
 
 ## Why it works
 
-1. **Training is deterministic for a given file and seed.** A cold rehearsal and a warm rerun of the same file
-   agreed to about 5e-6 (1.041525 vs 1.041520 on 19 Sep). The official run executes the same code on the same
-   kind of chip, so it follows the same optimizer trajectory.
-2. **The offset is mostly a property of the text, not of the recipe.** The first 2M public tokens are easier than
-   typical text: the same model scores about +0.0070 worse on 20M public tokens, about the size of the offset. The
-   offset therefore barely moves between very different recipes. It moved 0.0011 across nine submissions that
+1. **Training repeated itself in our checks.** A cold rehearsal and a warm rerun of the same file agreed to about
+   5e-6 (1.041525 vs 1.041520 on 19 Sep), and two replicate pairs in `research/sim-data/runs.jsonl` (same code,
+   knobs and seed on chip C) logged identical losses until their first clock-triggered schedule switch. That is
+   direct evidence from very few runs, not a proof of bit-for-bit determinism; the offset statistics alone cannot
+   tell a deterministic official run from one that re-draws the data-order noise. If the official run executes the
+   same code on the same kind of chip and follows the same optimizer trajectory, the rehearsal predicts it.
+2. **The offset does not depend on the recipe.** The first 2M public tokens are easier than a longer stretch: the
+   18 runs in `runs.jsonl` scored on both texts score +0.00712 worse (sd 0.00012) on the first 20M public tokens,
+   about the size of the offset. The offset therefore barely moves between very different recipes. It moved 0.0011 across nine submissions that
    changed the architecture, the optimizer and the data order. It may also depend on the instance that ran the
    rehearsal: on the final day it was larger for rehearsals on the faster chips G and H.
 
@@ -30,7 +34,7 @@ uploads with a rehearsal, including the early chip-A/B era, the offset ranged fr
 | chip-C rehearsals K51-K60 (the simulator's offset model) | 7 | +0.00653 | 0.00042 | +0.0061 .. +0.0072 |
 | final day, chips C/E/G/H (K63-K82s7) | 7 | +0.00687 | 0.00030 | +0.0065 .. +0.0074 |
 | everything since K50 | 15 | +0.00671 | 0.00038 | +0.0061 .. +0.0074 |
-| every scored upload with a rehearsal | 30 | +0.00648 | 0.00061 | +0.0053 .. +0.0077 |
+| every scored upload with a rehearsal | 30 | +0.00648 | 0.00061 | +0.0053 .. +0.0078 |
 
 As a held-out check, freeze the chip-C fit (+0.00653) and predict the seven final-day uploads from their rehearsals:
 the errors (official - rehearsal - 0.00653) are K63 -0.00004, K70a +0.00002, K73s4 +0.00026, K73s6 +0.00083

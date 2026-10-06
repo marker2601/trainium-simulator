@@ -80,13 +80,13 @@ def run(N: Numbers) -> Dict[str, object]:
     k44 = next(r for r in load_scores() if r["name"] == "K44")
     N.add("xr-k", num(k_anchor, 4), f"{GAP}: 0.0155 / ln(2288/1788)")
     N.add("xr-k-anchor", num(k_anchor, 3), GAP)
-    N.add("kappa", num(KAPPA, 3), f"{GAP}: per-step rate x 100")
+    N.add("kappa", num(KAPPA, 3), f"{GAP}: per-step rate x 100 (doc)")
     N.add("xr-anchor-pct", num(100 * (ANCHOR_LONG / ANCHOR_SHORT - 1), 0) + "\\%", GAP)
-    N.add("xr-anchor-gain", num(ANCHOR_GAIN, 4), GAP)
-    N.add("xr-anchor-long", "2{,}288", GAP)
-    N.add("xr-anchor-short", "1{,}788", GAP)
+    N.add("xr-anchor-gain", num(ANCHOR_GAIN, 4), GAP + ": gain of the long run (doc)")
+    N.add("xr-anchor-long", "2{,}288", GAP + ": long run, seconds (doc)")
+    N.add("xr-anchor-short", "1{,}788", GAP + ": short run, seconds (doc)")
     N.add("xr-slope-pct", num(k_anchor * math.log(1.01), 5), f"{GAP}: k ln(1.01)")
-    N.add("xr-step-rate", num(PER_STEP_PER_PCT, 5), GAP)
+    N.add("xr-step-rate", num(PER_STEP_PER_PCT, 5), GAP + ": per-step rate, bpb per 1% more steps (doc)")
     N.add("q-prior-b", num(-KAPPA, 3), "ffsim/quality.py slope prior mean")
     N.add("q-prior-b-sd", num(0.005, 3), "ffsim/quality.py slope prior SD")
     N.add("q-prior-c", num(CURV, 3), "ffsim/quality.py curvature prior mean")
@@ -101,12 +101,13 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("k44-steps", f"{int(k44['steps']):,}".replace(",", "{,}"), "results/official-scores.csv")
     N.add("kappa-at-anchor", num(KAPPA - 2 * CURV * math.log(s_mid / 2300.0), 3),
           "kappa(S) = 0.057 - 2 x 0.026 ln(S/2300) at the anchor's geometric mid-point")
-    N.add("rank10", num(RANK10, 4), f"{GAP} (final snapshot, by rank)")
-    N.add("rank1", num(RANK1, 4), f"{GAP} (final snapshot, by rank)")
+    N.add("rank10", num(RANK10, 4), f"{GAP}: #10 on the final snapshot (doc)")
+    N.add("rank1", num(RANK1, 4), f"{GAP}: #1 on the final snapshot (doc)")
     body = []
+    k_print = round(k_anchor, 3)    # the table header prints kappa to 3 decimals; price the column at that value
     for label, target, key in (("\\#10 on the final snapshot", RANK10, "ten"), ("\\#1 on the final snapshot", RANK1, "one")):
         gap = best - target
-        lo = (math.exp(gap / k_anchor) - 1.0) * 100.0
+        lo = (math.exp(gap / k_print) - 1.0) * 100.0
         hi = (math.exp(gap / KAPPA) - 1.0) * 100.0
         N.add(f"gap-{key}", num(gap, 4), GAP)
         N.add(f"gap-{key}-pct", num(hi, 0) + "\\%", GAP + f" at kappa {KAPPA}")
@@ -129,7 +130,9 @@ def run(N: Numbers) -> Dict[str, object]:
         s = pair_sd(ev, int(n) if n else 1)
         noise_sds.append(s)
         eq = "n/a" if "changes steps" in note else num(steps_equiv(d), 1) + "\\%"
-        body.append(f"{lab} & {val} & {milli(s, 2)} & {num(abs(d) / s, 1)} & {EVIDENCE[ev]} & {n or '--'} & "
+        # campaign-log rows have no recorded comparison, so no ratio to a noise scale is printed for them
+        ratio = "--" if ev == "log" else num(abs(d) / s, 1)
+        body.append(f"{lab} & {val} & {milli(s, 2)} & {ratio} & {EVIDENCE[ev]} & {n or '--'} & "
                     f"{eq} & {note} \\\\")
     table(TABLES / "levers.tex", body, "@{}p{4.2cm}rrrlrrp{3.3cm}@{}",
           "Lever & $\\Delta$ & Noise SD & $|\\Delta|/\\text{SD}$ & Evidence & $n$ & Steps & Note",
@@ -160,8 +163,20 @@ def run(N: Numbers) -> Dict[str, object]:
     return {"kappa": KAPPA, "k_anchor": k_anchor}
 
 
+def vague_prices(N: Numbers, k_lo: float, k_hi: float) -> None:
+    """The gap to #10 and a typical late change priced at the ends of the vague-prior kappa interval (simulator.py)."""
+    best = min(r["official"] for r in load_scores() if r["official"] is not None)
+    gap = best - RANK10
+    src = f"{GAP}: gap to #10 priced at the vague-prior kappa interval (simulator.py kappa-vague-lo/hi)"
+    pcts = sorted((math.exp(gap / k) - 1.0) * 100.0 for k in (k_lo, k_hi))
+    N.add("gap-ten-vague-range", f"{num(pcts[0], 0)}--{num(pcts[1], 0)}\\%", src)
+    late = sorted(steps_equiv(0.0005, k) for k in (k_lo, k_hi))
+    N.add("late-change-vague-range", f"{num(late[0], 1)}--{num(late[1], 1)}\\%",
+          "0.0005 bpb priced at the vague-prior kappa interval")
+
+
 def _figure(best: float, k_anchor: float) -> None:
-    from style import AQUA, BLUE, BLUE_WASH, GREY, INK, INK_2, ORANGE, TEXTWIDTH, plt, save_pdf
+    from style import AQUA, BLUE, BLUE_WASH, INK, ORANGE, TEXTWIDTH, plt, save_pdf
     import numpy as np
 
     fig, ax = plt.subplots(figsize=(TEXTWIDTH * 0.62, 2.6))
@@ -183,8 +198,6 @@ def _figure(best: float, k_anchor: float) -> None:
     late = 0.5
     ax.scatter([steps_equiv(0.0005)], [late], marker="v", s=24, color=AQUA, zorder=4,
                label=f"late recipe change ({steps_equiv(0.0005):.1f}% steps)")
-    ax.axvspan(15, 23, color=GREY, alpha=0.18, lw=0)
-    ax.text(19, 30.0, "+15–23%\ntokens/s", ha="center", va="top", fontsize=7, color=INK_2)
     ax.set_xlim(0, 70)
     ax.set_ylim(0, 32)
     ax.set_xlabel("extra effective compute (% more optimizer steps)")

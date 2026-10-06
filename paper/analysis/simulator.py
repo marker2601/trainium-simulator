@@ -11,6 +11,11 @@ without the empirical-Bayes floor; the temporal hold-out split into supported an
 pairs scored here (with a Wilson interval and the zero-predictor baseline) from the per-pair values of
 docs/simulator-report-20260929.md section 5; the compute the dataset represents.
 
+Revision 2: a leave-one-pair-out family-mean baseline; the steps-only model and the zero predictor on the temporal
+pairs; decisive subsets scored for both models on the same pairs; cluster-bootstrap intervals for every sign row; the
+steps slope refitted under a vague prior (SD 0.05); tables/surrogate-configs.tex from quality-validation.md section 11;
+feature descriptions in tables/features.tex without campaign outcomes.
+
 Numbers quoted from documents rather than recomputed are marked ``(doc)`` in their source comment in numbers.tex.
 """
 from __future__ import annotations
@@ -62,6 +67,93 @@ FAMILY_NAMES = {
     "m13_flags": "code-M13 flags", "m14_attn_src": "attention-source reuse", "mtp": "multi-token prediction",
     "rope": "RoPE base", "softcap": "soft cap", "warmup": "LR warm-up",
 }
+
+
+# Feature descriptions printed in tables/features.tex where ffsim/quality.py's own text quotes campaign outcomes: the
+# table describes the encoding only (the outcomes are data, reported elsewhere).
+FEATURE_TEXT = {
+    "leaky_sq": "(LK - 0.35)^2: a bowl in the slope (0 / 0.25 / 0.35 / 0.5 were tried)",
+    "acc_in_graph": "ACC_IN_GRAPH - 1 (K56 mechanism: gradient accumulation inside the compiled graph)",
+}
+
+# Surrogate configurations compared in research/sim-data/quality-validation.md section 11 (a historical report whose
+# generator is not released): a readable description of each attempt for tables/surrogate-configs.tex.
+QV = "research/sim-data/quality-validation.md"
+SURROGATE_CONFIGS = {
+    "A0": "original conventions: K59 defaults for missing knobs, no leakage guard, every code version its own era",
+    "A1": "code defaults for missing knobs, code lineage, leakage guard",
+    "A2": "A1 + one era for M9 and its flag-gated successors",
+    "A3": "A2 + bowl prior on tuned knobs, bowls $\\ge 0$ (the default)",
+    "A4": "A3, slope prior SD 0.002",
+    "A5": "A3, seed prior SD 0.0009",
+    "A6": "A3, era grouping off",
+    "A7": "A3, K59 defaults for missing knobs",
+    "A8": "A3, bowl prior mean 0.001",
+    "A9": "A3, knob prior SD 0.002",
+    "A10": "A3 without the bowl constraint",
+    "A11": "A3 fitted on M9+ runs only",
+}
+
+
+def surrogate_configs(N: Numbers) -> None:
+    """tables/surrogate-configs.tex: the twelve surrogate configurations of quality-validation.md section 11, with
+    their pair-validation results as that report printed them (values quoted, marked (doc))."""
+    import re
+    from common import ROOT
+    text = (ROOT / QV).read_text(encoding="utf-8")
+    sec = text.split("## 11.", 1)[1].split("\n## ", 1)[0]
+    lines = [ln for ln in sec.splitlines() if re.match(r"^\|\s*A\d+\b", ln)]
+    rows = []
+    for ln in lines:
+        cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+        name = cells[0].split()[0]
+
+        def sm(cell: str):
+            s, m = [x.strip() for x in cell.split("/")]
+            return float(s.rstrip("%")) / 100.0, float(m)
+        rows.append({"name": name, "n": int(cells[1]), "spec": sm(cells[4]), "rec": sm(cells[5]),
+                     "dec": sm(cells[6]), "lokvo": sm(cells[9])})
+    assert [r["name"] for r in rows] == list(SURROGATE_CONFIGS), [r["name"] for r in rows]
+    # the pairs named in the simulator's specification: in_task_list in validation-pairs.json, as the report states
+    spec_n = sum(1 for p in load_pairs() if p.get("in_task_list"))
+    m = re.search(r"(\d+) on the spec's list", text)
+    assert m and int(m.group(1)) == spec_n, (m and m.group(1), spec_n)
+    N.add("sc-spec-n", str(spec_n), "validation-pairs.json: pairs named in the simulator's specification (in_task_list)")
+    body = []
+    for r in rows:
+        star = "\\textbf{" if r["name"] == "A3" else "{"
+        body.append(f"{star}{r['name']}}} & {SURROGATE_CONFIGS[r['name']]} & {r['n']} & "
+                    f"{pct(r['spec'][0], 0)} & {milli(r['spec'][1], 2)} & {pct(r['rec'][0], 0)} & "
+                    f"{milli(r['rec'][1], 2)} & {pct(r['dec'][0], 0)} & {pct(r['lokvo'][0], 0)} & "
+                    f"{milli(r['lokvo'][1], 2)} \\\\")
+    table(TABLES / "surrogate-configs.tex", body, "@{}lp{4.2cm}rrrrrrrr@{}",
+          "& & & \\multicolumn{2}{c}{LOPO, \\val{sc-spec-n} pairs} & \\multicolumn{2}{c}{LOPO, recipe} & Decisive & "
+          "\\multicolumn{2}{c}{LOKVO, \\val{sc-spec-n} pairs} \\\\\n"
+          "\\cmidrule(lr){4-5}\\cmidrule(lr){6-7}\\cmidrule(lr){9-10}\n"
+          "Config & Change & Runs & Sign & MAE & Sign & MAE & sign & Sign & MAE",
+          f"surrogate configurations, {QV} section 11 (values as printed there); MAE in 1e-3 bpb (simulator.py)",
+          size="\\footnotesize", tabcolsep="4pt")
+    by = {r["name"]: r for r in rows}
+    lo = min(rows, key=lambda r: r["rec"][0])
+    hi = max(rows, key=lambda r: r["rec"][0])
+    doc = f"{QV} s11 (doc)"
+    N.add("sc-n", str(len(rows)), doc.replace(" (doc)", ": configurations compared (doc)"))
+    N.add("sc-default-name", "A3", QV + " s11: the default configuration")
+    N.add("sc-rec-lo-name", lo["name"], QV + " s11: lowest recipe-pair LOPO sign agreement")
+    N.add("sc-rec-hi-name", hi["name"], QV + " s11: highest recipe-pair LOPO sign agreement")
+    N.add("sc-rec-sign-lo", pct(lo["rec"][0], 0), QV + " s11: recipe-pair LOPO sign agreement, lowest (doc)")
+    N.add("sc-rec-sign-hi", pct(hi["rec"][0], 0), QV + " s11: recipe-pair LOPO sign agreement, highest (doc)")
+    N.add("sc-default-rec-sign", pct(by["A3"]["rec"][0], 0), QV + " s11: recipe-pair LOPO sign agreement, A3 (doc)")
+    N.add("sc-spec-sign-before", pct(by["A7"]["spec"][0], 0),
+          QV + " s11: LOPO sign agreement on the 73 listed pairs, A7 (old missing-knob rule) (doc)")
+    N.add("sc-spec-sign-after", pct(by["A3"]["spec"][0], 0),
+          QV + " s11: LOPO sign agreement on the 73 listed pairs, A3 (doc)")
+    spec = [r["spec"][0] for r in rows]
+    N.add("sc-spec-sign-range", f"{pct(min(spec), 0)}--{pct(max(spec), 0)}",
+          QV + " s11: LOPO sign agreement on the 73 listed pairs, range over configurations (doc)")
+    lk = [r["lokvo"][0] for r in rows]
+    N.add("sc-lokvo-sign-range", f"{pct(min(lk), 0)}--{pct(max(lk), 0)}",
+          QV + " s11: LOKVO sign agreement on the 73 listed pairs, range over configurations (doc)")
 
 
 def _family(f: Any) -> str:
@@ -149,6 +241,36 @@ def _zero_rows(rows: List[dict]) -> List[dict]:
     return [dict(r, predicted=0.0, error=-r["observed"], abs_error=abs(r["observed"])) for r in rows]
 
 
+def _family_mean_rows(rows: List[dict]) -> List[dict]:
+    """Leave-one-pair-out family mean: predict a pair by the mean measured difference of the other pairs of its
+    family, leaving out every pair that shares a run with it (as LOPO drops the pair's two runs). A pair with no
+    such neighbour falls back to the mean of the other pairs of its kind (recipe or noise)."""
+    out = []
+    for i, r in enumerate(rows):
+        runs = {r.get("treatment"), r.get("control")}
+
+        def ok(j: int, o: dict) -> bool:
+            return j != i and not ({o.get("treatment"), o.get("control")} & runs)
+        same = [o["observed"] for j, o in enumerate(rows) if ok(j, o) and o["family"] == r["family"]]
+        if same:
+            pred = mean(same)
+        else:
+            kind = r["family"] in NOISE_FAMILIES
+            pred = mean(o["observed"] for j, o in enumerate(rows) if ok(j, o) and (o["family"] in NOISE_FAMILIES) == kind)
+        err = pred - r["observed"]
+        out.append(dict(r, predicted=pred, error=err, abs_error=abs(err), sign_ok=_sign_ok(pred, r["observed"]),
+                        fallback=not same))
+    return out
+
+
+def _ci_cell(rows: List[dict]) -> str:
+    """Cluster-bootstrap 95% interval of sign agreement (clusters = control runs), as a table cell."""
+    if not rows:
+        return ""
+    b = _cluster_bootstrap(rows)
+    return f"{pct(b[0], 0)}--{pct(b[1], 0)}"
+
+
 def _temporal(qm, pairs: List[dict], cutoff: str) -> Dict[str, Any]:
     """Fit only on runs dated before ``cutoff`` (UTC date), predict every pair dated on or after it."""
     from ffsim.quality import FEATURES, knob_features
@@ -175,13 +297,15 @@ def _temporal(qm, pairs: List[dict], cutoff: str) -> Dict[str, Any]:
         unsupported += int(unsup)
         err = pred - obs
         rows.append({"observed": obs, "predicted": pred, "pred_sd": psd, "error": err, "abs_error": abs(err),
-                     "sign_ok": _sign_ok(pred, obs), "family": p.get("family"), "unsupported": unsup})
+                     "sign_ok": _sign_ok(pred, obs), "family": p.get("family"), "unsupported": unsup,
+                     "name": p.get("pair_id") or p.get("name"), "treatment": t.run_id, "control": c.run_id})
     st = _stats(rows)
     st.update({"n_fit": child.n, "n_late_runs": len(late), "n_unsupported": unsupported})
     sup = [r for r in rows if not r["unsupported"]]
     uns = [r for r in rows if r["unsupported"]]
     st["sup"] = _stats(sup) if sup else None
     st["uns"] = _stats(uns) if uns else None
+    st["rows"] = rows
     return st
 
 
@@ -209,6 +333,13 @@ def run(N: Numbers) -> Dict[str, Any]:
     N.add("ds-pairs-recipe", str(sum(1 for p in pairs if p.get("family") not in NOISE_FAMILIES)), "validation-pairs.json")
     N.add("ds-pairs-noise", str(sum(1 for p in pairs if p.get("family") in NOISE_FAMILIES)), "validation-pairs.json")
     N.add("ds-pair-families", str(len({p.get('family') for p in pairs})), "validation-pairs.json")
+    noise = [p for p in pairs if p.get("family") in NOISE_FAMILIES]
+    rec = [p for p in pairs if p.get("family") not in NOISE_FAMILIES]
+    assert all(p.get("seed") == p.get("control_seed") and p.get("same_chip") for p in rec), "recipe pair across seeds/chips"
+    N.add("ds-pairs-diffseed", str(sum(1 for p in noise if p.get("seed") != p.get("control_seed"))),
+          "validation-pairs.json: noise pairs whose arms differ in seed (same chip)")
+    N.add("ds-pairs-crosschip", str(sum(1 for p in noise if not p.get("same_chip"))),
+          "validation-pairs.json: noise pairs whose arms ran on different chips (same seed)")
     body = []
     for c in sorted(k for k in chips if k):
         rs = [r for r in records if r.chip == c]
@@ -242,7 +373,7 @@ def run(N: Numbers) -> Dict[str, Any]:
     N.add("trn-hours-screens", intc(round(h_scr, -1)), ds)
     N.add("trn-hours-total", intc(round(h_full + h_scr, -1)), ds)
     N.add("trn-charged-median", intc(mc_full), ds)
-    N.add("trn-startup-median", intc(statistics.median(su_all)), ds)
+    N.add("trn-startup-median", intc(ms_full), ds + ": median start-up of the full runs")
 
     # ---------------------------------------------------------------- quality fit
     N.add("q-nfit", str(qm.n), "ffsim.quality fit on runs.jsonl")
@@ -258,6 +389,19 @@ def run(N: Numbers) -> Dict[str, Any]:
     N.add("q-nseeds", str(len(qm.seeds)), "ffsim.quality fit")
     N.add("q-slope", num(qm.steps_slope(), 4), "ffsim.quality fit, d bpb / d ln steps at 2300")
     N.add("q-slope-pct", num(-qm.steps_slope() * math.log(1.01), 5), "ffsim.quality fit, per 1% steps")
+    # the steps slope with the default prior (-0.057 +- 0.005) and with a vague prior (SD 0.05, ten times wider): with
+    # the vague prior the slope is set by the runs, so its interval is the data's own statement about kappa
+    c_def = next(c for c in qm.coefficients() if c["name"] == "ln_steps")
+    N.add("q-slope-sd", num(c_def["sd"], 4), "ffsim.quality fit: posterior SD of d bpb / d ln steps at 2300")
+    q_vague = QualityModel(QualityConfig(slope_prior_sd=0.05)).fit(records, pairs)
+    c_v = next(c for c in q_vague.coefficients() if c["name"] == "ln_steps")
+    kv, kv_sd = -c_v["estimate"], c_v["sd"]
+    src_v = "ffsim.quality refit with slope prior -0.057 +- 0.05 (curvature prior unchanged): -slope at 2300 steps"
+    N.add("kappa-vague-prior-sd", num(0.05, 2), "vague slope prior SD")
+    N.add("kappa-vague", num(kv, 3), src_v)
+    N.add("kappa-vague-sd", num(kv_sd, 3), src_v + ", posterior SD")
+    N.add("kappa-vague-lo", num(kv - 1.96 * kv_sd, 3), src_v + ", 95% posterior interval")
+    N.add("kappa-vague-hi", num(kv + 1.96 * kv_sd, 3), src_v + ", 95% posterior interval")
     N.add("q-dropped-noknobs", str(qm.dropped.get("no_effective_knobs", 0)), "ffsim.quality fit")
     N.add("q-dropped-nocode", str(qm.dropped.get("no_code_version", 0)), "ffsim.quality fit")
 
@@ -298,10 +442,10 @@ def run(N: Numbers) -> Dict[str, Any]:
         return [r for r in rows if r["family"] not in NOISE_FAMILIES]
 
     base_rows = {"full": lopo["rows"], "steps": steps_only["rows"], "major": _majority_rows(lopo["rows"]),
-                 "zero": _zero_rows(lopo["rows"])}
+                 "zero": _zero_rows(lopo["rows"]), "fam": _family_mean_rows(lopo["rows"])}
     assert [r["name"] for r in base_rows["full"]] == [r["name"] for r in base_rows["steps"]]
     boot = {}
-    for key in ("full", "steps", "major", "zero"):
+    for key in ("full", "steps", "major", "zero", "fam"):
         for sub, rows in (("all", base_rows[key]), ("rec", rec_only(base_rows[key]))):
             b = _cluster_bootstrap(rows)
             boot[(key, sub)] = b
@@ -314,6 +458,30 @@ def run(N: Numbers) -> Dict[str, Any]:
           "paired cluster bootstrap, recipe pairs, full - steps-only")
     N.add("base-diff-mae-ci", f"{milli(dmlo, 2, sign=True)} to {milli(dmhi, 2, sign=True)}",
           "paired cluster bootstrap, recipe pairs, full - steps-only, 1e-3 bpb")
+    N.add("base-fam-nfallback", str(sum(r["fallback"] for r in rec_only(base_rows["fam"]))),
+          "recipe pairs with no other same-family pair that shares no run: predicted by the recipe-pair mean")
+    flo, fhi, fmlo, fmhi = _paired_bootstrap(rec_only(base_rows["full"]), rec_only(base_rows["fam"]))
+    N.add("base-diff-fam-sign-ci", f"{num(100 * flo, 0, sign=True)} to {num(100 * fhi, 0, sign=True)} points",
+          "paired cluster bootstrap, recipe pairs, full - family mean")
+    N.add("base-diff-fam-mae-ci", f"{milli(fmlo, 2, sign=True)} to {milli(fmhi, 2, sign=True)}",
+          "paired cluster bootstrap, recipe pairs, full - family mean, 1e-3 bpb")
+    # decisive subsets scored for both models on the SAME pairs: the surrogate's own decisive predictions
+    # (|pred| >= 0.0003) and the outcome-decisive pairs (|observed| >= 0.0003)
+    full_rec, steps_rec = rec_only(base_rows["full"]), rec_only(base_rows["steps"])
+    pdec_names = {r["name"] for r in full_rec if abs(r["predicted"]) >= NOISE}
+    dec_names = {r["name"] for r in full_rec if abs(r["observed"]) >= NOISE}
+    subsets = {}
+    for tag, names in (("pdec", pdec_names), ("dec", dec_names)):
+        for model, rows_m in (("full", full_rec), ("steps", steps_rec)):
+            sub = [r for r in rows_m if r["name"] in names]
+            st = _stats(sub)
+            subsets[(model, tag)] = (sub, st)
+            N.add(f"base-{model}-{tag}-n", str(st["n"]), f"recipe pairs, {tag} subset of the full surrogate")
+            N.add(f"base-{model}-{tag}-sign", pct(st["sign"], 1), "same subset for both models")
+            N.add(f"base-{model}-{tag}-signci", _ci_cell(sub), "cluster bootstrap over control runs")
+            N.add(f"base-{model}-{tag}-mae", num(st["mae"], 5), "same subset for both models")
+    for sub_tag, rows_s in (("ins-all", ins["rows"]), ("lokvo-rec", rec_only(lokvo["rows"]))):
+        N.add(f"{sub_tag}-signci", _ci_cell(rows_s), "cluster bootstrap over control runs, 4000 draws, rng 0")
 
     # by family (appendix)
     fam_l = collections.defaultdict(list)
@@ -334,8 +502,24 @@ def run(N: Numbers) -> Dict[str, Any]:
 
     # ---------------------------------------------------------------- temporal hold-out
     tbody = []
+    temporal_rows = {}
     for cutoff, key in (("2026-09-28", "a"), ("2026-09-29", "b")):
         st = _temporal(qm, pairs, cutoff)
+        with _knobs_off():
+            st_s = _temporal(qs, pairs, cutoff)       # steps + era + chip + seed, refitted on the same early runs
+        assert [r["name"] for r in st["rows"]] == [r["name"] for r in st_s["rows"]]
+        zero_t = _zero_rows(st["rows"])
+        temporal_rows[key] = (st, st_s)
+        N.add(f"temp-{key}-signci", _ci_cell(st["rows"]), "cluster bootstrap over control runs")
+        N.add(f"temp-{key}-steps-sign", pct(st_s["sign"], 0), "temporal hold-out, knob effects off")
+        N.add(f"temp-{key}-steps-signci", _ci_cell(st_s["rows"]), "cluster bootstrap over control runs")
+        N.add(f"temp-{key}-steps-mae", num(st_s["mae"], 5), "temporal hold-out, knob effects off")
+        N.add(f"temp-{key}-zero-mae", num(_stats(zero_t)["mae"], 5), "temporal hold-out, zero predictor")
+        tlo, thi, tmlo, tmhi = _paired_bootstrap(st["rows"], st_s["rows"])
+        N.add(f"temp-{key}-diff-sign-ci", f"{num(100 * tlo, 0, sign=True)} to {num(100 * thi, 0, sign=True)} points",
+              "paired cluster bootstrap, temporal pairs, full - steps-only")
+        N.add(f"temp-{key}-diff-mae-ci", f"{milli(tmlo, 2, sign=True)} to {milli(tmhi, 2, sign=True)}",
+              "paired cluster bootstrap, temporal pairs, full - steps-only, 1e-3 bpb")
         d = cutoff[-2:]
         N.add(f"temp-{key}-cutoff", f"{int(d)} Sep", "temporal hold-out")
         N.add(f"temp-{key}-nfit", str(st["n_fit"]), "temporal hold-out")
@@ -356,10 +540,14 @@ def run(N: Numbers) -> Dict[str, Any]:
         sup_cell = f"{s2['n']}: {pct(s2['sign'], 0)}" if s2 else "--"
         uns_cell = f"{s3['n']}: {pct(s3['sign'], 0)}" if s3 else "--"
         tbody.append(f"runs before {int(d)} Sep & {st['n_fit']} & {st['n']} & {pct(st['sign'], 0)} & "
-                     f"{milli(st['mae'], 2)} & {sup_cell} & {uns_cell} \\\\")
-    table(TABLES / "temporal.tex", tbody, "@{}lrrrrrr@{}",
-          "Fit on & Runs & Pairs & Sign & MAE ($10^{-3}$) & Supported & Prior-only",
-          "temporal hold-out (simulator.py); supported / prior-only cells are n: sign agreement")
+                     f"{milli(st['mae'], 2)} & {pct(st_s['sign'], 0)} & {milli(st_s['mae'], 2)} & "
+                     f"{milli(_stats(zero_t)['mae'], 2)} & {sup_cell} & {uns_cell} \\\\")
+    table(TABLES / "temporal.tex", tbody, "@{}lrrrrrrrrr@{}",
+          "MAE in $10^{-3}$ bpb & & & \\multicolumn{2}{c}{Surrogate} & \\multicolumn{2}{c}{Steps only} & Zero & & \\\\\n"
+          "\\cmidrule(lr){4-5}\\cmidrule(lr){6-7}\n"
+          "Fit on & Runs & Pairs & Sign & MAE & Sign & MAE & MAE & Supported & Prior-only",
+          "temporal hold-out (simulator.py); MAE in 1e-3 bpb; supported / prior-only cells are n: sign agreement",
+          size="\\footnotesize", tabcolsep="4pt")
 
     # ---------------------------------------------------------------- post-fit pairs (new mechanisms)
     pf = [{"observed": o, "predicted": p, "error": p - o, "abs_error": abs(p - o), "sign_ok": _sign_ok(p, o)}
@@ -412,7 +600,6 @@ def run(N: Numbers) -> Dict[str, Any]:
 
     N.add("search-n", "282", f"{SIMDOC} (doc)")
     N.add("walk-phase-err", "6--10", f"{SIMDOC} (doc)")
-    N.add("walk-total-err", "0.3\\%", f"{SIMDOC} (doc)")
     N.add("reserve-s", "5.5", "research/sim-data/simulate-validation.md section 2 (doc)")
     N.add("reserve-n", "136", "research/sim-data/simulate-validation.md section 2 (doc)")
     N.add("overhead", "0.57\\%", "ffsim/steptime.py MEDIAN_TO_MEAN_OVERHEAD")
@@ -447,26 +634,35 @@ def run(N: Numbers) -> Dict[str, Any]:
     za, zr = _stats(base_rows["zero"]), _stats(rec_only(base_rows["zero"]))
     ma, mr = _stats(base_rows["major"]), _stats(rec_only(base_rows["major"]))
     ci = lambda key, sub: f"{pct(boot[(key, sub)][0], 0)}--{pct(boot[(key, sub)][1], 0)}"  # noqa: E731
+    fr = rec_only(base_rows["fam"])
     body = [
         "\\multicolumn{5}{@{}l}{\\emph{Full surrogate}} \\\\",
-        row("\\quad in-sample (reference only)", ip["n"], ip),
+        row("\\quad in-sample (reference only)", ip["n"], ip, _ci_cell(ins["rows"])),
         row("\\quad leave one pair out (LOPO), all pairs", lp["n"], lp, ci("full", "all")),
         row("\\quad LOPO, recipe pairs only", lr["n"], lr, ci("full", "rec")),
-        f"\\quad LOPO, recipe pairs with $|\\hat\\Delta|\\ge0.3$ (decision-relevant) & {lr['n_pdec']} & "
-        f"{pct(lr['sign_pdec'], 1)} & & \\\\",
-        f"\\quad LOPO, recipe pairs with $|\\Delta|\\ge0.3$ (outcome-decisive) & {lr['n_dec']} & "
-        f"{pct(lr['sign_dec'], 1)} & & \\\\",
-        row("\\quad leave one knob value out (LOKVO), recipe pairs", vr["n"], vr),
+        row("\\quad LOPO, recipe pairs with $|\\hat\\Delta|\\ge0.3$ (decision-relevant)",
+            subsets[("full", "pdec")][1]["n"], subsets[("full", "pdec")][1], _ci_cell(subsets[("full", "pdec")][0])),
+        row("\\quad LOPO, recipe pairs with $|\\Delta|\\ge0.3$ (outcome-decisive)",
+            subsets[("full", "dec")][1]["n"], subsets[("full", "dec")][1], _ci_cell(subsets[("full", "dec")][0])),
+        row("\\quad leave one knob value out (LOKVO), recipe pairs", vr["n"], vr, _ci_cell(rec_only(lokvo["rows"]))),
         "\\multicolumn{5}{@{}l}{\\emph{Baselines, same pairs and protocol}} \\\\",
         row("\\quad steps + era + chip + seed, knob effects off (LOPO), recipe", sr["n"], sr, ci("steps", "rec")),
-        f"\\quad \\quad recipe pairs with $|\\hat\\Delta|\\ge0.3$ & {sr['n_pdec']} & {pct(sr['sign_pdec'], 1)} & & \\\\",
+        row("\\quad \\quad on the surrogate's decision-relevant pairs", subsets[("steps", "pdec")][1]["n"],
+            subsets[("steps", "pdec")][1], _ci_cell(subsets[("steps", "pdec")][0])),
+        row("\\quad \\quad on the outcome-decisive pairs", subsets[("steps", "dec")][1]["n"],
+            subsets[("steps", "dec")][1], _ci_cell(subsets[("steps", "dec")][0])),
+        row("\\quad family mean of the other pairs (LOPO), recipe pairs", len(fr), _stats(fr), ci("fam", "rec")),
         row("\\quad leave-one-out majority sign, recipe pairs", mr["n"], mr, ci("major", "rec")).rsplit("&", 1)[0] + "& -- \\\\",
         f"\\quad zero predictor ($\\hat\\Delta=0$), recipe pairs & {zr['n']} & -- & & {milli(zr['mae'], 2)} \\\\",
         "\\multicolumn{5}{@{}l}{\\emph{Forward in time and new mechanisms}} \\\\",
-        f"\\quad temporal hold-out, fit before 28 Sep & {N.values['temp-a-n']} & {N.values['temp-a-sign']} & & "
-        f"{milli(float(N.values['temp-a-mae']), 2)} \\\\",
-        f"\\quad temporal hold-out, fit before 29 Sep & {N.values['temp-b-n']} & {N.values['temp-b-sign']} & & "
-        f"{milli(float(N.values['temp-b-mae']), 2)} \\\\",
+    ]
+    for key, day in (("a", "28"), ("b", "29")):
+        st, st_s = temporal_rows[key]
+        body += [row(f"\\quad temporal hold-out, fit before {day} Sep", st["n"], st, _ci_cell(st["rows"])),
+                 row("\\quad \\quad steps-only baseline, same early runs", st_s["n"], st_s, _ci_cell(st_s["rows"])),
+                 f"\\quad \\quad zero predictor on the same pairs & {st['n']} & -- & & "
+                 f"{milli(_stats(_zero_rows(st['rows']))['mae'], 2)} \\\\"]
+    body += [
         f"\\quad pairs finished after the release fit$^{{\\dagger}}$ & {len(pf)} & {N.values['postfit-sign']} & "
         f"{N.values['postfit-wilson']} & {milli(mean(r['abs_error'] for r in pf), 2)} \\\\",
         f"\\quad \\quad zero predictor on the same pairs & {len(pf)} & -- & & "
@@ -501,9 +697,11 @@ def run(N: Numbers) -> Dict[str, Any]:
     for f in FEATURES:
         if f.bowl and f.name != "leaky_sq":
             continue
-        body.append(f"\\texttt{{{tex_escape(f.name)}}} & {tex_escape(f.transform)} & {f.scale:.3g} \\\\")
+        text = FEATURE_TEXT.get(f.name, f.transform)
+        body.append(f"\\texttt{{{tex_escape(f.name)}}} & {tex_escape(text)} & {f.scale:.3g} \\\\")
     table(TABLES / "features.tex", body, "@{}lp{10.6cm}r@{}", "Feature & Encoding (centred on the K59 recipe) & Scale",
           "ffsim.quality FEATURES (simulator.py)", size="\\scriptsize")
+    surrogate_configs(N)
 
     # ---------------------------------------------------------------- GPU proxy parity (docs/SIMULATOR.md route 2)
     gpu = [("Attention-source reuse (5:6,7,8)", -0.00187, -0.00181, "chip C pair", True),
@@ -526,7 +724,7 @@ def run(N: Numbers) -> Dict[str, Any]:
           f"GPU proxy vs chip, 1e-3 bpb except the last row; values from {SIMDOC} route 2", size="\\footnotesize")
     N.add("gpu-mae", num(mean(diffs), 5), f"{SIMDOC} route 2, computed")
     N.add("gpu-maxdiff", num(max(diffs), 5), f"{SIMDOC} route 2, computed")
-    N.add("gpu-maxdiff-inf", num(max(diffs_inf), 5), f"{SIMDOC} route 2, the two equal-step chip pairs")
+    N.add("gpu-maxdiff-inf", num(max(diffs_inf), 5), f"{SIMDOC} route 2, the two equal-step chip pairs (doc)")
     N.add("gpu-n", str(len(gpu)), SIMDOC)
     N.add("gpu-n-inf", str(len(diffs_inf)), SIMDOC)
     N.add("gpu-patches", "32", f"{SIMDOC} (doc)")
@@ -538,7 +736,7 @@ def run(N: Numbers) -> Dict[str, Any]:
     N.add("gpu-cost-total", "185", f"{SIMDOC} (doc)")
 
     _figure(lopo["rows"])
-    return {"qm": qm, "lopo": lopo}
+    return {"qm": qm, "lopo": lopo, "kappa_vague": (kv - 1.96 * kv_sd, kv + 1.96 * kv_sd)}
 
 
 def _figure(rows: List[dict]) -> None:

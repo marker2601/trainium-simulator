@@ -11,7 +11,8 @@ organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a
   \centering
   \caption{\textbf{Every scored upload} (\texttt{results/official-scores.csv}). Rehearsal and official in bpb
     (official to four decimals; \upl{K82s4} and \upl{K82s7} were published to seven, \val{best-official-long} and
-    \val{salt7-official-long}). Offset $=$ official $-$ rehearsal, rounded half-up. $\bullet$: new best at the
+    \val{salt7-official-long}). Offset $=$ official $-$ rehearsal, rounded half-up from the exact difference, so it
+    can differ in the last digit from the offset column of the CSV (\upl{K15}). $\bullet$: new best at the
     time. \textsuperscript{s}\,salt chosen by a lottery; \textsuperscript{i}\,salt inherited from a lottery winner;
     \textsuperscript{n}\,rehearsal normalised to chip-C speed. \upl{K65a}--\upl{K65d} were official tests and were
     not rehearsed. The change descriptions spell out the ledger's internal shorthand.}
@@ -60,6 +61,81 @@ organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a
   \input{tables/oracle_sensitivity}
 \end{table}
 
+\subsection{What the offset variance is made of}
+\label{app:offset-detail}
+
+Since \upl{K50} the within-chip offset SD is \val{off-sd-within}. If the official text behaves like the first 20M public tokens, the run-to-run variation of
+the text gap (SD \val{offdec-text}) explains only \val{offdec-text-share} of the within-chip offset variance and
+rounding to four decimals almost none (SD \val{offdec-round}); the remaining SD, \val{offdec-rest}
+(\val{offdec-rest-lo}--\val{offdec-rest-hi} at the limits of the within-chip SD's interval), comes from step-count
+jitter, from the official side or from nondeterminism, which these data cannot separate.
+
+\paragraph{Chip or model quality?} On the final day the faster chips also rehearsed the better recipes and the
+lottery winners, so an apparent chip effect could be an effect of model quality or of selection. Across the
+\val{cq-n} uploads since \upl{K50}, the offset's slope on the rehearsal score is \val{cq-slope} (95\% CI
+\val{cq-slope-lo} to \val{cq-slope-hi}, $p=\val{cq-slope-p}$), which moves the offset by \val{cq-slope-span} across
+the rehearsal span. The \val{cq-gh-n} uploads rehearsed on chips G and H have a mean offset \val{cq-gh-diff} above the
+rest (exact permutation $p=\val{cq-perm-p}$ over all \val{cq-perm-n} label assignments), but given the rehearsal score
+the G/H term is \val{cq-gh-coef} (95\% CI \val{cq-gh-lo} to \val{cq-gh-hi}; permutation $p=\val{cq-perm-p-adj}$) and
+the slope becomes \val{cq-slope-adj}. With this few uploads the data cannot tell a chip effect from an effect of model
+quality or selection, so we say only that the offset \emph{may} depend on the chip.
+
+\subsection{Traps in detail}
+\label{app:traps}
+
+The four ways in which a rehearsal was not a faithful replica of the official run (\cref{sec:traps}):
+\begin{enumerate}
+  \item \textbf{Cold means cold.} Any one-time compilation that happens after the clock starts costs steps in the
+    official run. A warm rehearsal, which reuses compiled graphs, does not pay that cost. \Cref{sec:prewarm}
+    quantifies one instance: warm rehearsals of an EMA recipe looked \val{ema-warm-bias}\docnum{} bpb better than the
+    cold official run would be.
+  \item \textbf{Chip speed.} A rehearsal predicts the official score only if the official host runs at the
+    rehearsal chip's speed; otherwise $\gamma_c\neq0$. We normalised same-recipe runs to chip-C speed at $\rho$ and
+    never across a change that alters step time. The organisers' rerun of one file on a slower host did
+    \val{rerun-steps}\docnum{} fewer steps and scored \val{rerun-delta}\docnum{} worse, consistent with $\rho$
+    ($n=1$).
+  \item \textbf{The warm-up coin flip.} A change that touches steps 0--19 can move a seed onto a different early
+    trajectory (\cref{sec:seeds}). The rehearsal still predicts the official score, because the official run takes
+    the same path, but the measured difference is then a seed effect rather than the change's effect.
+  \item \textbf{The time target is a budget, not a promise.} The training clock stops when the next step would
+    cross the target; the median reserve was \val{reserve-s}\docnum{}~s over \val{reserve-n} completed runs, and we
+    kept \val{headroom}\docnum{}~s of headroom under the cap.
+\end{enumerate}
+Two organiser-side anomalies are excluded from all calibration statistics and listed in
+\path{research/sim-data/official-uploads.csv}: the slower-host rerun above, and a duplicate scoring run that was cut
+off before its learning-rate decay.
+
+\subsection{The normalised rehearsal of \upl{K70a}}
+\label{sec:k70a}
+
+Chip~E ran about \val{chip-spread}\docnum{} slower in step time than chip~C. \upl{K70a}'s raw chip-E rehearsal,
+\val{k70a-raw}, was converted to chip-C speed by subtracting $\rho$ times its step deficit, which gave
+\val{k70a-norm}: an adjustment of \val{k70a-adj}, i.e.\ \val{k70a-adj-pct} of steps at $\rho$ (not all of a
+step-time deficit becomes a step deficit, because the schedule is clock-keyed). Its raw offset would be
+\val{k70a-raw-offset}, an outlier. The repository does not show whether the normalised value was computed before the
+upload: no time-stamped projection exists, so we treat it as a post-hoc adjustment. \Cref{tab:oracle-sens} gives
+every oracle statistic three ways. With the raw rehearsal the since-\upl{K50} SD rises from \val{sens-used-sd} to
+\val{sens-raw-sd}, the frozen MAE from \val{sens-used-mae} to \val{sens-raw-mae}, and the expanding-window count
+falls to \val{sens-raw-inside}; excluding \upl{K70a} changes little.
+
+\subsection{Expanding-window prediction}
+
+\Cref{fig:offset-prospective} predicts each upload from the mean offset of all earlier uploads since \upl{K50}, with
+a $t$ prediction interval, starting once three earlier points exist (\cref{sec:oracle-holdout}). \Cref{tab:coverage}
+reports coverage at 50, 80 and 95\% for burn-ins of three and five uploads: at 50\% the intervals cover
+\val{cov-50-b3} and \val{cov-50-b5}, close to nominal, and at 80\% \val{cov-80-b3} and \val{cov-80-b5}, slightly
+conservative.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics{offset_prospective.pdf}
+  \caption{\textbf{Pseudo-prospective offset prediction.} Each point is an upload's offset (marker: rehearsal chip;
+    grey: the three burn-in uploads). The solid line is the mean offset of all earlier uploads since \upl{K50}, the
+    band its 95\% prediction interval, and the dashed line the frozen chip-C fit. Generated by
+    \texttt{paper/analysis/oracle.py}.}
+  \label{fig:offset-prospective}
+\end{figure}
+
 \subsection{The written projections}
 \label{sec:projections}
 
@@ -77,6 +153,14 @@ also a reason to treat their closeness as anecdote rather than as a test.
 \label{app:sim}
 
 \subsection{Dataset}
+\label{app:simdata}
+
+Each record of \texttt{runs.jsonl} carries the effective \texttt{FF\_*} environment, steps, charged and start-up
+seconds, median step time per accumulation phase, the early loss curve where logged (\val{ds-loss-curves} records),
+and the \valbpb{} on the first 2M public tokens. Records outside the quality fit are screens, runs from the earliest
+chips without a recorded code version, rows whose base recipe is unknown, or runs without a final score. The pairs
+of \texttt{validation-pairs.json} pair each treatment with the control the campaign named at the time, leaving out
+60-step screens\docnum{}; no earlier comparisons were paired.
 
 \begin{table}[!htbp]
   \centering
@@ -112,7 +196,9 @@ order, and ``M9+'' groups the flag-gated versions from M9 on, whose new mechanis
 
 \begin{table}[!htbp]
   \centering
-  \caption{\textbf{Knob features of the quality surrogate} (\texttt{ffsim/quality.py}, \texttt{FEATURES}).}
+  \caption{\textbf{Knob features of the quality surrogate} (\texttt{ffsim/quality.py}, \texttt{FEATURES}). Two
+encodings were set with campaign outcomes in view: the \texttt{leaky\_sq} bowl, centred on the slope 0.35 that had
+measured best, and \texttt{acc\_in\_graph}, added after the \upl{K56} mechanism had measured well.}
   \label{tab:features}
   \input{tables/features}
 \end{table}
@@ -153,6 +239,20 @@ over-predicted (\cref{tab:postfit}).
 \end{table}
 
 \subsection{Pair validation by family, forward in time, and on new mechanisms}
+\label{app:pairval}
+
+Against the family-mean baseline, which scores \val{base-fam-rec-sign} (\val{base-fam-rec-signci}) with MAE
+\val{base-fam-rec-mae} on the recipe pairs, the surrogate's MAE difference, \val{base-diff-fam-mae-ci}$\times10^{-3}$,
+includes zero. ``Decisive'' pairs defined by the measured outcome ($|\Delta|\ge0.0003$) favour large step-count changes, so
+\cref{sec:simval} reports the pairs on which the \emph{prediction} is decisive; on them the MAE is
+\val{base-full-pdec-mae} for the surrogate against \val{base-steps-pdec-mae} for the steps-only model. Forward in
+time, the surrogate's MAE is better than the steps-only model's with the 29~September cutoff (difference
+\val{temp-b-diff-mae-ci}$\times10^{-3}$) but not with 28~September (\val{temp-a-diff-mae-ci}), where the zero
+predictor's MAE is \val{temp-a-zero-mae}. During development (\cref{tab:surrogate-configs}), a fix to how missing
+knobs are read moved LOPO sign agreement on the pairs named in the simulator's specification from
+\val{sc-spec-sign-before}\docnum{} to \val{sc-spec-sign-after}\docnum{}, and recipe-pair sign agreement ranged from
+\val{sc-rec-sign-lo}\docnum{} (\val{sc-rec-lo-name}) to \val{sc-rec-sign-hi}\docnum{} (\val{sc-rec-hi-name}) across
+configurations; the default, \val{sc-default-name}, scored \val{sc-default-rec-sign}\docnum{}.
 
 \begin{table}[!htbp]
   \centering
@@ -176,10 +276,17 @@ over-predicted (\cref{tab:postfit}).
   \centering
   \caption{\textbf{Temporal hold-out of the quality surrogate.} ``Supported'' pairs move only features that some run
     in the restricted fit varied; ``prior-only'' pairs move a feature that no such run varied, so the model can only
-    return its prior for it. Cells give $n$: sign agreement.}
+    return its prior for it; those cells give $n$: sign agreement of the surrogate. ``Steps only'': the same model
+    with every knob effect switched off, fitted on the same early runs; ``Zero'': the predictor $\hat\Delta=0$.}
   \label{tab:temporal}
   \input{tables/temporal}
 \end{table}
+
+With the 28~September cutoff, the \val{temp-a-sup-n} temporal pairs whose moved features the restricted fit had
+seen score \val{temp-a-sup-sign}, and the \val{temp-a-uns-n} pairs that only the prior can answer score
+\val{temp-a-uns-sign}; with 29~September the two groups score \val{temp-b-sup-sign} and \val{temp-b-uns-sign}
+(\cref{tab:temporal}). For the prior-only pairs the sign must come from the step term, the era and seed effects and
+the positive prior means of the bowl terms, which make a move away from a tuned value cost (\cref{app:fit}).
 
 \begin{table}[!htbp]
   \centering
@@ -200,11 +307,23 @@ over-predicted (\cref{tab:postfit}).
   \input{tables/sim_other}
 \end{table}
 
-The full validation reports, including support grading for every knob value, the leakage guard and every
-configuration tried, are \texttt{research/sim-data/steptime-validation.md}, \texttt{simulate-validation.md} and
-\texttt{dataset-qa.md}. \texttt{research/sim-data/quality-validation.md} is a historical report: it was written on
-an earlier snapshot of the dataset (\val{qv-records}\docnum{} records), and the script that generated it is not
-released, so its numbers are not recomputed here.
+The full validation reports, including support grading for every knob value and the leakage guard, are
+\texttt{research/sim-data/steptime-validation.md}, \texttt{simulate-validation.md} and \texttt{dataset-qa.md}.
+\texttt{research/sim-data/quality-validation.md} is a historical report: it was written on an earlier snapshot of the
+dataset (\val{qv-records}\docnum{} records), and the script that generated it is not released, so its numbers are
+not recomputed here. Its \S11 compares the \val{sc-n}\docnum{} surrogate configurations of \cref{tab:surrogate-configs},
+whose LOPO results were visible while the default was chosen (\cref{sec:simval}).
+
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{The surrogate configurations compared during development}, as printed in
+    \texttt{research/sim-data/quality-validation.md} \S11\docnum{} (an earlier snapshot of the data; MAE in
+    $10^{-3}$ bpb). The first LOPO and the LOKVO columns use the pairs named in the simulator's specification;
+    ``recipe'' is the subset that changes the recipe, and ``Decisive'' its decisive pairs as defined in that report.
+    The default configuration, in bold, is the one used throughout the paper.}
+  \label{tab:surrogate-configs}
+  \input{tables/surrogate-configs}
+\end{table}
 
 \section{Seed sweeps}
 
@@ -276,6 +395,35 @@ visible failure.
 \section{The final recipe}
 \label{app:recipe}
 
+\begin{table}[!htbp]
+  \centering
+  \caption{\textbf{The final recipe, \upl{K82s4}.} About \val{params}\docnum{} parameters; every value is a default
+    of \texttt{recipes/K82s4/train.py} (full knob list in \cref{tab:hyper}).}
+  \label{tab:recipe}
+  \small
+  \begin{tabular}{@{}p{2.2cm}p{13.6cm}@{}}
+    \toprule
+    Component & Setting \\
+    \midrule
+    Model & 9 blocks, width 1{,}024; four 256-wide query heads sharing one key/value head (GQA); value embeddings
+      fed to blocks 0 and 8; LeakyReLU(0.35)$^2$ MLP ($4\times$); rotary embeddings with a key offset (radius 0.3);
+      blocks 6--8 reuse block~5's attention source (\knob{FF_ATTN_SRC=5:6,7,8}); logit soft cap 15. \\
+    Objective & Next-token loss plus a 3-token multi-token-prediction loss with weights 1/0.5/0.25, faded to plain
+      next-token prediction in eight stages by 45\% of the run. \\
+    Optimizers & Muon (5 Newton--Schulz iterations, fused update) for matrices; AdamW for embeddings, scalars and
+      the head; MLP output projection at learning rate $\times0.8$. \\
+    Schedule & Charged-time target 1{,}795~s; batch warm-up 65k $\to$ 131k $\to$ 262k tokens per step
+      (\knob{FF_ACCUM_SCHED=1:0.06,2:0.2,4}) with learning rate $\times0.35$ and $\times0.6$ in the small-batch phases;
+      20 warm-up steps; linear cooldown over the last 70\% of the run. \\
+    Data & Stream-row loader; from micro-batch \val{rowpool-from} on, rows are drawn without replacement from a pool
+      of \val{rowpool-size} micro-batches (shuffle salt 4). \\
+    Final weights & 0.6 blend of live weights and an EMA updated every 32 steps; the EMA update is compiled
+      during the excluded start-up (\knob{FF_EMA_PREWARM}). \\
+    Seed & 73. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \Cref{tab:hyper} lists the settings of \upl{K82s4} that the paper refers to, read from
 \path{ffsim/examples/recipe-K82s4.json}, which records all \val{k82-nknobs} knobs of
 \path{recipes/K82s4/train.py}. Most of the rest are switches for mechanisms that are off, or for profiling. The
@@ -309,9 +457,20 @@ has SD $\sqrt2\,s$ and a 95\% half-width of $1.96\sqrt2\,s$ (\cref{sec:resolutio
 
 \paragraph{The winner's curse for salts.} Write a salt's rehearsal advantage as $a = \theta + \eta$, with true effect
 $\theta \sim \mathcal{N}(0, s_\theta^2)$ and a part $\eta\sim\mathcal{N}(0, s_\eta^2)$ that does not transfer to the
-official run. Then $\mathbb{E}[\theta \mid a] = \lambda a$ with $\lambda = s_\theta^2/(s_\theta^2 + s_\eta^2)$. With
-$s_\theta=\val{salt-sd-mid}$ and $s_\eta$ from 0.0002 to the since-\upl{K50} offset SD,
-$\lambda$ lies in \val{salt-shrink-lo}--\val{salt-shrink-hi} (\cref{sec:salts}).
+official run. Then $\mathbb{E}[\theta \mid a] = \lambda a$ with $\lambda = s_\theta^2/(s_\theta^2 + s_\eta^2)$. What
+is measured is the spread of rehearsal scores, $s_a^2 = s_\theta^2 + s_\eta^2$, so $\lambda = 1 - s_\eta^2/s_a^2$,
+with $s_a$ the salt SD (\val{salt-sd}\docnum{}). Noise that enters only the official run is independent of $a$ and
+does not enter $s_\eta$. On one chip, $s_\eta^2$ is the variance of the text gap (SD \val{gap-sd}) plus that of the
+rehearsal's step-count jitter, $\kappa$ times the within-sweep SD of steps over their mean
+(\val{wc-jit-lo}--\val{wc-jit-hi}), so $s_\eta=\val{wc-eta-lo}$--\val{wc-eta-hi} and
+$\lambda=\val{wc-lam-lo}$--\val{wc-lam-hi} over the ranges of $s_a$ and the jitter. When the draws ran on different
+chips, a between-chip offset SD $s_b=\val{wc-between}$ (method of moments over the uploads since \upl{K50}) adds to
+both the spread and the part that does not transfer, so the share lost is
+$(s_\eta^2+s_b^2)/(s_a^2+s_b^2)=\val{wc-shrink-cross-lo}$--\val{wc-shrink-cross-hi} (\cref{sec:salts}). This
+$s_\eta$ assumes that the rehearsal itself is repeatable apart from its step jitter: the remainder of the within-chip
+offset SD (\val{offdec-rest}, \cref{app:offset-detail}) is treated as official-side. If part of it is rehearsal
+noise, $s_\eta$ is larger and $\lambda$ smaller; repeated cold runs of one file and seed would measure that
+noise directly.
 
 \paragraph{Prediction interval for the offset.} Under \cref{eq:offset} with $\gamma\equiv0$, and $\hat\mu$ and $s$
 estimated from $n$ uploads, $(y_{\text{new}} - r_{\text{new}} - \hat\mu)/(s\sqrt{1+1/n})$ follows a Student $t$
@@ -322,8 +481,10 @@ levels of \cref{tab:coverage}.
 \label{app:docfacts}
 
 Numbers marked \docnum{} in the text are quoted from the campaign documents in \texttt{docs/} (and two validation
-reports in \texttt{research/sim-data/}) because the records behind them are not released. They are registered once in
-\texttt{paper/analysis/docfacts.py}, \texttt{exchange.py} and \texttt{simulator.py}. \Cref{tab:docfacts} lists them.
+reports in \texttt{research/sim-data/}) because the records behind them are not released; a few non-numeric facts
+marked the same way come from the campaign's unreleased log (``campaign log'' in the table). They are registered once in
+\texttt{paper/analysis/docfacts.py}, \texttt{exchange.py} and \texttt{simulator.py}. \Cref{tab:docfacts} lists them;
+``contest rules'' there refers to the published rules \citep{trainiumfrontier2026rules}.
 
 {\footnotesize
 \input{tables/docfacts}
@@ -349,10 +510,13 @@ reports in \texttt{research/sim-data/}) because the records behind them are not 
     $\sigma_{\text{off}}$, $s$ & SD of the offset residual, and its sample estimate \\
     $T$, $t_{\text{res}}$ & charged-time target and the stop reserve (\cref{eq:decomp}) \\
     $q$, $L$ & rehearsal score predicted by the surrogate, and $L=\ln(S/2300)$ (\cref{eq:quality}) \\
-    $\alpha$, $\gamma$, $b$, $c$, $\beta_j$, $u$ & surrogate era, chip, step, curvature, knob and seed effects \\
+    $\alpha$, $\delta$, $b$, $c$, $\beta_j$, $u$ & surrogate era, chip, step, curvature, knob and seed effects
+      (\cref{eq:quality}) \\
     $\sigma_q$, $s_j$, $m$ & surrogate residual SD, prior SDs and prior means \\
-    $\varepsilon$ & residual noise (offset or surrogate, by context) \\
-    $\lambda$, $s_\theta$, $s_\eta$ & winner's-curse shrinkage and its two SDs (\cref{app:derivations}) \\
+    $\varepsilon_i$ & residual of the offset model for upload $i$ (\cref{eq:offset}) \\
+    $\varepsilon_q$ & residual of the quality surrogate, SD $\sigma_q$ (\cref{eq:quality}) \\
+    $\lambda$, $s_a$, $s_\theta$, $s_\eta$, $s_b$ & winner's-curse shrinkage, the spread of rehearsal advantages, its
+      transferable and non-transferable parts, and the between-chip offset SD (\cref{app:derivations}) \\
     \bottomrule
   \end{tabular}
 \end{table}

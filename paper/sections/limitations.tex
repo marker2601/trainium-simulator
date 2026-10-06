@@ -14,10 +14,13 @@
     of the evaluation set.
   \item \textbf{The offset may depend on the chip.} The frozen calibration's errors are positive on the faster
     final-day chips (\cref{tab:offset-chips}), where every lottery-selected final-day upload was rehearsed, so
-    instance and selection are confounded. The oracle's headline statistics depend on one model-normalised rehearsal
+    instance and selection are confounded; given the rehearsal score, the chip-G/H term is not significant
+    (permutation $p=\val{cq-perm-p-adj}$). The oracle's headline statistics depend on one model-normalised rehearsal
     (\cref{tab:oracle-sens}). The pseudo-prospective analyses are retrospective; only three written projections are
     archived.
-  \item \textbf{Determinism rests on one pair.} It used older code (\cref{sec:determinism}). The within-chip offset SD
+  \item \textbf{Determinism rests on little direct evidence.} One cold/warm pair with older code, and two replicate
+    pairs that agree to the printed precision only until their first clock-triggered event
+    (\cref{sec:determinism}). The within-chip offset SD
     (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi}) contains the SD that re-drawing the
     order noise would give (about \val{noise-chip-pair}), so the offset statistics cannot tell a deterministic official run from one that re-draws the order noise. Step counts jitter by up to
     \val{jitter-range-hi} steps within a chip.
@@ -28,18 +31,31 @@
     The chip E, G and H runs behind the row-pool pair, the salt lottery, the EMA-blend and output-projection pairs, the
     pool-size ablation and the final-day test bench are quotes from campaign documents, marked \docnum{}
     (\cref{app:docfacts}): reported, not recomputable.
+  \item \textbf{Development-set validation.} The surrogate's configuration was chosen among \val{sc-n}\docnum{}
+    candidates with their LOPO results visible, and some feature encodings were set with campaign outcomes in view
+    (\cref{sec:simval}), so LOPO and LOKVO may overstate how the model would do on fresh pairs. The \val{postfit-n}
+    post-fit pairs are the only clean test, and there it is at chance.
   \item \textbf{Simulator circularity.} The surrogate was fitted on our own search trajectory, whose knobs are
     non-random and confounded with code eras (\cref{tab:coefficients}); some inputs come from a campaign ledger partly
     extracted from free text (\texttt{research/sim-data/dataset-qa.md}); its step prior is centred on the price it is
     sometimes used to support. On genuinely new mechanisms it is at chance (\val{postfit-sign}, \val{postfit-wilson}).
   \item \textbf{The price of a step.} It rests on a per-step rate whose number of comparisons is not recorded and on one
-    long run, and it varies with the step count. The gap figures extrapolate it, and other teams' recipes may sit on
-    a different curve.
+    long run, and it varies with the step count. A surrogate refit with a vague slope prior puts it at
+    \val{kappa-vague-lo}--\val{kappa-vague-hi}, below the value we use (\cref{sec:price}). The gap figures
+    extrapolate it, and other teams' recipes may sit on a different curve.
+  \item \textbf{Survivor bias in the levers.} \Cref{tab:levers} lists the changes that were kept because they
+    measured well, so their effects are biased upward, most for the single late pairs near the noise scale; the
+    four campaign-log levers have no recorded comparison at all.
+  \item \textbf{Uncertain noise scale.} The noise column rests on a salt SD quoted from a campaign document, and a
+    lever that acts from step~0 faces the larger seed SD (\cref{sec:lever-notes}), so its ratio to the noise scale is an
+    upper bound.
   \item \textbf{Leaderboard snapshot.} The references are from the last public snapshot we recorded (about
     \val{leaderboard-time}\docnum{}); the organisers' published final standings may differ.
-  \item \textbf{Forking paths.} The campaign was adaptive and the analyses are post hoc (the spike threshold, for
-    example, was chosen after seeing the data); the temporal and pseudo-prospective checks are least exposed to this.
-    Follow-up experiments should be pre-registered in the repository.
+  \item \textbf{Forking paths.} The campaign was adaptive and the analyses are post hoc. The spike threshold was
+    chosen after seeing the data, and so were the start of the calibration window at \upl{K50}, the chip-C
+    calibration set \upl{K51}--\upl{K60}, the burn-in of three uploads for the expanding window and the normalisation
+    of \upl{K70a}'s rehearsal (\cref{sec:oracle-holdout}); the temporal and pseudo-prospective checks are least exposed
+    to this.
   \item \textbf{Utilisation estimates.} ``About \val{mfu}\docnum{} MFU'' and ``\val{idle}\docnum{} idle'' are
     approximate profiles, used only to motivate the kernel hypothesis of \cref{sec:gap}.
 \end{enumerate}

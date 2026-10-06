@@ -13,6 +13,12 @@ calibration's final-day errors; every oracle statistic with the chip-E rehearsal
 chip-C speed), raw, and excluded; uploads labelled by how their salt was chosen (directly by a lottery, or inherited
 from one); interval coverage at 50/80/95% for two burn-in lengths; the oracle's resolution for a paired difference;
 a within-chip decomposition of the step-count increase.
+
+Revision 2: the 2M-to-20M text gap from the runs.jsonl records scored on both texts, and a split of the within-chip
+offset SD into that gap, rounding and a remainder; baselines for the final-day uploads (no offset, the mean of all
+earlier uploads, the mean of the early uploads); pairwise rank concordance of rehearsal and official scores; offset
+against model quality with and without an indicator for instances G and H, with an exact permutation test; and the
+winner's-curse shrinkage with lambda = 1 - s_eta^2 / s_a^2 (``winners_curse``, called by make_all.py after seeds.py).
 """
 from __future__ import annotations
 
@@ -212,20 +218,29 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("diff-sd", num(math.sqrt(2) * s_since, 5), "sqrt(2) x since-K50 offset SD")
     N.add("diff-95", num(1.96 * math.sqrt(2) * s_since, 4), "1.96 sqrt(2) x since-K50 offset SD")
     N.add("diff-sd-within", num(math.sqrt(2) * s_within, 5), "sqrt(2) x within-chip offset SD")
+    N.add("diff-95-within", num(1.96 * math.sqrt(2) * s_within, 4), "1.96 sqrt(2) x within-chip offset SD")
     N.add("pi-half", num(t_quantile(0.975, len(since) - 1) * s_since * math.sqrt(1 + 1 / len(since)), 4),
           "95% prediction half-width at n=15")
 
-    # ---------------------------------------------------------------- winner's curse heuristic for salt lotteries
-    salt_sd = 0.00035
-    sd_final = sd([by[n]["offset"] for n in FINAL_DAY])
-    N.add("salt-sd-mid", num(salt_sd, 5), "docs/FINDINGS.md s3: salt SD 0.0003-0.0004, midpoint")
-    lam = lambda s_eta: salt_sd ** 2 / (salt_sd ** 2 + s_eta ** 2)  # noqa: E731
-    N.add("salt-shrink", num(lam(sd_final), 2), "reliability ratio (oracle.py)")
-    # sensitivity: the final-day SD includes chip-to-chip variation; the within-chip SD is the other natural choice
-    N.add("salt-shrink-within", num(lam(s_within), 2), "reliability ratio at the within-chip offset SD")
-    N.add("salt-shrink-lo", num(min(lam(sd_final), lam(s_within), lam(s_since)), 2), "range over s_eta choices")
-    N.add("salt-shrink-hi", num(max(lam(sd_final), lam(s_within), lam(s_since), lam(0.0002)), 2),
-          "range over s_eta choices incl. 0.0002")
+    # ---------------------------------------------------------------- the 2M-to-20M text gap and the within-chip SD
+    gap = text_gap(N)
+    # split the within-chip offset variance into the text gap's run-to-run SD, the rounding of official scores to
+    # four decimals (uniform on +-0.00005) and a remainder on the official side (host speed, step jitter, order)
+    s_round = 0.0001 / math.sqrt(12.0)
+    N.add("offdec-round", num(s_round, 5), "SD of rounding to 4 decimals, 0.0001/sqrt(12)")
+    N.add("offdec-text", num(gap["sd"], 5), "research/sim-data/runs.jsonl: SD of bpb_20m - bpb_2m (= gap-sd)")
+
+    def _rest(s: float) -> float:
+        return math.sqrt(max(0.0, s ** 2 - gap["sd"] ** 2 - s_round ** 2))
+    s_lo = s_within * math.sqrt(den / chi2_quantile(0.975, den))
+    s_hi = s_within * math.sqrt(den / chi2_quantile(0.025, den))
+    N.add("offdec-rest", num(_rest(s_within), 5), "sqrt(within-chip SD^2 - text-gap SD^2 - rounding SD^2)")
+    N.add("offdec-rest-lo", num(_rest(s_lo), 5), "remainder at the lower chi-square limit of the within-chip SD")
+    N.add("offdec-rest-hi", num(_rest(s_hi), 5), "remainder at the upper chi-square limit of the within-chip SD")
+    N.add("offdec-text-share", num(100 * gap["sd"] ** 2 / s_within ** 2, 0) + "\\%",
+          "text-gap variance as a share of the within-chip offset variance")
+    N.add("offdec-rest-share", num(100 * _rest(s_within) ** 2 / s_within ** 2, 0) + "\\%",
+          "remainder variance as a share of the within-chip offset variance")
 
     # ---------------------------------------------------------------- frozen chip-C fit -> final day
     N.add("frozen-offset", num(frozen, 5, sign=True), src)
@@ -280,7 +295,53 @@ def run(N: Numbers) -> Dict[str, object]:
     N.add("seq-maxerr", num(max(abs(s["err"]) for s in seq), 5), src)
     N.add("seq-first", seq[0]["name"].replace("_min", ""), src)
     N.add("seq-expected", num(0.95 * len(seq), 1), "0.95 x n")
-    N.add("nooffset-mae", num(mean(abs(r["offset"]) for r in since), 4), src)
+    # baselines for the final-day uploads, each scored on the same seven uploads as the frozen chip-C fit
+    fd_rows = [by[n] for n in FINAL_DAY]
+    i_fd = min(cal.index(r) for r in fd_rows)
+    prior_all = [r["offset"] for r in cal[:i_fd]]
+    prior_since = [r["offset"] for r in cal[k50:i_fd]]
+    early_offs = [r["offset"] for r in early]
+
+    def _fd_mae(pred: float) -> float:
+        return mean(abs(r["offset"] - pred) for r in fd_rows)
+    N.add("nooffset-mae", num(mean(abs(r["offset"]) for r in fd_rows), 4), src + ": final-day uploads, offset 0")
+    N.add("nooffset-mae-since", num(mean(abs(r["offset"]) for r in since), 4), src + ": uploads since K50, offset 0")
+    N.add("priormean-mae", num(_fd_mae(mean(prior_all)), 5),
+          src + ": final day, predicted by the mean of every earlier rehearsed upload")
+    N.add("priormean-n", str(len(prior_all)), src)
+    N.add("priormean-offset", num(mean(prior_all), 5, sign=True), src)
+    N.add("priorsince-mae", num(_fd_mae(mean(prior_since)), 5),
+          src + ": final day, predicted by the mean of the earlier uploads since K50")
+    N.add("priorsince-n", str(len(prior_since)), src)
+    N.add("earlymean-mae", num(_fd_mae(mean(early_offs)), 5),
+          src + ": final day, predicted by the mean of the early uploads (chips A/B, F2-K46)")
+    N.add("earlymean-n", str(len(early_offs)), src)
+    N.add("earlymean-offset", num(mean(early_offs), 5, sign=True), src)
+
+    # pairwise rank concordance since K50: does the rehearsal order two uploads as the official scores do?
+    conc = {"n": 0, "agree": 0, "tie": 0, "close_n": 0, "close_agree": 0}
+    close_thr = 0.0005
+    for i in range(len(since)):
+        for j in range(i + 1, len(since)):
+            a, b = since[i], since[j]
+            dr, do = a["rehearsal"] - b["rehearsal"], a["official"] - b["official"]
+            ok = do != 0 and (dr > 0) == (do > 0)
+            conc["n"] += 1
+            conc["agree"] += ok
+            conc["tie"] += do == 0
+            if abs(dr) < close_thr:
+                conc["close_n"] += 1
+                conc["close_agree"] += ok
+    N.add("conc-n", str(conc["n"]), src + ": pairs of uploads since K50")
+    N.add("conc-agree", str(conc["agree"]), src + ": pairs ordered the same by rehearsal and official score")
+    N.add("conc-ties", str(conc["tie"]), src + ": pairs with equal official scores")
+    N.add("conc-disagree", str(conc["n"] - conc["agree"] - conc["tie"]), src)
+    N.add("conc-close-thr", num(close_thr, 4), "rehearsal difference below which a pair counts as close")
+    N.add("conc-close-n", str(conc["close_n"]), src + ": pairs whose rehearsals differ by less than 0.0005")
+    N.add("conc-close-agree", str(conc["close_agree"]), src)
+
+    # ---------------------------------------------------------------- chip or model quality? (since K50)
+    chip_vs_quality(N, since)
 
     # ---------------------------------------------------------------- K70a sensitivity (as used / raw / excluded)
     note = by["K70a"]["note"]
@@ -358,7 +419,8 @@ def run(N: Numbers) -> Dict[str, object]:
           "every scored upload, results/official-scores.csv (oracle.py)", size="\\scriptsize", tabcolsep="3pt")
 
     _figure(since, seq, frozen)
-    return {"since": since, "seq": seq, "frozen": frozen}
+    return {"since": since, "seq": seq, "frozen": frozen, "s_within": s_within, "s_since": s_since,
+            "s_between": _between_chip_sd(since), "gap_sd": gap["sd"]}
 
 
 # Internal shorthand in the ledger's "what changed" column, spelled out for readers (results/official-scores.csv is
@@ -451,3 +513,145 @@ def _figure(since: List[dict], seq: List[dict], frozen: float) -> None:
               borderaxespad=0.2, columnspacing=1.2)
     ax.tick_params(axis="x", length=0)
     save_pdf(fig, FIGURES / "offset_prospective.pdf")
+
+
+# ------------------------------------------------------------------------------------------- revision 2 analyses
+def text_gap(N: Numbers) -> Dict[str, float]:
+    """The 2M-to-20M text gap: runs.jsonl records scored on both the first 2M and the first ~20M public validation
+    tokens (bpb_20m - bpb_2m), and whether the two texts order the runs the same way."""
+    import itertools
+    import json
+    from common import RUNS
+    recs = [json.loads(line) for line in RUNS.read_text(encoding="utf-8").splitlines() if line.strip()]
+    both = [r for r in recs if r.get("bpb_20m") is not None and r.get("bpb_2m") is not None]
+    gaps = [float(r["bpb_20m"]) - float(r["bpb_2m"]) for r in both]
+    src = "research/sim-data/runs.jsonl: bpb_20m - bpb_2m"
+    chips = sorted({r.get("chip") or "?" for r in both})
+    N.add("gap-n", str(len(gaps)), src)
+    N.add("gap-chips", ", ".join(chips), src + ": chips of those runs")
+    N.add("gap-mean", num(mean(gaps), 5, sign=True), src)
+    N.add("gap-sd", num(sd(gaps), 5), src)
+    N.add("gap-min", num(min(gaps), 5, sign=True), src)
+    N.add("gap-max", num(max(gaps), 5, sign=True), src)
+    k = n = 0
+    for a, b in itertools.combinations(both, 2):
+        n += 1
+        k += (float(a["bpb_2m"]) - float(b["bpb_2m"])) * (float(a["bpb_20m"]) - float(b["bpb_20m"])) > 0
+    N.add("gap-order-k", str(k), src + ": run pairs ordered the same on both texts")
+    N.add("gap-order-pairs", str(n), src)
+    N.add("gap-order-agree", num(100.0 * k / n, 0) + "\\%", src + ": share of run pairs ordered the same")
+    x = [float(r["bpb_2m"]) for r in both]
+    y = [float(r["bpb_20m"]) for r in both]
+    mx, my = mean(x), mean(y)
+    r_xy = sum((a - mx) * (b - my) for a, b in zip(x, y)) / math.sqrt(sum((a - mx) ** 2 for a in x) *
+                                                                   sum((b - my) ** 2 for b in y))
+    N.add("gap-r", num(r_xy, 3), src + ": Pearson r between the two scores")
+    return {"mean": mean(gaps), "sd": sd(gaps), "n": len(gaps)}
+
+
+def _between_chip_sd(since: List[dict]) -> float:
+    """Between-chip SD of the offset since K50: one-way random-effects method of moments, (MSB - MSW) / n0."""
+    groups: Dict[str, List[float]] = collections.OrderedDict()
+    for r in since:
+        groups.setdefault(r["chip"], []).append(r["offset"])
+    n_tot, k = len(since), len(groups)
+    grand = mean(r["offset"] for r in since)
+    msb = sum(len(v) * (mean(v) - grand) ** 2 for v in groups.values()) / (k - 1)
+    msw = sum(sum((x - mean(v)) ** 2 for x in v) for v in groups.values()) / (n_tot - k)
+    n0 = (n_tot - sum(len(v) ** 2 for v in groups.values()) / n_tot) / (k - 1)
+    return math.sqrt(max(0.0, (msb - msw) / n0))
+
+
+def _t_two_sided(t: float, df: int) -> float:
+    from common import _betainc
+    return _betainc(df / 2.0, 0.5, df / (df + t * t))
+
+
+def chip_vs_quality(N: Numbers, since: List[dict]) -> None:
+    """Is the offset a property of the rehearsal instance or of model quality? Regress the offset on the rehearsal
+    score, with and without an indicator for the final-day instances G and H, and test the G/H difference by an
+    exact permutation of which uploads carry the label (all C(n, k) assignments)."""
+    import itertools
+    import numpy as np
+    src = "results/official-scores.csv, uploads since K50"
+    y = np.array([r["offset"] for r in since])
+    x = np.array([r["rehearsal"] for r in since])
+    gh = np.array([1.0 if r["chip"] in ("G", "H") else 0.0 for r in since])
+    n = len(y)
+
+    def ols(cols):
+        X = np.column_stack([np.ones(n)] + cols)
+        beta = np.linalg.lstsq(X, y, rcond=None)[0]
+        res = y - X @ beta
+        dfree = n - X.shape[1]
+        cov = (res @ res / dfree) * np.linalg.inv(X.T @ X)
+        return beta, np.sqrt(np.diag(cov)), dfree
+
+    b1, se1, df1 = ols([x])
+    b2, se2, df2 = ols([x, gh])
+    t1, t2 = t_quantile(0.975, df1), t_quantile(0.975, df2)
+    N.add("cq-n", str(n), src)
+    N.add("cq-gh-n", str(int(gh.sum())), src + ": uploads rehearsed on instances G and H")
+    N.add("cq-slope", num(b1[1], 3, sign=True), src + ": d offset / d rehearsal bpb, no instance term")
+    N.add("cq-slope-lo", num(b1[1] - t1 * se1[1], 3, sign=True), src + ": 95% t interval")
+    N.add("cq-slope-hi", num(b1[1] + t1 * se1[1], 3, sign=True), src)
+    N.add("cq-slope-p", num(_t_two_sided(b1[1] / se1[1], df1), 2), src + ": two-sided t test of the slope")
+    span = float(x.max() - x.min())
+    N.add("cq-slope-span", num(abs(b1[1]) * span, 5), src + ": |slope| x the since-K50 rehearsal span")
+    N.add("cq-slope-adj", num(b2[1], 3, sign=True), src + ": slope with a G/H indicator")
+    N.add("cq-slope-adj-lo", num(b2[1] - t2 * se2[1], 3, sign=True), src)
+    N.add("cq-slope-adj-hi", num(b2[1] + t2 * se2[1], 3, sign=True), src)
+    N.add("cq-gh-coef", num(b2[2], 5, sign=True), src + ": G/H indicator, given the rehearsal score")
+    N.add("cq-gh-lo", num(b2[2] - t2 * se2[2], 5, sign=True), src + ": 95% t interval")
+    N.add("cq-gh-hi", num(b2[2] + t2 * se2[2], 5, sign=True), src)
+    diff = float(y[gh == 1].mean() - y[gh == 0].mean())
+    N.add("cq-gh-diff", num(diff, 5, sign=True), src + ": mean offset, G/H minus the rest")
+    # exact permutation over every assignment of the G/H label to the same number of uploads
+    m = int(gh.sum())
+    t_obs = abs(b2[2] / se2[2])
+    tot = ex_d = ex_t = 0
+    for comb in itertools.combinations(range(n), m):
+        z = np.zeros(n)
+        z[list(comb)] = 1.0
+        tot += 1
+        ex_d += abs(float(y[z == 1].mean() - y[z == 0].mean())) >= abs(diff) - 1e-15
+        bz, sz, _ = ols([x, z])
+        ex_t += abs(bz[2] / sz[2]) >= t_obs - 1e-12
+    N.add("cq-perm-n", intc(tot), src + ": label assignments enumerated")
+    N.add("cq-perm-p", num(ex_d / tot, 3), src + ": exact two-sided permutation p, G/H mean difference")
+    N.add("cq-perm-p-adj", num(ex_t / tot, 3),
+          src + ": exact two-sided permutation p, G/H coefficient given the rehearsal score")
+
+
+def winners_curse(N: Numbers, o: Dict[str, float], jitter_rel: List[float], kappa: float) -> None:
+    """Shrinkage of a salt lottery's rehearsal edge. A salt's rehearsal score varies across salts with SD s_a (the
+    documented order re-draw SD, 0.0003-0.0004); write it as a = theta + eta, with eta the parts that are specific to
+    the rehearsal and do not reach the official score. Then E[theta | a] = lambda a with
+    lambda = max(0, 1 - s_eta^2 / s_a^2). On one chip, eta is the run-to-run text-gap SD plus the rehearsal's own
+    step jitter (kappa x SD(steps) / steps); across chips it also carries the between-chip offset SD s_b, which
+    widens the spread of a as well: share lost = (s_eta^2 + s_b^2) / (s_a^2 + s_b^2)."""
+    src = "winner's curse: s_a from docs/FINDINGS.md s3, s_eta from runs.jsonl (oracle.py)"
+    s_a_lo, s_a_hi = 0.0003, 0.0004
+    jit = sorted(kappa * s for s in jitter_rel)
+    jit_lo, jit_hi = jit[0], jit[-1]
+    eta_lo = math.sqrt(o["gap_sd"] ** 2 + jit_lo ** 2)
+    eta_hi = math.sqrt(o["gap_sd"] ** 2 + jit_hi ** 2)
+    sb = o["s_between"]
+
+    def lost(eta: float, s_a: float, s_b: float = 0.0) -> float:
+        return min(1.0, (eta ** 2 + s_b ** 2) / (s_a ** 2 + s_b ** 2))
+    N.add("wc-jit-lo", num(jit_lo, 5), src + ": kappa x within-sweep SD of steps / mean steps, smallest sweep SD")
+    N.add("wc-jit-hi", num(jit_hi, 5), src + ": largest sweep SD")
+    N.add("wc-eta-lo", num(eta_lo, 5), src + ": sqrt(gap-sd^2 + jitter^2)")
+    N.add("wc-eta-hi", num(eta_hi, 5), src)
+    N.add("wc-between", num(sb, 5), "results/official-scores.csv: between-chip offset SD since K50 (method of moments)")
+    one = [lost(e, s) for e in (eta_lo, eta_hi) for s in (s_a_lo, s_a_hi)]
+    cross = [lost(e, s, sb) for e in (eta_lo, eta_hi) for s in (s_a_lo, s_a_hi)]
+    N.add("wc-shrink-lo", num(min(one), 2), src + ": share of the edge lost, one chip, minimum over s_a and jitter")
+    N.add("wc-shrink-hi", num(max(one), 2), src + ": share lost, one chip, maximum")
+    N.add("wc-lam-lo", num(1.0 - max(one), 2), src + ": lambda, one chip, minimum")
+    N.add("wc-lam-hi", num(1.0 - min(one), 2), src + ": lambda, one chip, maximum")
+    N.add("wc-shrink-cross-lo", num(min(cross), 2), src + ": share lost, draws on different chips, minimum")
+    N.add("wc-shrink-cross-hi", num(max(cross), 2), src + ": share lost, draws on different chips, maximum")
+    N.add("wc-lam-cross-lo", num(1.0 - max(cross), 2), src + ": lambda across chips, minimum")
+    N.add("wc-lam-cross-hi", num(1.0 - min(cross), 2), src + ": lambda across chips, maximum")

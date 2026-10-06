@@ -4,12 +4,12 @@
 \toprule
 Lever & $\Delta$ & Noise SD & $|\Delta|/\text{SD}$ & Evidence & $n$ & Steps & Note \\
 \midrule
-Multi-token prediction (3 tokens, faded) & \ensuremath{-}4.3 & 0.49 & 8.7 & campaign log$^{\dagger}$ & -- & 7.8\% &  \\
+Multi-token prediction (3 tokens, faded) & \ensuremath{-}4.3 & 0.49 & -- & campaign log$^{\dagger}$ & -- & 7.8\% &  \\
 Row pool, 256 micro-batches & \ensuremath{-}2.3 & 0.49 & 4.6 & chip pair & 1 & 4.1\% & chip E; official $-$2.2; $-$0.5\% steps \\
-Batch warm-up 65k$\to$131k$\to$262k & \ensuremath{-}1.9 & 0.49 & 3.8 & campaign log$^{\dagger}$ & -- & n/a & changes steps itself$^{\ddagger}$ \\
-LeakyReLU(0.35)$^2$ MLP & \ensuremath{-}1.7 & 0.49 & 3.4 & campaign log$^{\dagger}$ & -- & 3.0\% & chip C vs ReLU$^2$ $-$1.05; official $-$1.5 \\
+Batch warm-up 65k$\to$131k$\to$262k & \ensuremath{-}1.9 & 0.49 & -- & campaign log$^{\dagger}$ & -- & n/a & changes steps itself$^{\ddagger}$ \\
+LeakyReLU(0.35)$^2$ MLP & \ensuremath{-}1.7 & 0.49 & -- & campaign log$^{\dagger}$ & -- & 3.0\% & chip C vs ReLU$^2$ $-$1.05; official $-$1.5 \\
 Attention-source reuse (6--8 reuse 5) & \ensuremath{-}1.5 & 0.25 & 6.1 & chip pair & 4 & 2.7\% & 3 seeds, 2 chips; 5th pair (s97) $+$1.15 raw; step cost $<$0.1\% \\
-Rotary key offset & \ensuremath{-}1.3 & 0.49 & 2.6 & campaign log$^{\dagger}$ & -- & 2.3\% &  \\
+Rotary key offset & \ensuremath{-}1.3 & 0.49 & -- & campaign log$^{\dagger}$ & -- & 2.3\% &  \\
 Cooldown 0.7 + small-batch LR & \ensuremath{-}0.6 & 0.29 & 2.1 & chip, step-norm. & 3 & 1.1\% & all 3 negative; seeds differ \\
 EMA blend 0.6 (no prewarm) & \ensuremath{-}0.5 & 0.49 & 1.0 & chip pair & 1 & 0.9\% & official $-$0.3 (K77a$-$K73s4) \\
 MLP output-projection LR $\times$0.8 & \ensuremath{-}0.4 & 0.49 & 0.8 & chip, step-norm. & 1 & 0.7\% & seed 73 only \\

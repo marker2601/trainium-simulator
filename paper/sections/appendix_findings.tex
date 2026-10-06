@@ -3,12 +3,12 @@
 \label{app:findings}
 
 This appendix holds the evidence behind C3 (\cref{sec:findings}) and the GPU proxy of C2 (\cref{sec:sim}). It
-breaks the campaign's step-count gains down by kind (\cref{sec:steps}), comments on three entries of
+breaks the campaign's step-count gains down by kind (\cref{sec:steps}), explains how to read
 \cref{tab:levers} (\cref{sec:lever-notes}), examines the row pool, attention-source reuse and the EMA prewarm
 (\cref{sec:rowpool,sec:asr,sec:prewarm}) and the noise and selection effects (\cref{sec:seeds,sec:salts}), and
 lists what did not work (\cref{sec:negative}). It then asks how constant the price of a step is (\cref{app:kappa}),
-prices the remaining gap (\cref{sec:gap}), describes the GPU proxy (\cref{sec:gpu}) and closes with the work
-related to the recipe and the findings (\cref{app:related-recipe}).
+prices the remaining gap (\cref{sec:gap}), describes the GPU proxy (\cref{sec:gpu}) and closes with further related
+work (\cref{app:related-recipe}).
 
 \subsection{Where the steps came from}
 \label{sec:steps}
@@ -34,8 +34,20 @@ every upload's step count.
   \input{tables/steps_decomp}
 \end{table}
 
-\subsection{Three entries of the levers table}
+\subsection{Reading the levers table}
 \label{sec:lever-notes}
+
+\paragraph{Survivors and their noise scale.} \Cref{tab:levers} lists survivors. Its levers were kept because their
+measured difference was favourable, out of many changes tried (\cref{tab:negative}; none of
+\val{scalar-keys}\docnum{} scalar knob keys won), so each measured $\Delta$ is biased away from zero by the same
+winner's curse as a salt lottery (\cref{sec:salts}), most for single pairs near the noise scale, that is, for the
+late levers. The noise scale is itself uncertain: it rests on a salt SD quoted as a range (\val{salt-sd}\docnum{}),
+and a change that acts from step~0, as every architecture lever does, may re-roll the warm-up path and then faces the
+seed SD, \val{seed-sd-all-lo}--\val{seed-sd-all-hi} per run including spike paths (\cref{sec:seeds}), up to several
+times the salt SD. Against that scale even attention-source reuse is at most a few SDs from zero, so the ratios in
+the table are upper bounds for the step-0 levers.
+
+\paragraph{Three entries.}
 
 Three entries of \cref{tab:levers} need a word. \emph{LeakyReLU(0.35)$^2$} appears with three sizes because they are
 three comparisons: \val{lever-leaky}\docnum{} in the campaign log on an earlier base, \val{leaky-chip-c}\docnum{} in a
@@ -187,7 +199,8 @@ step-10 loss, and \val{xshift-official} is about \val{xshift-spike-ratio} times 
 \subsection{Salt lotteries and the winner's curse}
 \label{sec:salts}
 
-Because rehearsals are deterministic, a lottery over shuffle salts can be run on chip and the best rehearsal uploaded.
+Because a rehearsal predicts its official score up to an offset, a lottery over shuffle salts can be run on chip
+and the best rehearsal uploaded.
 Four salts of the \upl{K73} recipe spanned \val{salt-span}\docnum{} on chip, and salt~4 was uploaded as \upl{K73s4};
 the later uploads \upl{K77a} and \upl{K82s4} inherit it. A second lottery on the final recipe picked salt~7
 (\upl{K82s7}); its size is not recorded in the released files. Where a lottery's draws ran on different chips, salt
@@ -196,13 +209,21 @@ rehearsed \val{salt6-reh-vs-salt4} against it, but on chip~G against chip~H, so 
 officially it scored \val{salt6-vs-salt4} against salt~4 (\upl{K73s6}). Salt~7 gave the best rehearsal of the campaign
 (\val{salt7-rehearsal}) and tied salt~4 officially (\val{salt7-vs-salt4}).
 
-A simple model explains the pattern. A salt's rehearsal advantage is its true effect (SD about \val{salt-sd-mid}) plus a
-part that does not transfer to the official run, with SD $s_\eta$. The expected share of a selected advantage that
-survives is the reliability ratio $\lambda$ (\cref{app:derivations}). With $s_\eta$ equal to the final-day offset SD,
-$\lambda\approx\val{salt-shrink}$; that SD includes chip-to-chip variation, so we also use the within-chip offset SD
-($\lambda=\val{salt-shrink-within}$), the since-\upl{K50} SD and a smaller 0.0002; together they give
-$\lambda$ between \val{salt-shrink-lo} and \val{salt-shrink-hi}.
-Lotteries are worth running when draws are cheap, but the projected gain should be shrunk by roughly a quarter to a half,
+A simple model is consistent with this pattern. A salt's rehearsal advantage is its true effect plus a part that
+does not transfer to the official run, with SD $s_\eta$. Noise that enters only the official run widens the outcome
+but does not bias a selected draw, so $s_\eta$ holds only what is specific to the rehearsal: the variation of the
+text gap between models (SD \val{gap-sd}, \cref{sec:contest}) and the rehearsal's step-count jitter priced at
+$\kappa$ (\val{wc-jit-lo}--\val{wc-jit-hi}), together \val{wc-eta-lo}--\val{wc-eta-hi}. This assumes that the
+rehearsal is otherwise repeatable: the unexplained part of the within-chip offset SD (\val{offdec-rest},
+\cref{app:offset-detail}) is counted as official-side, and repeated cold runs of one file and seed would test that
+assumption (\cref{app:derivations}). Against a spread of
+rehearsal scores of \val{salt-sd}\docnum{}, the expected share of a selected advantage that survives, the reliability
+ratio $\lambda$ (\cref{app:derivations}), is \val{wc-lam-lo}--\val{wc-lam-hi} when every draw ran on one chip. When
+the draws ran on different chips, the between-chip offset SD (\val{wc-between}) adds to the part that does not
+transfer, and $\lambda$ falls to \val{wc-lam-cross-lo}--\val{wc-lam-cross-hi}. Lotteries are worth running when draws
+are cheap, but the projected gain should be shrunk by a share of about \val{wc-shrink-lo}--\val{wc-shrink-hi}
+on one chip and \val{wc-shrink-cross-lo}--\val{wc-shrink-cross-hi} across chips (both over the range of the salt SD
+and the jitter),
 and if the official shard overlaps the public text (\cref{sec:contest}) part of what survives is selection on the
 evaluation set itself \citep{dwork2015reusable,blum2015ladder}.
 
@@ -213,9 +234,11 @@ evaluation set itself \citep{dwork2015reusable,blum2015ladder}.
 directions}: depth~10 and two key/value heads lost while running \val{depth10-steps}\docnum{} fewer steps, and depth~8
 lost despite \val{depth8-steps}\docnum{} more steps. We read this as the 9-block model being a local optimum of the
 capacity-for-steps trade at our kernels' speed, but it rests on one or two chip pairs without an equal-step comparison,
-so we cannot say whether depth~10 lost \emph{only} because of its steps. Second, \emph{scalar retuning did not pay}:
-none of \val{scalar-keys}\docnum{} scalar knob keys (learning-rate scales, betas, weight decay, initialisation,
-momentum, soft cap, RoPE base, cooldown $\pm0.1$) won a confirmation. The four official tests on the final day
+so we cannot say whether depth~10 lost \emph{only} because of its steps. Second, \emph{scalar retuning found
+nothing}: none of \val{scalar-keys}\docnum{} scalar knob keys (learning-rate scales, betas, weight decay,
+initialisation, momentum, soft cap, RoPE base, cooldown $\pm0.1$) won a confirmation. A single chip pair's noise SD
+(\val{noise-chip-pair}) is as large as the effect a retune could plausibly have, so unless a key was tried several
+times this is an absence of evidence for scalar gains, not evidence that none exist. The four official tests on the final day
 (\upl{K65a}--\upl{K65d}) were all worse than or tied with their base.
 
 \begin{table}[!htbp]
@@ -237,7 +260,13 @@ $\kappa(S)=\val{kappa}-2c\ln(S/2300)$, which is \val{kappa-at-anchor} at the lon
 \upl{K44}'s step count, and the campaign log records \val{slope-900}\docnum{} at about 900 steps. That curvature is
 itself a prior set from these campaign rates, so it is consistent with the two calibrations rather than evidence for
 them. The surrogate's fitted slope (\val{q-slope-pct} per 1\%, \cref{sec:quality}) is \emph{not} independent
-evidence either: its prior mean is $\kappa$ itself.
+evidence either: its prior mean is $\kappa$ itself. Nor do the run data pin $\kappa$ down: refitting the surrogate with
+a vague slope prior (SD \val{kappa-vague-prior-sd} instead of \val{q-prior-b-sd}) gives $\kappa=\val{kappa-vague}$
+(95\% interval \val{kappa-vague-lo}--\val{kappa-vague-hi}), which excludes the value we use. That fit's slope is
+confounded with mechanisms that change both steps and quality, so it is not a better estimate, but at its interval
+the gap to \#10 would cost \val{gap-ten-vague-range} more compute instead of \val{gap-ten-range}, and a typical
+final-day change of \val{late-change}\docnum{}~bpb would be worth \val{late-change-vague-range} more steps instead of
+\val{late-change-pct}.
 
 \subsection{Pricing the gap in compute}
 \label{sec:gap}
@@ -265,7 +294,7 @@ calibrations and these gaps.
     throughout; dashed line: $\kappa=\val{xr-k-anchor}$ from the single long run (square). Black bars: the compute
     needed to close the gap from our best score to \#10 and \#1 on the final leaderboard snapshot, across the two
     values of $\kappa$. Triangle: a typical final-day recipe change of \val{late-change}\docnum{}~bpb, worth
-    \val{late-change-pct} more steps. Grey band: the kernel-throughput gain discussed in \cref{sec:gap}.}
+    \val{late-change-pct} more steps.}
   \label{fig:exchange}
 \end{figure}
 
@@ -323,8 +352,27 @@ flipped sign. A GPU pair is void when its step-10 loss sits on a different warm-
 \texttt{--deterministic} flag uses PyTorch's \texttt{warn\_only=True}; paired verdicts need \texttt{warn\_only=False}.
 The protocol, runbook and patch notes are in \texttt{ffsim/gpu/}.
 
-\subsection{Related work on the recipe and the findings}
+\subsection{Further related work}
 \label{app:related-recipe}
+
+\paragraph{Benchmarks, proxies and reproducibility.} DAWNBench \citep{coleman2017dawnbench} made time-to-accuracy an
+end-to-end metric, and its analysis \citep{coleman2019dawnbench} found that metric to have a low coefficient of
+variation and the speed-optimised models to generalise nearly as well as conventionally trained ones; the report on
+the first AlgoPerf competition \citep{kasimbeg2025algoperf} discusses the engineering needed to compare submissions
+fairly on fixed hardware. Both are organiser-side accounts of a benchmark. New ImageNet and CIFAR-10 test sets
+\citep{recht2019imagenet} lowered accuracies while largely preserving the order of models, and out-of-distribution
+accuracy tracks in-distribution accuracy closely across many distribution shifts \citep{miller2021accuracy}; the
+rehearsal offset of \cref{sec:oracle}, a shift about the size of the 2M-to-20M text gap (\val{gap-mean}) that does
+not depend on the recipe, is a small instance of the same pattern. For decisions in language-model development,
+\citet{madaan2024variance} quantify the seed variance of evaluation benchmarks, \citet{heineman2025signal} relate a
+benchmark's usefulness for small-scale decisions to its signal-to-noise ratio, and DataDecide
+\citep{magnusson2025datadecide} measures how often small experiments pick the pretraining data that is best at a
+larger scale. Surrogate benchmarks replace expensive evaluations with a regression model fitted to logged runs, for
+hyperparameter optimisation \citep{eggensperger2015surrogates} and for architecture search
+\citep{zela2022surrogate}. \citet{chen2022reproducible} make deep-learning training reproducible by recording and
+replaying software randomness and patching hardware-related nondeterminism, and \citet{hoefler2015scientific} ask
+authors to report whether measurements are deterministic, to give confidence intervals when they are not and to
+compare them in a statistically sound way.
 
 \paragraph{Optimizers, schedules and instability.} Our recipe uses Muon, momentum orthogonalised by a Newton--Schulz
 iteration \citep{jordan2024muon,bjorck1971orthogonal}, for matrices and AdamW

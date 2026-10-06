@@ -1,8 +1,7 @@
 # The paper
 
-**Rehearse, Don't Guess: Deterministic Rehearsal, a Run Simulator and the Price of a Step on AWS Trainium.** The LaTeX source of the full-length paper on the FrontierForge
-Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`). The plan it follows is
-[`OUTLINE.md`](OUTLINE.md).
+**Rehearse, Don't Guess: Predicting Language-Model Training Results on AWS Trainium.** The LaTeX source of the full-length paper on the FrontierForge
+Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`).
 
 ## Layout
 
@@ -14,7 +13,7 @@ Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`).
 | `tables/*.tex` | **generated**: every data table |
 | `figures/*.pdf` | **generated**: every figure, drawn at its printed width (6.5 in text width, 8 pt text) |
 | `analysis/*.py` | the scripts that generate all of the above from the repository's data |
-| `refs.bib` | 86 verified references; each entry's `verification` field says how it was checked (BibTeX ignores it) |
+| `refs.bib` | 98 verified references; each entry's `verification` field says how it was checked (BibTeX ignores it) |
 | `check_tex.py` | static checks that need no TeX installation, including estimated table widths and figure scales (`-v` lists every table) |
 | `make_bundle.py` | a flat, self-contained source folder and zip for Overleaf or arXiv (`--bbl` adds the compiled `main.bbl`, `--out` chooses the folder) |
 | `requirements.txt` | the analysis dependencies: the repository's `requirements.txt` plus matplotlib, pinned to the release that drew the committed figures |
@@ -102,6 +101,4 @@ it replaces the author block, hides the acknowledgements and replaces the reposi
 - Compile once (CI artifact `paper-pdf` or Overleaf) and read the log for overfull boxes; `check_tex.py` only
   estimates widths.
 - Rerun the three regeneration commands above and `python -m pytest -q tests`, then rebuild.
-- Read `sections/limitations.tex` once more against any new results. The follow-up experiments listed in
-  `OUTLINE.md` section 5 (E1, E2, E3, E5, E6, E7) are not in this version; pre-register them in the repository before
-  running them.
+- Read `sections/limitations.tex` once more against any new results.

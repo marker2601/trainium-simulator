@@ -10,7 +10,7 @@ One script and one style serve both the README (SVG) and the paper (PDF). Inputs
     research/sim-data/validation-pairs.json      the 99 treatment/control pairs used to validate the quality model
     constants copied from named doc tables       docs/FINDINGS.md, docs/GAP-ANALYSIS.md, docs/SIMULATOR.md (cited inline)
 
-Figures (paper numbering in brackets, see paper/OUTLINE.md):
+Figures (draft numbering in brackets):
     score_history        [Fig. 1] official val_bpb per upload, with the levers that moved it
     step_counts          [Fig. 2] optimizer steps per 30-minute rehearsal, by chip
     oracle_calibration   [Fig. 3] chip rehearsal vs official score, and the offset per upload

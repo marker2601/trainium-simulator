@@ -7,12 +7,13 @@ was a rule: rehearse the exact file, cold, and add an offset (C1). It predicted 
 selection-dependent, its resolution for differences between uploads is about \val{diff-95}~bpb, and its
 best-looking statistics lean on one normalised rehearsal. A simulator that separates the steps a recipe gets from what
 each step is worth (C2) beats a steps-only baseline on recipe changes it can relate to its data, keeps
-\val{lokvo-rec-sign} sign agreement on knob values it has never seen, and is at chance on genuinely new mechanisms; it
-says what is noise, not what will work. One price per optimizer step (C3) made every trade explicit, exposed a
+\val{lokvo-rec-sign} sign agreement on knob values it has never seen (a development-set estimate), and is at chance
+on genuinely new mechanisms; it says what is noise, not what will work. One price per optimizer step (C3) made every trade explicit, exposed a
 compilation regression that only cold rehearsals reveal, and shows that seed, order and selection effects are as large
 as most late improvements. Read as a hypothesis, the same accounting puts the gap to the top ten at
 \val{gap-ten-range} more effective compute and points at kernels. The data that would test the simulator beyond our
-own search belong to other teams, so we release it with a guarded way to contribute (C4).
+own search belong to other teams, so we release it with a guarded way to contribute (C4). \Cref{sec:transfer}
+lists the practices we expect to carry over to other contests.
 
 \paragraph{Release.} The repository contains the simulator (\ffsim{}, MIT), both recipes (Apache-2.0 derivatives of
 the organiser's baseline), the run dataset and upload ledger, a local app with prediction and contribution endpoints,

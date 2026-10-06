@@ -5,7 +5,7 @@
 Feature & Encoding (centred on the K59 recipe) & Scale \\
 \midrule
 \texttt{leaky} & LK - 0.35 (leaky relu\textsuperscript{2} slope; 0 = plain relu\textsuperscript{2}) & 0.15 \\
-\texttt{leaky\_sq} & (LK - 0.35)\textsuperscript{2}: the slope curve is a bowl (0 / 0.25 / 0.35 / 0.5 gave +0.0013 / +0.0003 / 0 / +0.0014 at s73) & 0.0225 \\
+\texttt{leaky\_sq} & (LK - 0.35)\textsuperscript{2}: a bowl in the slope (0 / 0.25 / 0.35 / 0.5 were tried) & 0.0225 \\
 \texttt{leaky\_form\_abs} & 1 if LK > 0 and form is 'abs' (M10b); fn/fnm = 0 & 1 \\
 \texttt{leaky\_form\_max} & 1 if LK > 0 and form is 'max' (M11c, torch.maximum) & 1 \\
 \texttt{relu2\_fn} & 1 if FF\_RELU2\_FN (the RF arm: relu\textsuperscript{2} with a hand-written backward, LK = 0) & 1 \\
@@ -28,7 +28,7 @@ Feature & Encoding (centred on the K59 recipe) & Scale \\
 \texttt{wd\_log} & ln(WD / 0.02) (0.012 / 0.03 tried) & 0.405 \\
 \texttt{key\_offset\_off} & 1 if the rotary key offset is off (pre-K51 recipes) & 1 \\
 \texttt{key\_offset\_log} & ln(radius / 0.3) when the key offset is on (0.03 / 0.1 / 0.2 / 0.5 / 1.0 / 3.0 were tried: two decades, so a log scale), 0 when off & 1.1 \\
-\texttt{acc\_in\_graph} & ACC\_IN\_GRAPH - 1 (K56 mechanism: -0.0006 over 3 pairs, +1\% steps) & 1 \\
+\texttt{acc\_in\_graph} & ACC\_IN\_GRAPH - 1 (K56 mechanism: gradient accumulation inside the compiled graph) & 1 \\
 \texttt{accum\_until} & charged-time fraction at which the batch warm-up reaches the final k, minus 0.2 (plain 'K' $\rightarrow$ -0.2; '2:0.2,4' and RAMP3 $\rightarrow$ 0) & 0.2 \\
 \texttt{accum\_k1\_until} & first-phase (k1) end fraction minus 0.06 (RAMP3 $\rightarrow$ 0; two-phase or none $\rightarrow$ -0.06) & 0.06 \\
 \texttt{accum\_lr0} & LR scale of the first small-batch phase minus 0.5 (0 when no batch warm-up) & 0.25 \\

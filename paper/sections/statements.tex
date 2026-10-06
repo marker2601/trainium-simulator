@@ -22,15 +22,16 @@ The code, data and analysis scripts are in the public repository
     PyTorch~2.11.0, \texttt{torch-neuronx}~2.11.3 and the Neuron compiler \texttt{neuronx-cc}~2.26 (build
     2.26.6360.0), with the model compiled by \texttt{torch.compile} (backend \texttt{neuron},
     \texttt{dynamic=False}, the recipes' default), one process per NeuronCore (launch command in
-    \texttt{recipes/README.md}). The Neuron runtime was 2.34.10 on chip~C and 2.33.10 on chip~D; the released files
-    do not record it for the other chips.
+    \texttt{recipes/README.md}). The Neuron runtime was 2.34.10 on chip~C, \val{runtime-chip-a}\docnum{} on chip~A
+    and 2.33.10 on chip~D; chips \val{image-chips}\docnum{} were launched from a machine image taken from chip~A and
+    so presumably ran the same runtime, but no record from them survives.
   \item \textbf{Commands.} \texttt{pip install -r paper/requirements.txt} installs the pinned dependencies; \texttt{python -m pytest -q tests} runs the test suite;
     \texttt{python paper/analysis/make\_all.py} regenerates \texttt{paper/numbers.tex}, every table in
     \texttt{paper/tables/} and every figure in \texttt{paper/figures/}; \texttt{python paper/check\_tex.py} runs the
     static checks; \texttt{latexmk -pdf main.tex} in \texttt{paper/} builds this document. The analysis is
     deterministic (fixed random seeds, no clock).
   \item \textbf{What is reported but not recomputable.} Numbers marked \docnum{} are quoted from the campaign
-    documents in \texttt{docs/} because their raw records are not released: chip-log measurements, the final-day runs
+    documents in \texttt{docs/} or the campaign log because their raw records are not released: chip-log measurements, the final-day runs
     on chips E, G and H (row-pool pair, salt lotteries, EMA-blend and output-projection pairs, pool-size ablation),
     and the GPU-proxy measurements. \Cref{app:docfacts} lists them with their sources. Official scores come only from
     the organisers. Re-running a recipe needs a \texttt{trn2.3xlarge} instance and the organiser's kit, which we do

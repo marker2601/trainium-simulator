@@ -274,7 +274,7 @@ contrib/               schema.json (one contributed run) and stats.json (what th
 recipes/               K82s4 and K60 train.py, byte-identical to the uploaded files (Apache-2.0)
 docs/                  FINDINGS, SIMULATOR, EXACT-ORACLE, GAP-ANALYSIS, campaign-time notes
 docs/figures/          every figure (SVG, PNG, PDF) and the one script that builds them from repo data
-paper/                 OUTLINE.md: the plan, claims ledger and open experiments for the technical report
+paper/                 the paper's LaTeX source and the scripts that regenerate its numbers, tables and figures
 results/               official-scores.csv: every scored upload with rehearsal and offset
 research/sim-data/     runs.jsonl, validation-pairs.json, official-uploads.csv, validation reports, searches,
                        contrib/runs-contrib.jsonl (merged community runs)

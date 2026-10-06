@@ -55,6 +55,14 @@
   \else\textbf{??#1??}\PackageWarning{ffnumbers}{Undefined value `#1'}\fi}
 \input{numbers}
 
+% Review copy: paper/main-review.tex defines \ffreviewcopy (the footer text) and inputs this file.
+\ifdefined\ffreviewcopy
+  \usepackage{fancyhdr}
+  \fancypagestyle{plain}{\fancyhf{}\fancyfoot[L]{\scriptsize\ffreviewcopy}\fancyfoot[R]{\thepage}%
+    \renewcommand{\headrulewidth}{0pt}}
+  \pagestyle{plain}
+\fi
+
 % ---------------------------------------------------------------- notation (Appendix~\ref{app:notation})
 \newcommand{\valbpb}{val\_bpb}
 \newcommand{\ffsim}{\texttt{ffsim}}

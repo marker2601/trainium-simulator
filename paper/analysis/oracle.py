@@ -353,7 +353,7 @@ def run(N: Numbers) -> Dict[str, object]:
         date = r["date"].replace("2026-", "").replace("~", "$\\sim$")
         body.append(f"{tex_escape(r['name'])}{_mark(r['name'])} & {date} & {r['chip']} & {reh} & {steps} & "
                     f"{num(r['official'], 4)} & {off} & {star} & {tex_escape(_plain(r['note']))} \\\\")
-    table(TABLES / "uploads.tex", body, "@{}llcrrrrcp{5.0cm}@{}",
+    table(TABLES / "uploads.tex", body, "@{}llcrrrrcp{7.9cm}@{}",
           "Upload & Date & Chip & Rehearsal & Steps & Official & Offset & Best & What changed",
           "every scored upload, results/official-scores.csv (oracle.py)", size="\\scriptsize", tabcolsep="3pt")
 

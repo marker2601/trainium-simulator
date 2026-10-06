@@ -81,6 +81,19 @@ jobs:
             paper/main.log
           if-no-files-found: error
           retention-days: 30
+      - name: Compile the review copy (paper/main-review.tex, footer marks a draft shared for comments)
+        uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
+        with:
+          root_file: main-review.tex
+          working_directory: paper
+          args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+      - name: Upload the review copy
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paper-review-pdf
+          path: paper/main-review.pdf
+          if-no-files-found: error
+          retention-days: 30
       - name: Upload main.bbl
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

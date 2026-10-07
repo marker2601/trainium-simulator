@@ -6,7 +6,7 @@
   \item \textbf{Few seeds, at a selected seed.} Most late effects in \cref{tab:levers,tab:negative} are single
     same-seed pairs at seed~73, which ranked \val{g7-s73-rank} of \val{g7-nseeds} in its sweep, and may not hold at
     other seeds. The row pool rests on one chip pair and one official pair from the same trajectory; the prewarm on
-    one official pair and single-run step counts; the EMA blend on one chip pair. Our rule of three seeds below 0.0003
+    one official pair and single-run step counts; the EMA blend on one chip pair. Our rule of three seeds for effects below 0.0003
     was often not affordable.
   \item \textbf{Selection and the evaluation text.} Seeds and salts were chosen by rehearsal score (five of the seven
     final-day uploads carry a lottery-selected salt), and \upl{K65a}--\upl{K65d} were official tests of single
@@ -18,7 +18,7 @@
     (permutation $p=\val{cq-perm-p-adj}$). The oracle's headline statistics depend on one model-normalised rehearsal
     (\cref{tab:oracle-sens}). The pseudo-prospective analyses are retrospective; only three written projections are
     archived.
-  \item \textbf{Determinism rests on little direct evidence.} One cold/warm pair with older code, and two replicate
+  \item \textbf{Determinism rests on little direct evidence.} It rests on one cold/warm pair with older code and two replicate
     pairs that agree to the printed precision only until their first clock-triggered event
     (\cref{sec:determinism}). The within-chip offset SD
     (\val{off-sd-within}, 95\% CI \val{off-sd-within-lo}--\val{off-sd-within-hi}) contains the SD that re-drawing the
@@ -27,9 +27,9 @@
   \item \textbf{Hardware heterogeneity.} Instances differed by up to \val{chip-spread}\docnum{} in step time, and
     chip~D ran an older Neuron runtime (2.33.10, against 2.34.10 on chip~C). We normalised only same-recipe runs,
     never across a change that alters step time, and every comparison names its chip.
-  \item \textbf{Released data do not cover the final day.} \texttt{runs.jsonl} holds chips A--D up to 29~September.
-    The chip E, G and H runs behind the row-pool pair, the salt lottery, the EMA-blend and output-projection pairs, the
-    pool-size ablation and the final-day test bench are quotes from campaign documents, marked \docnum{}
+  \item \textbf{Released data do not cover the final day.} \texttt{runs.jsonl} holds runs from chips A--D up to 29~September.
+    The chip E, G and H runs behind the row-pool pair, the salt lotteries, the EMA-blend and output-projection pairs, the
+    pool-size ablation and the final-day test bench are quoted from campaign documents, marked \docnum{}
     (\cref{app:docfacts}): reported, not recomputable.
   \item \textbf{Development-set validation.} The surrogate's configuration was chosen among \val{sc-n}\docnum{}
     candidates with their LOPO results visible, and some feature encodings were set with campaign outcomes in view
@@ -44,12 +44,12 @@
     \val{kappa-vague-lo}--\val{kappa-vague-hi}, below the value we use (\cref{sec:price}). The gap figures
     extrapolate it, and other teams' recipes may sit on a different curve.
   \item \textbf{Survivor bias in the levers.} \Cref{tab:levers} lists the changes that were kept because they
-    measured well, so their effects are biased upward, most for the single late pairs near the noise scale; the
+    measured well, so their effects are biased away from zero, most for the single late pairs near the noise scale; the
     four campaign-log levers have no recorded comparison at all.
   \item \textbf{Uncertain noise scale.} The noise column rests on a salt SD quoted from a campaign document, and a
     lever that acts from step~0 faces the larger seed SD (\cref{sec:lever-notes}), so its ratio to the noise scale is an
     upper bound.
-  \item \textbf{Leaderboard snapshot.} The references are from the last public snapshot we recorded (about
+  \item \textbf{Leaderboard snapshot.} The leaderboard reference points are from the last public snapshot we recorded (about
     \val{leaderboard-time}\docnum{}); the organisers' published final standings may differ.
   \item \textbf{Forking paths.} The campaign was adaptive and the analyses are post hoc. The spike threshold was
     chosen after seeing the data, and so were the start of the calibration window at \upl{K50}, the chip-C

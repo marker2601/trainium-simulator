@@ -15,7 +15,7 @@ order-redraw noise model of \cref{sec:seeds}: $\sqrt2$ times the shuffle-salt SD
 (\val{noise-chip-pair}), plus the offset noise of two uploads for an official pair (\val{noise-official-pair}),
 divided by $\sqrt n$ for $n$ pairs. It is the right scale for changes that act after the warm-up; a change that
 re-rolls the warm-up path faces the larger seed noise. Four of the six largest effects (multi-token prediction,
-batch warm-up, LeakyReLU$^2$, the key offset) come from the campaign log and have no run identifiers in the
+batch warm-up, LeakyReLU$^2$, the rotary key offset) come from the campaign log and have no run identifiers in the
 repository, so the table gives them no ratio to a noise scale; the late levers are single pairs at seed~73. Of the
 levers with a recorded comparison, only the row pool and attention-source reuse clear about three noise SDs. The
 table lists survivors, so its effects are biased away from zero, and for levers that act from step~0 the ratios are
@@ -45,7 +45,7 @@ EMA update, compiled inside the charged clock on a fresh instance, cost \val{ema
 only cold rehearsals revealed; the fix runs one EMA update during the excluded start-up (\cref{sec:prewarm}).
 Seeds take one of two warm-up paths, and spike-path runs ended \val{spike-delta} worse on average; seed and
 shuffle-salt noise are as large as most late improvements, and a salt chosen by a lottery keeps in expectation a
-share $\lambda$ of its rehearsal edge of \val{wc-lam-lo}--\val{wc-lam-hi} when every draw ran on one chip and
+share $\lambda$ of its rehearsal edge, \val{wc-lam-lo}--\val{wc-lam-hi} when every draw ran on one chip and
 \val{wc-lam-cross-lo}--\val{wc-lam-cross-hi} when they ran on different chips (\cref{sec:seeds,sec:salts}).
 
 Capacity changes lost in both directions, and scalar retuning found nothing: none of \val{scalar-keys}\docnum{}

@@ -71,7 +71,7 @@ Route 2 of the spec (GPU proxy) is out of scope: the 21 Sep proxy failed validat
   monitor-only 55.
 - Pairs: 99 same-seed pairs in `validation-pairs.json` (73 on the builder-defined task list, 33 of those in the families
   the spec names; 62 recipe pairs, 10 seed pairs, 8 prior-only pairs, 10 rehearsal pairs).
-- Uploads: 26 rows, 23 calibration points (K54b rejected for size, K44_rerun and F6_dup organiser-side reruns excluded);
+- Uploads: 26 rows, 23 calibration points (K54b rejected for size, K44_rerun and F6_dup, rescored by the organisers, excluded);
   the chip-C subset used by the model is now 7 points (K51, K53, K54b_min, K56, K57, K59, K60).
 
 ## 3. Validation against the spec's three targets

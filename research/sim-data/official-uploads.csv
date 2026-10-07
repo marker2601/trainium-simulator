@@ -10,14 +10,14 @@ K60,2026-09-29,C41_cold_K60,0.9591028698885415,2361,0.9655,+0.0064,M14,"K59 + at
 K59,2026-09-29,C40_cold_K59,0.960920033619009,2357,0.9671,+0.0062,M12,"K57T recipe on M12 + FF_LEAKY_RELU2=0.35 FF_LEAKY_FORM=fnm, seed 73, TT 1793; chip-C cold rehearsal"
 K57,2026-09-28,C36_cold_K57,0.96192670224815,2359,0.9686,+0.00667,M9,K56 with seed 73; chip-C cold rehearsal
 K56,2026-09-28,C35_cold_K56a,0.9624483982673186,2360,0.9693,+0.0069,M9,"K55 (key offset radius 0.3) + FF_ACC_IN_GRAPH=1, seed 67; chip-C cold rehearsal"
-K54b_min,2026-09-27,C32_cold_K54b,0.9632608714445502,2353,0.9705,+0.0072,M7,"K54a (ZeRO-2 + AdamW ZeRO) + RAMP3, comment-stripped to fit the size limit; first official run crashed on the organiser side and was rescored"
-K54b,2026-09-27,C32_cold_K54b,0.9632608714445502,2353,,,M7,"NOT a calibration point: never scored (rejected, source over the 262,144 B limit)"
+K54b_min,2026-09-27,C32_cold_K54b,0.9632608714445502,2353,0.9705,+0.0072,M7,"K54a (ZeRO-2 + AdamW ZeRO) + RAMP3, comment-stripped to fit the portal's file-size limit"
+K54b,2026-09-27,C32_cold_K54b,0.9632608714445502,2353,,,M7,"NOT a calibration point: never scored (rejected, source over the portal's file-size limit)"
 K53,2026-09-27,C30_cold_K53,0.9651481278647015,2142,0.9712,+0.0061,M6,K52 + MUON_ZERO + EMA_PREWARM + EMA every 32 + TT 1790.5; chip-C cold rehearsal
 K51,2026-09-26,C28_cold_K51,0.9678859569240843,2036,0.9742,+0.0063,M4,"K50 + FF_KEY_OFFSET + FF_ACCUM_SCHED=2:0.2,4 + FF_INSURANCE_AT=9; first chip-C rehearsal"
 K50,2026-09-26,C27_cold_K50,0.96914,1943,0.9760,+0.0069,M3,"K49 + batch warm-up FF_ACCUM_SCHED=2:0.12,4 FF_ACCUM_LR=0.7071; chip-B rehearsal"
 K46,2026-09-25,C23_cold_K46,0.97725,1753,0.9845,+0.0073,,K45 + FF_OPT_FUSE=2; chip-B rehearsal
 K45,2026-09-25,C22_cold_K45,0.97941,1692,0.9861,+0.0067,,K44 + FF_SCALAR_CONSTS=2 FF_ASYNC_OPT=1 FF_MUON_VIEWS; chip-B rehearsal
-K44_rerun,2026-09-24,C21_cold_K44,0.98235,1615,0.99021,+0.00786,,NOT a calibration point: organiser-side rerun of the K44 file on a slower host (about 2.3% fewer steps)
+K44_rerun,2026-09-24,C21_cold_K44,0.98235,1615,0.99021,+0.00786,,NOT a calibration point: a second score for the K44 file, from a run the organisers rescored
 K44,2026-09-24,C21_cold_K44,0.98235,1615,0.98884,+0.00649,,K43 + FF_COOLDOWN_FRAC 0.60; chip-B rehearsal
 K43,2026-09-23,C20_cold_K43,0.98321,1610,0.9897,+0.0065,,seed 67 + TT 1788 + two insurance levels + EMA every 8 (Muon shard base); chip-B rehearsal
 K41,2026-09-22,C18_cold_K41,0.98827,1507,0.9937,+0.0054,,"depth 9 x width 1024 + cooldown 0.45 + TT 1780, seed 58; chip-A rehearsal"
@@ -29,6 +29,6 @@ K33,2026-09-20,C12_cold_K33,1.03622,917,1.0427,+0.0065,,"K31 recipe (value embed
 K29,2026-09-19,C8_cold_K29,1.04959,935,1.0554,+0.0058,,K26 + stream rows (eval-layout finding)
 K24,2026-09-18,C5_cold_K24,1.082604211035652,912,1.0885,+0.0059,,"depth 12, 262k batch, Muon x2.0, AdamW x1.4142, WD 0.02, cooldown 0.3, TT 1760"
 K15,2026-09-17,K16_warm_K15,1.1282456464455939,1808,1.1360,+0.0077,,0-dim lambdas + compile + static loss + async sync; warm rehearsal
-F6_dup,2026-09-16,F6_cd30_s50,1.1344351319562322,1316,1.2529,+0.1185,,NOT a calibration point: the F6 file scored a second time; that run was truncated before LR decay (organiser side)
+F6_dup,2026-09-16,F6_cd30_s50,1.1344351319562322,1316,1.2529,+0.1185,,NOT a calibration point: a second score for the F6 file, from a run the organisers rescored; that run was truncated before LR decay
 F6,2026-09-16,F6_cd30_s50,1.1344351319562322,1316,1.1397,+0.0053,,F2 recipe + cooldown 0.30
 F2,2026-09-16,F2_b131k,1.1403158656190606,1257,1.146310177912976,+0.0060,,"131k batch, microbatch 8, cooldown 0.20, TT 1710; first calibration of the offset"

@@ -4,8 +4,8 @@
 
 \Cref{tab:uploads} lists every scored upload (\val{n-scored} in total; \val{n-rehearsed} with a rehearsal). Dates
 are the upload day in US Central time, and a tilde marks a day reconstructed from the campaign ledger. Two
-organiser-side scores are excluded: a rerun of \upl{K44} on a slower host, and a truncated duplicate run of
-\upl{F6} (\cref{sec:traps}). \Cref{fig:steps} shows the rehearsal step counts.
+scores from runs that the organisers rescored, one each for \upl{K44} and \upl{F6}, are excluded
+(\cref{sec:traps}). \Cref{fig:steps} shows the rehearsal step counts.
 
 \begin{table}[!htbp]
   \centering
@@ -77,7 +77,7 @@ lottery winners, so an apparent chip effect could be an effect of model quality 
 the rehearsal span. The \val{cq-gh-n} uploads rehearsed on chips G and H have a mean offset \val{cq-gh-diff} above the
 rest (exact permutation $p=\val{cq-perm-p}$ over all \val{cq-perm-n} label assignments), but given the rehearsal score
 the G/H term is \val{cq-gh-coef} (95\% CI \val{cq-gh-lo} to \val{cq-gh-hi}; permutation $p=\val{cq-perm-p-adj}$) and
-the slope becomes \val{cq-slope-adj}. With this few uploads the data cannot tell a chip effect from an effect of model
+the slope becomes \val{cq-slope-adj}. With so few uploads the data cannot tell a chip effect from an effect of model
 quality or selection, so we say only that the offset \emph{may} depend on the chip.
 
 \subsection{Traps in detail}
@@ -91,9 +91,7 @@ The four ways in which a rehearsal was not a faithful replica of the official ru
     cold official run would be.
   \item \textbf{Chip speed.} A rehearsal predicts the official score only if the official host runs at the
     rehearsal chip's speed; otherwise $\gamma_c\neq0$. We normalised same-recipe runs to chip-C speed at $\rho$ and
-    never across a change that alters step time. The organisers' rerun of one file on a slower host did
-    \val{rerun-steps}\docnum{} fewer steps and scored \val{rerun-delta}\docnum{} worse, consistent with $\rho$
-    ($n=1$).
+    never across a change that alters step time.
   \item \textbf{The warm-up coin flip.} A change that touches steps 0--19 can move a seed onto a different early
     trajectory (\cref{sec:seeds}). The rehearsal still predicts the official score, because the official run takes
     the same path, but the measured difference is then a seed effect rather than the change's effect.
@@ -101,9 +99,9 @@ The four ways in which a rehearsal was not a faithful replica of the official ru
     cross the target; the median reserve was \val{reserve-s}\docnum{}~s over \val{reserve-n} completed runs, and we
     kept \val{headroom}\docnum{}~s of headroom under the cap.
 \end{enumerate}
-Two organiser-side anomalies are excluded from all calibration statistics and listed in
-\path{research/sim-data/official-uploads.csv}: the slower-host rerun above, and a duplicate scoring run that was cut
-off before its learning-rate decay.
+Two scores from runs that the organisers rescored, one each for \upl{K44} and \upl{F6}, are excluded from all
+calibration statistics, so that each upload counts once; both are listed in
+\path{research/sim-data/official-uploads.csv}.
 
 \subsection{The normalised rehearsal of \upl{K70a}}
 \label{sec:k70a}
@@ -181,8 +179,8 @@ operation count: removing one elementwise pass over the MLP activation saved \va
 QKV projection, which has fewer operations, was \val{st-qkv}\docnum{} \emph{slower}, and a 96-parameter gate cost
 \val{st-gate}\docnum{}. A mechanism that no fitted run carries is charged a \val{st-novel-prior}\docnum{} prior and
 flagged ``cost unknown''. Medians are scaled by the measured median-to-mean overhead (\val{overhead}) before the walk.
-Left one code lineage out, the model predicts the $k\!=\!4$ step time of runs whose mechanisms another lineage
-carried with an MAE of \val{st-lolo-reach} (\val{st-lolo-nreach} runs; \cref{tab:sim-other}), and the walk reproduces
+With one code lineage left out, the model predicts the $k\!=\!4$ step time of runs whose mechanisms another lineage
+carried, with an MAE of \val{st-lolo-reach} (\val{st-lolo-nreach} runs; \cref{tab:sim-other}), and the walk reproduces
 a rehearsal's phase switches to within \val{walk-phase-err}\docnum{} steps.
 
 \subsection{Features and code eras}
@@ -190,7 +188,7 @@ a rehearsal's phase switches to within \val{walk-phase-err}\docnum{} steps.
 The quality surrogate reads \val{q-nbase-features} base features (\cref{tab:features}) and \val{q-nbowl-features}
 non-negative curvature (``bowl'') terms for tuned scalars, the squares of the corresponding base features. Every
 feature is centred on the \upl{K59} reference recipe, so the era intercept of the current code family is that recipe's
-predicted score at 2{,}300 steps on chip~C. The scale is the size of a typical campaign move; the ridge prior applies
+predicted score at 2{,}300 steps on chip~C. Each feature's scale in \cref{tab:features} is the size of a typical campaign move; the ridge prior applies
 per scaled unit. \emph{Code eras} are groups of versions of our training script: M3 to M14 number the main lineage in
 order, and ``M9+'' groups the flag-gated versions from M9 on, whose new mechanisms are off unless a knob turns them on.
 
@@ -247,7 +245,7 @@ includes zero. ``Decisive'' pairs defined by the measured outcome ($|\Delta|\ge0
 \cref{sec:simval} reports the pairs on which the \emph{prediction} is decisive; on them the MAE is
 \val{base-full-pdec-mae} for the surrogate against \val{base-steps-pdec-mae} for the steps-only model. Forward in
 time, the surrogate's MAE is better than the steps-only model's with the 29~September cutoff (difference
-\val{temp-b-diff-mae-ci}$\times10^{-3}$) but not with 28~September (\val{temp-a-diff-mae-ci}), where the zero
+\val{temp-b-diff-mae-ci}$\times10^{-3}$) but not with 28~September (\val{temp-a-diff-mae-ci}$\times10^{-3}$), where the zero
 predictor's MAE is \val{temp-a-zero-mae}. During development (\cref{tab:surrogate-configs}), a fix to how missing
 knobs are read moved LOPO sign agreement on the pairs named in the simulator's specification from
 \val{sc-spec-sign-before}\docnum{} to \val{sc-spec-sign-after}\docnum{}, and recipe-pair sign agreement ranged from
@@ -275,8 +273,8 @@ configurations; the default, \val{sc-default-name}, scored \val{sc-default-rec-s
 \begin{table}[!htbp]
   \centering
   \caption{\textbf{Temporal hold-out of the quality surrogate.} ``Supported'' pairs move only features that some run
-    in the restricted fit varied; ``prior-only'' pairs move a feature that no such run varied, so the model can only
-    return its prior for it; those cells give $n$: sign agreement of the surrogate. ``Steps only'': the same model
+    in the restricted fit varied; ``Prior-only'' pairs move a feature that no such run varied, so the model can only
+    return its prior for it. Cells in these two columns give $n$: sign agreement of the surrogate. ``Steps only'': the same model
     with every knob effect switched off, fitted on the same early runs; ``Zero'': the predictor $\hat\Delta=0$.}
   \label{tab:temporal}
   \input{tables/temporal}
@@ -360,17 +358,17 @@ levers lie outside the data (\upl{K82s4}) is anchored to its measured rehearsal 
 has data of its own.
 
 \paragraph{Review and merge.} Only a label added by an account with write access approves a record, and editing the
-issue afterwards removes it. The approval opens a pull request that appends the record exactly as approved, on a
+issue afterwards removes the label. The approval opens a pull request that appends the record exactly as approved, on a
 branch named by its content hash. Merging triggers a guarded refit whose output arrives as a second pull request;
 nothing pushes to the main branch. Workflows run with read-only tokens wherever possible, pin every action to a commit
 hash and never execute contributed content.
 
 \paragraph{Stress test.} \Cref{tab:guard} pushes synthetic records through the real validation and guard code in
 memory (\texttt{paper/analysis/contrib\_guard.py}). Honest records are the model's own prediction plus a hardware
-bias and seed-sized noise, on knob values the data has seen; they moved the base predictions by at most
+bias and seed-sized noise, on knob values the data have seen; they moved the base predictions by at most
 \val{guard-honest-c-shift} and were accepted. A single record 0.01~bpb worse than predicted was absorbed by its own
 hardware effect (base shift \val{guard-outlier-shift}) and was not flagged, because an unseen hardware effect widens
-the predictive SD. The coordinated attack was refused at every size tried, down to two records, which moved a
+the predictive SD. The coordinated attack was refused at every size tried, down to two records, which would have moved a
 published base prediction by \val{guard-attack-two-shift}.
 
 \begin{table}[!htbp]
@@ -398,7 +396,7 @@ visible failure.
 \begin{table}[!htbp]
   \centering
   \caption{\textbf{The final recipe, \upl{K82s4}.} About \val{params}\docnum{} parameters; every value is a default
-    of \texttt{recipes/K82s4/train.py} (full knob list in \cref{tab:hyper}).}
+    of \texttt{recipes/K82s4/train.py} (knob settings in \cref{tab:hyper}).}
   \label{tab:recipe}
   \small
   \begin{tabular}{@{}p{2.2cm}p{13.6cm}@{}}

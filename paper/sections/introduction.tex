@@ -44,12 +44,12 @@ time-budgeted training contest, and we think they are useful to anyone running o
 
 \paragraph{Contributions.} In one sentence: in a wall-clock contest, a cold, full-length rehearsal of the exact
 upload predicted the official score up to a measurable offset, while a cheaper simulator could tell which changes
-were inside the noise but not which would win. The same four contributions, in this order, structure the paper.
+were inside the noise but not which would win. The four contributions below, in this order, structure the paper.
 \begin{itemize}
   \item \textbf{C1: How well full-length rehearsal predicts a leaderboard} (\cref{sec:oracle}). A cold,
-    full-budget rehearsal of the exact upload file, scored on the first \val{eval-tokens} public validation tokens,
+    full-length rehearsal of the exact upload file, scored on the first \val{eval-tokens} public validation tokens,
     predicted the official score up to an offset of \val{off-mean-since} (SD \val{off-sd-since}, $n=\val{off-n-since}$).
-    The offset is mostly text (the official shard is harder than the first 2M public tokens) but appears to carry
+    The offset is mostly a property of the text (the official shard is harder than the first 2M public tokens) but appears to carry
     a per-instance component of a few $10^{-4}$, confounded with salt selection. A calibration frozen on the chip-C
     calibration uploads predicted the seven final uploads with MAE \val{holdout-mae} and a positive bias on faster
     instances; we report how much of this depends on one normalised rehearsal, on salt selection and on the burn-in of

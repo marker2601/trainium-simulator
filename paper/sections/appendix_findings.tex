@@ -113,7 +113,7 @@ start-up. It was not new on the final day: the ledger lists the EMA prewarm alre
 (26~September). It disappeared when \upl{\val{prewarm-dropped}} turned the EMA off, and \upl{K77a} re-enabled the EMA
 without it. Only cold rehearsals exposed the regression, which is the general lesson below.
 
-\paragraph{Evidence.} Step counts on one instance show the cost (\cref{tab:prewarm}). On chip~G the recipe without EMA
+\paragraph{Evidence.} Step counts compared within one instance show the cost (\cref{tab:prewarm}). On chip~G the recipe without EMA
 ran \val{steps-k73s6} steps, with EMA but without prewarm \val{steps-k77a}, and with both \val{steps-k82s7}; on chip~H,
 without EMA \val{steps-k73s4} and with both \val{steps-k82s4}. These are single runs, and step counts jitter by
 \val{jitter-range-lo}--\val{jitter-range-hi} steps within a seed sweep (SD \val{jitter-sd-lo}--\val{jitter-sd-hi};
@@ -161,7 +161,7 @@ The largest single source of variance in our data was not a setting. In warm-up 
 multi-token-prediction sum (weights 1/0.5/0.25), not per-token cross-entropy, which is why it is near 13~nats. We
 classify a run as spike-path when its step-10 loss is at least \val{spike-l10} nats. Good-path runs of these recipes
 reach \val{l10-good} nats at step~10 and spike-path runs \val{l10-spike}; we chose the threshold after seeing the data,
-in the empty gap between them, and one run at \val{l10-mid} is reported as intermediate. On the three clean seed sweeps
+in the otherwise empty gap between them, and one run at \val{l10-mid} is reported as intermediate. On the three clean seed sweeps
 of a fixed recipe in our data (\cref{tab:seeds}), \val{spike-k} of \val{spike-n} seeds with a logged curve took the
 spike path, \val{spike-frac} (Wilson 95\% interval \val{spike-wilson-lo}--\val{spike-wilson-hi}). The sweeps share
 \val{spike-shared-seeds} seed, and the path may be a property of the seed, recipe and hardware together, so the runs
@@ -224,7 +224,7 @@ transfer, and $\lambda$ falls to \val{wc-lam-cross-lo}--\val{wc-lam-cross-hi}. L
 are cheap, but the projected gain should be shrunk by a share of about \val{wc-shrink-lo}--\val{wc-shrink-hi}
 on one chip and \val{wc-shrink-cross-lo}--\val{wc-shrink-cross-hi} across chips (both over the range of the salt SD
 and the jitter),
-and if the official shard overlaps the public text (\cref{sec:contest}) part of what survives is selection on the
+and if the official shard overlaps the public text (\cref{sec:contest}), part of what survives is selection on the
 evaluation set itself \citep{dwork2015reusable,blum2015ladder}.
 
 \subsection{What did not work}
@@ -256,7 +256,7 @@ times this is an absence of evidence for scalar gains, not evidence that none ex
 
 The law of \cref{eq:exchange} is not constant across the campaign. The simulator's prior
 (\cref{sec:quality}) gives it a curvature of $c=\val{q-prior-c}$ per $(\ln S)^2$, so that the local slope is
-$\kappa(S)=\val{kappa}-2c\ln(S/2300)$, which is \val{kappa-at-anchor} at the long run's mid-point if it ran at
+$\kappa(S)=\val{kappa}-2c\ln(S/2300)$, which is \val{kappa-at-anchor} at the geometric mid-point of the long-run calibration if its shorter run ran at
 \upl{K44}'s step count, and the campaign log records \val{slope-900}\docnum{} at about 900 steps. That curvature is
 itself a prior set from these campaign rates, so it is consistent with the two calibrations rather than evidence for
 them. The surrogate's fitted slope (\val{q-slope-pct} per 1\%, \cref{sec:quality}) is \emph{not} independent
@@ -272,7 +272,7 @@ final-day change of \val{late-change}\docnum{}~bpb would be worth \val{late-chan
 \label{sec:gap}
 
 \Cref{tab:gap} converts the distance from our best official score, \val{best-official}, to reference points on the final
-public leaderboard snapshot (about \val{leaderboard-time}\docnum{}; ranks only) into effective compute through
+public leaderboard snapshot (about \val{leaderboard-time}\docnum{}) into effective compute through
 \cref{eq:exchange}. Closing the \val{gap-ten} gap to \#10 would have needed about \val{gap-ten-range} more effective
 compute across our two calibrations of $\kappa$. The gap to \#1, \val{gap-one-range}, extrapolates far beyond the
 \val{xr-anchor-pct} anchor and is an order of magnitude only. \Cref{fig:exchange} draws the price of a step with both
@@ -313,9 +313,9 @@ in Phase~1.
 \subsection{The GPU proxy}
 \label{sec:gpu}
 
-Besides the surrogate, \ffsim{} has a second route: it runs the actual competition \texttt{train.py} on a CUDA GPU along the chip's optimizer trajectory, step for step (\cref{app:gpu} describes its parts). It measures per-step quality only; step time must come from the chip.
+Besides the surrogate, \ffsim{} has a second route: it runs the actual contest \texttt{train.py} on a CUDA GPU along the chip's optimizer trajectory, step for step (\cref{app:gpu} describes its parts). It measures per-step quality only; step time must come from the chip.
 
-\Cref{tab:gpu} compares it with Trainium on an L40S GPU. Two of the four comparisons are informative equal-step
+\Cref{tab:gpu} compares it, run on an L40S GPU, with Trainium. Two of the four comparisons are informative equal-step
 chip pairs (attention-source reuse and LeakyReLU$^2$), and the GPU matched them to within \val{gpu-maxdiff-inf}\docnum{}.
 The cooldown-0.7 reference is the mean of two chip pairs of opposite sign, and the split-AdamW reference is an
 official upload delta at a different step count, so neither is a test. The noise is larger than the agreement: in
@@ -343,7 +343,7 @@ not a validated instrument. A run of the full schedule cost about \val{gpu-hours
 The proxy is built from four parts. \emph{A generated fork}: a patcher applies \val{gpu-patches}\docnum{} checked
 textual patches to the recipe, a check verifies that the committed fork is byte-identical to a fresh build, and the
 patcher refuses any anchor it cannot find exactly. \emph{A virtual charged clock}: every clock-keyed switch
-(accumulation phases, the eight multi-token prediction stages, cooldown levels, the EMA save and the stop) fires at the
+(accumulation phases, the eight multi-token-prediction stages, cooldown levels, the EMA save and the stop) fires at the
 step number at which it fired on chip, computed from a chip log's per-phase step times; real GPU time is ignored.
 \emph{Data-world emulation}: the trainer reproduces the organiser loader's eight-rank sharding on one device, so each
 step sees the same tokens. \emph{Calibration before use}: no GPU verdict may influence a chip run until the proxy has

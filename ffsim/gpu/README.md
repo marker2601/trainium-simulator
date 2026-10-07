@@ -89,6 +89,6 @@ equal-step conversion, the gate rule on synthetic results).
   MFU, $2.6-3.8 on g6e.xlarge ($1.861/h, us-west-2 on-demand, 29 Sep); the 4-run pre-screen $11-16; the
   38-run gate $99-144 sequential, or 4.7-6.6 h wall on 16 parallel g6e.xlarge for $113-158. Re-cost
   from the first run's measured step time.
-- Phase 1 closes 1 Oct 06:59 UTC; nothing here can affect it. Phase 2 (7 Oct - 5 Nov, 16 chips x 4 h)
+- Phase 1 closes 1 Oct 06:59 UTC; nothing here can affect it. Phase 2 (16 chips x 4 h)
   is 256x the chip-seconds, so the K60 calibration carries families, not numbers, and full-scale
   Phase-2 runs are out of reach on a GPU (~364 L40S-hours each); see PROTOCOL.md section 7.

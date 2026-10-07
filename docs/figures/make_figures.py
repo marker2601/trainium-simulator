@@ -507,7 +507,7 @@ def fig_exchange(rows: list) -> list:
     footnote(fig, f"The curve is fitted on one +28% run (24 Sep). Its slope near zero is about 0.00063 bpb per 1%; "
                   "the per-step rate measured directly\non two chips is about 0.00057 bpb per 1% more steps. Gaps "
                   f"are from our best official score, {best:.4f} ({best_name}), to the final leaderboard snapshot,\n"
-                  "by rank only (docs/GAP-ANALYSIS.md).")
+                  "referred to by rank (docs/GAP-ANALYSIS.md).")
     return save(fig, "exchange_rate")
 
 

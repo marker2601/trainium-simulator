@@ -1,7 +1,7 @@
 # Gap analysis: what separated us from the top 10
 
 Written on the last night of Phase 1 (30 Sep 2026, CDT) and updated on 1 Oct with our final scores and the final
-leaderboard snapshot (about 7:40 AM CDT, scores by rank). The inputs are our own measurements and the public
+leaderboard snapshot (about 7:40 AM CDT). The inputs are our own measurements and the public
 leaderboard. Nothing here uses or infers validation data.
 
 ## The exchange rate between compute and score

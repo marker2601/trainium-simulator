@@ -14,7 +14,7 @@ The rule we followed for every rehearsed upload from 26~September on (all except
 Each shuffle salt is a code constant, so every salt is its own file with its own hash, and its rehearsal is a
 rehearsal of that file. Among the rehearsed uploads, two depart from the rule. The rehearsal of \upl{K70a} ran on
 chip~E, which is slow, and was normalised to chip-C speed before use (\cref{sec:k70a}). \upl{K54b} was rehearsed
-before its comments were stripped to bring it under the size limit; the uploaded file, \upl{K54b\_min}, parses to the
+before its comments were stripped to bring it under the file-size limit; the uploaded file, \upl{K54b\_min}, parses to the
 \val{k54b-ast}\docnum{} as the rehearsed one, so it runs the same program. For upload $i$ with rehearsal
 score $r_i$ on chip $c(i)$ and official score $y_i$ we write
 \begin{equation}
@@ -25,7 +25,7 @@ where $\mu$ is the part of the offset that belongs to the evaluation text and $\
 the campaign we used the special case $\gamma\equiv0$: estimate $\hat\mu$ and $s$ from $n$ earlier uploads and
 predict $y_{\text{new}}$ with the interval $r_{\text{new}} + \hat\mu \pm t_{n-1,0.975}\, s\sqrt{1 + 1/n}$
 (\cref{app:derivations}). Apart from \upl{K65a}--\upl{K65d}, a file was uploaded only after its cold rehearsal
-had exited cleanly, with no graph breaks, charged time inside the budget and the file under the size limit. The
+had exited cleanly, with no graph breaks, charged time inside the budget and the file under the file-size limit. The
 repository records written projections for three uploads (\cref{sec:projections}).
 
 \paragraph{Why it should work, and why not exactly.} If training is deterministic (\cref{sec:determinism}), the
@@ -51,7 +51,7 @@ The offset was not the same on every chip (\cref{tab:offset-chips}). Chip~C, on 
 were rehearsed, averaged \val{chip-off-c} ($n=\val{chip-off-n-c}$); chip~H \val{chip-off-h} ($n=2$); chip~G, the
 fastest final-day instance, \val{chip-off-g} ($n=3$). Within chips the SD is \val{off-sd-within}, smaller than the
 pooled \val{off-sd-since}. Rounding and the run-to-run variation of the text gap explain little of the within-chip SD (\cref{app:offset-detail}). Predicting each upload
-leave-one-out from the other uploads on its own chip, where there is one, gives an MAE of \val{loo-chip-mae} against
+leave-one-out from the other uploads on its own chip, where there are any, gives an MAE of \val{loo-chip-mae} against
 \val{loo-pooled-mae} for the pooled mean ($n=\val{loo-n}$). The offset may therefore be better described as text plus
 chip, as in \cref{eq:offset}, than as a property of the text alone. With two or three uploads per new chip,
 $\gamma_c$ cannot be estimated well; a step-normalised rehearsal would remove it at the source.
@@ -76,7 +76,7 @@ offset only \emph{may} depend on the chip.
   \includegraphics{oracle_calibration.pdf}
   \caption{\textbf{Rehearsal and official score.} (a) Rehearsal against official for the \val{off-n-since} uploads
     since \upl{K50}; the solid line is official $=$ rehearsal \val{off-mean-since-short} with a $\pm2$\,SD band,
-    the dashed line is identity. (b) The offset per upload in upload order; grey marks the early chip-A/B uploads.
+    and the dashed line is the identity. (b) The offset per upload in upload order; grey marks the early chip-A/B uploads.
     Marker shape is the rehearsal chip.}
   \label{fig:oracle}
 \end{figure}
@@ -100,7 +100,7 @@ window and calibration set were chosen with the data in view (\cref{sec:limits})
 mean. The bias is \val{holdout-bias}: \val{holdout-npos}
 of the 7 errors are positive (one-sided sign test $p=\val{holdout-signp}$), and the mean error is
 \val{chip-ferr-c} on chip~C, \val{chip-ferr-h} on chip~H and \val{chip-ferr-g} on chip~G. This is the pattern
-\cref{eq:offset} predicts for a calibration that sets $\gamma_c$ to chip C's value: the faster final-day chips
+\cref{eq:offset} predicts for a calibration that sets $\gamma_c$ to chip~C's value: the faster final-day chips
 look ``hotter''.
 
 \begin{table}[tbp]
@@ -156,8 +156,8 @@ The protocol is exact only if the rehearsal is a faithful replica of the officia
 before we understood them (\cref{app:traps}): one-time compilation after the clock starts, which a warm rehearsal
 does not pay (the EMA trap of \cref{sec:prewarm}); a rehearsal chip faster or slower than the official host
 ($\gamma_c\neq0$); a change to steps 0--19 that moves a seed onto another warm-up path, so that a measured difference
-becomes a seed effect; and a time target that is a budget, not a promise. Two organiser-side anomalies are excluded
-from all calibration statistics (\cref{app:traps}).
+becomes a seed effect; and a time target that is a budget, not a promise. Two scores from runs that the organisers
+rescored are excluded from all calibration statistics (\cref{app:traps}).
 
 \paragraph{How we used it.} Beyond gating uploads, the oracle let us compare structural changes on chip, against a
 same-chip control, without spending an upload, and run lotteries over shuffle salts and seeds; a selected draw gives

@@ -320,7 +320,7 @@ in preparation; its LaTeX source is in [`paper/`](paper/), and an arXiv preprint
 
 ## Acknowledgements
 
-Thanks to the **AWS Trainium Frontier organisers** for the challenge, the hardware, the baseline and a leaderboard
+Thanks to the **AWS Trainium Frontier organisers** for the challenge, the baseline and a leaderboard
 that kept us honest. Our recipes stand on the open-source **nanoGPT** and **modded-nanogpt** speedrun communities
 and the **Muon** optimizer community, whose public work made a 30-minute language model worth racing.
 

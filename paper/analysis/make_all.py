@@ -80,7 +80,6 @@ def hyperparams(N: Numbers) -> None:
     N.add("k82-nknobs", str(len(knobs)), "ffsim/examples/recipe-K82s4.json")
     size = (PAPER.parent / "recipes" / "K82s4" / "train.py").stat().st_size
     N.add("k82-bytes", intc(size), "recipes/K82s4/train.py")
-    N.add("size-limit", intc(262144), "enforced by the submission portal; not stated in the published rules")
 
 
 def docfacts_table(N: Numbers) -> None:

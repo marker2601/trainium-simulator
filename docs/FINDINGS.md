@@ -28,7 +28,7 @@ micro-batch per optimizer update.
 | 1 Oct, 1:41 AM | K82s7 | 0.96140 | K82s4 with shuffle salt 7; best rehearsal (0.954379), projected about 0.9614 |
 
 Every scored upload is in [`results/official-scores.csv`](../results/official-scores.csv). Two scores are left
-out: an organiser-side rerun of K44 and a truncated duplicate run of F6.
+out: they come from runs of K44 and F6 that the organisers rescored, and each upload counts once.
 
 Two things drove most of the descent:
 
@@ -41,7 +41,7 @@ Two things drove most of the descent:
 
 ## 2. The best recipe we publish ([`recipes/K82s4/train.py`](../recipes/K82s4/train.py))
 
-The base is the organiser's GPT baseline. The file is 252,013 bytes, under the 262,144-byte limit, and every
+The base is the organiser's GPT baseline. The file is 252,013 bytes, under the portal's file-size limit, and every
 setting below is a default in the file:
 
 - **Model.** Depth 9, width 1024. Four 256-wide query heads share one KV head. Value embeddings feed layers 0

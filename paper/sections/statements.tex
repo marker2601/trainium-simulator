@@ -13,9 +13,9 @@ The code, data and analysis scripts are in the public repository
     \texttt{research/sim-data/runs.jsonl} (\val{ds-n} run records, chips A--D; \val{ds-nochip} records have no
     recorded chip), \texttt{validation-pairs.json} (\val{ds-pairs} pairs), \texttt{official-uploads.csv}, the
     dataset QA and validation reports, and three reference chip-log directories used by the parsers and tests. Our
-    code, data and documents are released under the MIT licence; recipes derived from the organiser's baseline are
+    code, data and documents are released under the MIT licence; recipes derived from the organisers' baseline are
     Apache-2.0; contributed records are CC-BY-4.0.
-  \item \textbf{Code.} The simulator (\texttt{ffsim/}, numpy only), the GPU proxy (\texttt{ffsim/gpu/}), the app
+  \item \textbf{Code.} The simulator (\texttt{ffsim/}, NumPy only), the GPU proxy (\texttt{ffsim/gpu/}), the app
     (\texttt{space/}), the contribution pipeline (\texttt{ffsim/contrib.py}, \texttt{.github/workflows/}), and both
     recipes byte-identical to the uploaded files, with their SHA-256 hashes in \texttt{recipes/README.md}.
   \item \textbf{Software.} All chip runs used the organiser-provided AWS Neuron environment on \texttt{trn2.3xlarge}:
@@ -34,7 +34,7 @@ The code, data and analysis scripts are in the public repository
     documents in \texttt{docs/} or the campaign log because their raw records are not released: chip-log measurements, the final-day runs
     on chips E, G and H (row-pool pair, salt lotteries, EMA-blend and output-projection pairs, pool-size ablation),
     and the GPU-proxy measurements. \Cref{app:docfacts} lists them with their sources. Official scores come only from
-    the organisers. Re-running a recipe needs a \texttt{trn2.3xlarge} instance and the organiser's kit, which we do
+    the organisers. Re-running a recipe needs a \texttt{trn2.3xlarge} instance and the organisers' kit, which we do
     not redistribute; raw chip harvests are withheld because they contain host details.
 \end{itemize}
 
@@ -54,8 +54,7 @@ used part of the evaluation text (\cref{sec:contest,sec:salts}). Four uploads we
 \paragraph{Compute.} The run dataset alone represents about \val{trn-hours-total}~\texttt{trn2.3xlarge} instance-hours
 (\val{ds-full} full runs at a median \val{trn-charged-median}~s of charged time plus a median
 \val{trn-startup-median}~s of start-up, and \val{ds-screens} screens), plus final-day rehearsals on chips E, G and H
-that are not in the dataset, and about \$\val{gpu-cost-total}\docnum{} of GPU time for the proxy by 30~September. The
-contest rules provide AWS promotional credits to participating teams \citep{trainiumfrontier2026rules}.
+that are not in the dataset, and about \$\val{gpu-cost-total}\docnum{} of GPU time for the proxy by 30~September.
 The released simulator is meant to reduce the compute others spend on screening ideas.
 
 \paragraph{Contributed data.} The contribution pipeline requires explicit consent, publishes data under CC-BY-4.0,

@@ -9,7 +9,7 @@ official score up to an offset. The offset is mostly a property of the evaluatio
 larger for faster instances, which also rehearsed the salt-lottery winners, so instance and selection are
 confounded. A calibration frozen before the last day predicted the final seven uploads with a mean absolute error of
 \val{holdout-mae} bpb (95\% bootstrap \val{holdout-mae-lo}--\val{holdout-mae-hi}), almost all of it a positive bias;
-the oracle resolves differences between two uploads of about \val{diff-95} bpb, not smaller. (C2) \ffsim{}, a run
+the rehearsal oracle resolves differences between two uploads of about \val{diff-95} bpb, not smaller. (C2) \ffsim{}, a run
 simulator, separates the steps a recipe fits into the budget from what each step is worth. Its ridge surrogate,
 fitted on \val{q-nfit} fully specified runs, predicts the sign of a left-out recipe change \val{lopo-rec-sign} of the
 time on the pairs used to develop it, against \val{base-steps-rec-sign} for a steps-only baseline, but only at chance

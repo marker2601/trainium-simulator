@@ -7,7 +7,7 @@ Phase 1 campaign. It is venue-agnostic (11 pt `article`, `natbib` + `plainnat`).
 
 | path | what it is |
 |---|---|
-| `main.tex` | preamble, title, the order of the sections. Author: Jagadeesh Kumar Gorla (independent researcher, team FrontierForge). |
+| `main.tex` | preamble, title, the order of the sections. Authors: Jagadeesh Kumar Gorla (independent researcher, team FrontierForge), Rohith Mohandas Nayak and Navaneeth Kamath. |
 | `sections/*.tex` | one file per section plus `appendix.tex` and `statements.tex` (reproducibility, ethics, acknowledgements) |
 | `numbers.tex` | **generated**: every number the prose prints, as `\ffdef{key}{value}`, each with its source in a comment |
 | `tables/*.tex` | **generated**: every data table |
